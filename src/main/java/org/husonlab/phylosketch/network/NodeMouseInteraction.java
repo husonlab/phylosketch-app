@@ -26,7 +26,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import jloda.fx.selection.SelectionModel;
@@ -53,7 +52,7 @@ public class NodeMouseInteraction {
 		final var oldControlPointLocations = new HashMap<Integer, double[]>();
 		final var newControlPointLocations = new HashMap<Integer, double[]>();
 
-		final var moved = new Single<Boolean>(false);
+		final var moved = new Single<>(false);
 		final var currentTool = new Single<PrimaryPresenter.Tool>(null);
 		final var target = new SimpleObjectProperty<Node>(null);
 		final var line = new Line();
@@ -65,16 +64,16 @@ public class NodeMouseInteraction {
 				aShape.setScaleY(1.0);
 			}
 			if(n!=null) {
-					var aShape=networkView.getView(n).shape();
-					aShape.setScaleX(4.0);
-					aShape.setScaleY(4.0);
+				var aShape = networkView.getView(n).shape();
+				aShape.setScaleX(3);
+				aShape.setScaleY(3);
 			}
 		});
 
 		if (com.gluonhq.attach.util.Platform.isDesktop()) {
 			shape.setOnMousePressed(c -> {
 				currentTool.set(tool.get());
-				if(currentTool.get() == PrimaryPresenter.Tool.Pan || currentTool.get()==PrimaryPresenter.Tool.Pen) {
+				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
 					var x = c.getSceneX();
 					var y = c.getSceneY();
 					handlePressed(currentTool.get(), x, y, mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, line, moved, shape, pane, networkView.getWorld(), target);
@@ -83,7 +82,7 @@ public class NodeMouseInteraction {
 			});
 
 			shape.setOnMouseDragged(c -> {
-				if(currentTool.get() == PrimaryPresenter.Tool.Pan || currentTool.get()==PrimaryPresenter.Tool.Pen) {
+				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
 					var xScreen = c.getScreenX();
 					var yScreen = c.getScreenY();
 					var xScene = c.getSceneX();
@@ -94,7 +93,7 @@ public class NodeMouseInteraction {
 			});
 			shape.setOnMouseReleased(c -> {
 				shape.setEffect(null);
-				if(currentTool.get() == PrimaryPresenter.Tool.Pan || currentTool.get()==PrimaryPresenter.Tool.Pen) {
+				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
 					if (handleReleased(currentTool.get(), mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, nodeSelection, edgeSelection, v, networkView, c.isShiftDown(), c.isPopupTrigger(), line, moved,
 							shape, pane, target, undoManager))
 						c.consume();
@@ -104,7 +103,7 @@ public class NodeMouseInteraction {
 		} else {
 			shape.setOnTouchPressed(c -> {
 				currentTool.set(tool.get());
-				if (currentTool.get() == PrimaryPresenter.Tool.Pan || currentTool.get() == PrimaryPresenter.Tool.Pen) {
+				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
 					if (c.getTouchCount() == 1) {
 						System.err.println("shape touched");
 
@@ -117,7 +116,7 @@ public class NodeMouseInteraction {
 			});
 
 			shape.setOnTouchMoved(c -> {
-				if (currentTool.get() == PrimaryPresenter.Tool.Pan || currentTool.get() == PrimaryPresenter.Tool.Pen) {
+				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
 					if (c.getTouchCount() == 1) {
 						var xScreen = c.getTouchPoint().getScreenX();
 						var yScreen = c.getTouchPoint().getScreenY();
@@ -130,7 +129,7 @@ public class NodeMouseInteraction {
 			});
 
 			shape.setOnTouchReleased(c -> {
-				if (currentTool.get() == PrimaryPresenter.Tool.Pan || currentTool.get() == PrimaryPresenter.Tool.Pen) {
+				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
 					if (c.getTouchCount() == 1) {
 						if (handleReleased(currentTool.get(), mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, nodeSelection, edgeSelection, v, networkView, false, false, line, moved,
 								shape, pane, target, undoManager))
@@ -153,10 +152,13 @@ public class NodeMouseInteraction {
 		oldControlPointLocations.clear();
 		newControlPointLocations.clear();
 
-		if (what == PrimaryPresenter.Tool.Pen) {
+		if (what == PrimaryPresenter.Tool.AddNodesAndEdges) {
 			line.setStartX(shape.getTranslateX());
 			line.setStartY(shape.getTranslateY());
 			shape.setCursor(Cursor.CLOSED_HAND);
+
+			shape.setScaleX(2);
+			shape.setScaleY(2);
 
 			final Point2D location = pane.sceneToLocal(previousMousePosition[0], previousMousePosition[1]);
 
@@ -172,7 +174,11 @@ public class NodeMouseInteraction {
 										 SelectionModel<Node> nodeSelection, Node v, NetworkView networkView,
 										 Line line, Single<Boolean> moved,
 										 Shape shape, Pane pane, ObjectProperty<Node> target) {
-		if (what == PrimaryPresenter.Tool.Pan) {
+
+		shape.setScaleX(1);
+		shape.setScaleY(1);
+
+		if (what == PrimaryPresenter.Tool.MoveNodes) {
 			nodeSelection.clearSelection();
 			nodeSelection.select(v);
 			final double deltaX = (sceneX - previousMousePosition[0]);
@@ -207,7 +213,7 @@ public class NodeMouseInteraction {
 				uShape.setTranslateX(shape.getTranslateX() + deltaX);
 				uShape.setTranslateY(shape.getTranslateY() + deltaY);
 			}
-		} else if (what == PrimaryPresenter.Tool.Pen) {
+		} else if (what == PrimaryPresenter.Tool.AddNodesAndEdges) {
 			nodeSelection.clearSelection();
 			nodeSelection.select(v);
 
@@ -253,19 +259,19 @@ public class NodeMouseInteraction {
 					}
 				}
 			} else {
-				if (what == PrimaryPresenter.Tool.Pan) {
+				if (what == PrimaryPresenter.Tool.MoveNodes) {
 					// yes, createShape, not doAndAdd()
 					final double dx = previousMousePosition[0] - mouseDownPosition[0];
 					final double dy = previousMousePosition[1] - mouseDownPosition[1];
 					undoManager.add(new MoveSelectedNodesCommand(dx, dy, networkView,
 							nodeSelection.getSelectedItems(), oldControlPointLocations, newControlPointLocations));
-				} else if (what == PrimaryPresenter.Tool.Pen) {
+				} else if (what == PrimaryPresenter.Tool.AddNodesAndEdges) {
 					var x = line.getEndX();
 					var y = line.getEndY();
 
 					var w = networkView.findNodeIfHit(x, y);
-					if(w==null && target.get()!=null)
-						w=target.get();
+					if (w == null && target.get() != null)
+						w = target.get();
 					undoManager.doAndAdd(new NewEdgeAndNodeCommand(pane, networkView, nodeSelection, v, w, x, y));
 					shape.setCursor(Cursor.CROSSHAIR);
 				}
@@ -274,7 +280,9 @@ public class NodeMouseInteraction {
 			networkView.getWorld().getChildren().remove(line);
 			return true;
 		}
-		finally{
+		finally {
+			shape.setScaleX(1);
+			shape.setScaleY(1);
 			target.set(null);
 		}
 	}

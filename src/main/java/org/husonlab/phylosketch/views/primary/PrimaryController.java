@@ -21,12 +21,9 @@
 package org.husonlab.phylosketch.views.primary;
 
 import com.gluonhq.charm.glisten.application.AppManager;
-import com.gluonhq.charm.glisten.control.ToggleButtonGroup;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
-import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -39,6 +36,10 @@ public class PrimaryController {
 
 	@FXML
 	private View primary;
+
+
+	@FXML
+	private Label modeLabel;
 
 	@FXML
 	private Label label;
@@ -53,10 +54,10 @@ public class PrimaryController {
 	private Pane mainPane;
 
 	@FXML
-	private ToggleButton panToggleButton;
+	private ToggleButton penToggleButton;
 
 	@FXML
-	private ToggleButton penToggleButton;
+	private ToggleButton moveToggleButton;
 
 	@FXML
 	private Button redoButton;
@@ -131,12 +132,12 @@ public class PrimaryController {
 		return mainPane;
 	}
 
-	public ToggleButton getPanToggleButton() {
-		return panToggleButton;
-	}
-
 	public ToggleButton getPenToggleButton() {
 		return penToggleButton;
+	}
+
+	public ToggleButton getMoveToggleButton() {
+		return moveToggleButton;
 	}
 
 	public Button getRedoButton() {
@@ -165,5 +166,9 @@ public class PrimaryController {
 
 	public Button getResetButton() {
 		return resetButton;
+	}
+
+	public Label getModeLabel() {
+		return modeLabel;
 	}
 }

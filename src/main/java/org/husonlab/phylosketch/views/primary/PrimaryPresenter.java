@@ -20,34 +20,32 @@
 
 package org.husonlab.phylosketch.views.primary;
 
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import jloda.util.StringUtils;
 
 public class PrimaryPresenter {
-	public enum Tool {Pan, Pen, Eraser, Label}
+	public enum Tool {AddNodesAndEdges, EraseNodesAndEdges, MoveNodes, AddLabels}
 
 	private final ObjectProperty<Tool> tool = new SimpleObjectProperty<>(this, "tool");
 
 	public PrimaryPresenter(PrimaryView view, PrimaryController controller) {
 		controller.getToggles().selectedToggleProperty().addListener((v, o, n) -> {
-			if (n == controller.getPanToggleButton()) {
-				tool.set(PrimaryPresenter.Tool.Pan);
+			if (n == controller.getMoveToggleButton()) {
+				tool.set(PrimaryPresenter.Tool.MoveNodes);
 			} else if (n == controller.getPenToggleButton()) {
-				tool.set(PrimaryPresenter.Tool.Pen);
+				tool.set(PrimaryPresenter.Tool.AddNodesAndEdges);
 			} else if (n == controller.getEraserToggleButton()) {
-				tool.set(PrimaryPresenter.Tool.Eraser);
+				tool.set(PrimaryPresenter.Tool.EraseNodesAndEdges);
 			} else if (n == controller.getLabelToggleButton()) {
-				tool.set(PrimaryPresenter.Tool.Label);
-			}
+				tool.set(PrimaryPresenter.Tool.AddLabels);
+			} else if (n == null)
+				tool.set(null);
+			controller.getScrollPane().setPannable(tool.get() == null || tool.get() == Tool.AddLabels);
 		});
-		Platform.runLater(()-> {
-					var selected = controller.getToggles().getSelectedToggle();
-					controller.getToggles().selectToggle(null);
-					controller.getToggles().selectToggle(selected);
-				});
 
-		tool.addListener((c, o, n) -> System.err.println("Tool changed to: " + n));
+		controller.getModeLabel().setText("");
+		tool.addListener((c, o, n) -> controller.getModeLabel().setText(n == null ? "" : StringUtils.fromCamelCase(n.name())));
 
 		controller.getUndoButton().setOnAction(e -> view.getUndoManager().undo());
 		controller.getUndoButton().disableProperty().bind(view.getUndoManager().undoableProperty().not());
@@ -57,7 +55,7 @@ public class PrimaryPresenter {
 		if (com.gluonhq.attach.util.Platform.isDesktop()) {
 			controller.getStackPane().setOnScroll(e -> {
 				var factor = (e.getDeltaY() > 0 ? 1.1 : 1 / 1.1);
-				var box=view.getDocument().getView().getBoundingBox();
+				var box = view.getDocument().getView().getBoundingBox();
 				if(factor<1 && Math.min(box.getWidth(), box.getHeight())<50 || factor>1 && Math.max(box.getWidth(), box.getHeight())>2000) {
 					controller.getLabel().setText("Zoom capped");
 				}

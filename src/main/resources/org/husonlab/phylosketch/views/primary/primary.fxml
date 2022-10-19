@@ -1,20 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.gluonhq.charm.glisten.control.Icon?>
-<?import com.gluonhq.charm.glisten.mvc.View?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.ToolBar?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-
 <!--
   ~ primary.fxml Copyright (C) 2022 Daniel H. Huson
   ~
@@ -35,44 +20,61 @@
   ~
   -->
 
+<?import com.gluonhq.charm.glisten.control.*?>
+<?import com.gluonhq.charm.glisten.mvc.View?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <View fx:id="primary" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.primary.PrimaryController">
     <center>
-      <ScrollPane fx:id="scrollPane" pannable="true" BorderPane.alignment="CENTER">
-         <content>
-            <StackPane fx:id="stackPane">
-               <children>
-                    <Pane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="100.0" minWidth="100.0" style="-fx-background-color: lightyellow" />
-               </children>
-               <padding>
-                  <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-               </padding>
-            </StackPane>
-         </content>
-      </ScrollPane>
+        <AnchorPane BorderPane.alignment="CENTER">
+            <children>
+                <ScrollPane fx:id="scrollPane" pannable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <content>
+                        <StackPane fx:id="stackPane">
+                            <children>
+                                <Pane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="100.0"
+                                      minWidth="100.0" style="-fx-background-color: lightyellow"/>
+                            </children>
+                            <padding>
+                                <Insets bottom="50.0" left="50.0" right="50.0" top="50.0"/>
+                            </padding>
+                        </StackPane>
+                    </content>
+                </ScrollPane>
+                <Label fx:id="modeLabel" text="Label" textFill="DARKGRAY" AnchorPane.leftAnchor="10.0"
+                       AnchorPane.topAnchor="10.0"/>
+            </children>
+        </AnchorPane>
     </center>
     <top>
       <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>
             <HBox fx:id="togglesBox">
                 <children>
-                    <ToggleButton fx:id="panToggleButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" text="Pointer" selected="true">
+                    <ToggleButton fx:id="penToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="10.0" layoutY="10.0"
+                                  mnemonicParsing="false" text="Edit">
                         <graphic>
-                            <Icon content="PAN_TOOL" />
+                            <Icon content="EDIT"/>
                         </graphic>
                     </ToggleButton>
-                    <ToggleButton fx:id="penToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="Pen">
+                    <ToggleButton fx:id="eraserToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="57.0" layoutY="10.0"
+                                  mnemonicParsing="false" text="Eraser">
                         <graphic>
-                            <Icon content="EDIT" />
+                            <Icon content="REMOVE_CIRCLE"/>
                         </graphic>
                     </ToggleButton>
-                    <ToggleButton fx:id="eraserToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="57.0" layoutY="10.0" mnemonicParsing="false" text="Eraser">
-                     <graphic>
-                        <Icon content="REMOVE_CIRCLE" />
-                     </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="labelToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="103.0" layoutY="10.0" mnemonicParsing="false" text="Label">
+                    <ToggleButton fx:id="moveToggleButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
+                                  text="Move">
                         <graphic>
-                            <Icon content="LABEL" />
+                            <Icon content="IMPORT_EXPORT"/>
+                        </graphic>
+                    </ToggleButton>
+                    <ToggleButton fx:id="labelToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="103.0" layoutY="10.0"
+                                  mnemonicParsing="false" text="Label">
+                        <graphic>
+                            <Icon content="FORMAT_LIST_NUMBERED"/>
                         </graphic>
                     </ToggleButton>
                 </children>
