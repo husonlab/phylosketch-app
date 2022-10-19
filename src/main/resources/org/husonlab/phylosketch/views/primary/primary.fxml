@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.gluonhq.charm.glisten.control.Icon?>
+<?import com.gluonhq.charm.glisten.mvc.View?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+  ~ primary.fxml Copyright (C) 2022 Daniel H. Huson
+  ~
+  ~ (Some files contain contributions from other authors, who are then mentioned separately.)
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~
+  -->
+
+<View fx:id="primary" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.primary.PrimaryController">
+    <center>
+      <ScrollPane fx:id="scrollPane" pannable="true" BorderPane.alignment="CENTER">
+         <content>
+            <StackPane fx:id="stackPane">
+               <children>
+                    <Pane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="100.0" minWidth="100.0" style="-fx-background-color: lightyellow" />
+               </children>
+               <padding>
+                  <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+               </padding>
+            </StackPane>
+         </content>
+      </ScrollPane>
+    </center>
+    <top>
+      <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <items>
+            <HBox fx:id="togglesBox">
+                <children>
+                    <ToggleButton fx:id="panToggleButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" text="Pointer" selected="true">
+                        <graphic>
+                            <Icon content="PAN_TOOL" />
+                        </graphic>
+                    </ToggleButton>
+                    <ToggleButton fx:id="penToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="Pen">
+                        <graphic>
+                            <Icon content="EDIT" />
+                        </graphic>
+                    </ToggleButton>
+                    <ToggleButton fx:id="eraserToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="57.0" layoutY="10.0" mnemonicParsing="false" text="Eraser">
+                     <graphic>
+                        <Icon content="REMOVE_CIRCLE" />
+                     </graphic>
+                    </ToggleButton>
+                    <ToggleButton fx:id="labelToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="103.0" layoutY="10.0" mnemonicParsing="false" text="Label">
+                        <graphic>
+                            <Icon content="LABEL" />
+                        </graphic>
+                    </ToggleButton>
+                </children>
+            </HBox>
+             <Button fx:id="undoButton" contentDisplay="GRAPHIC_ONLY" layoutX="150.0" layoutY="10.0" mnemonicParsing="false" text="Undo">
+               <graphic>
+                  <Icon content="UNDO" />
+               </graphic>
+            </Button>
+            <Button fx:id="redoButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0" mnemonicParsing="false" text="Redo">
+               <graphic>
+                  <Icon content="REDO" />
+               </graphic>
+            </Button>
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="resetButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0" mnemonicParsing="false" text="Reset Zoom">
+                <graphic>
+                    <Icon content="HOME" />
+                </graphic>
+            </Button>
+
+        </items>
+      </ToolBar>
+   </top>
+   <bottom>
+      <VBox alignment="CENTER" spacing="15.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="label" text="Welcome to PhyloSketch" />
+            <Button mnemonicParsing="false" onAction="#buttonClick" text="PhyloSketch sucks">
+               <graphic>
+                  <Icon content="LANGUAGE" />
+               </graphic>
+            </Button>
+         </children>
+         <padding>
+            <Insets bottom="10.0" />
+         </padding>
+      </VBox>
+   </bottom>
+</View>
