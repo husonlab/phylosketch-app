@@ -52,7 +52,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		appManager.start(primaryStage);
 
-		if (com.gluonhq.attach.util.Platform.isDesktop()) {
+		if (isDesktop()) {
 			primaryStage.setX(100);
 			primaryStage.setY(100);
 			primaryStage.setWidth(600);
@@ -77,5 +77,9 @@ public class Main extends Application {
 
 	public static void main(String[] args) {
 		launch(args);
+	}
+
+	public static boolean isDesktop() {
+		return com.gluonhq.attach.util.Platform.isDesktop();
 	}
 }

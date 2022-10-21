@@ -20,14 +20,11 @@
 
 package org.husonlab.phylosketch.network.commands;
 
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
 import jloda.graph.Node;
-import jloda.phylo.PhyloTree;
 import org.husonlab.phylosketch.network.NetworkView;
-import org.husonlab.phylosketch.unused.view.PhyloView;
 
 import java.util.HashMap;
 import java.util.List;

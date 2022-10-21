@@ -18,35 +18,28 @@
  *
  */
 
-package org.husonlab.phylosketch.unused.view;
+package org.husonlab.phylosketch.network;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
+import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.GeometryUtilsFX;
-import jloda.fx.util.MouseDragClosestNode;
 import jloda.graph.Edge;
-import jloda.util.Pair;
-import org.husonlab.phylosketch.unused.commands.EdgeShapeCommand;
-
-import java.util.function.Function;
 
 public class EdgeView {
     final private int id;
     final private CubicCurve curve;
-    final private Label label;
+    private RichTextLabel label;
     final private Circle circle1;
     final private Circle circle2;
     final private Shape arrowHead;
@@ -54,13 +47,14 @@ public class EdgeView {
 
     /**
      * constructor
-     *
      */
-    public EdgeView(PhyloView view, Edge edge, ReadOnlyDoubleProperty aX, ReadOnlyDoubleProperty aY, ReadOnlyDoubleProperty bX, ReadOnlyDoubleProperty bY) {
+    public EdgeView(Document document, Edge edge, ReadOnlyDoubleProperty aX, ReadOnlyDoubleProperty aY, ReadOnlyDoubleProperty bX, ReadOnlyDoubleProperty bY) {
+        var view = document.getView();
+
         curve = new CubicCurve();
         curve.setFill(Color.TRANSPARENT);
         curve.setStroke(Color.BLACK);
-        curve.setStrokeWidth(3);
+        curve.setStrokeWidth(1);
         curve.setPickOnBounds(false);
 
         curve.startXProperty().bind(aX);
@@ -84,33 +78,6 @@ public class EdgeView {
 
         id = edge.getId();
 
-        // reference current translating control
-        final Function<Circle, Pair<Edge, Integer>> translatingControl = (circle) -> {
-            final Edge e = view.getGraph().findEdgeById(id);
-            if (circle == circle1)
-                return new Pair<>(e, 1);
-            else
-                return new Pair<>(e, 2);
-        };
-
-        final BooleanProperty isSelected = new SimpleBooleanProperty(view.getEdgeSelection().isSelected(edge));
-        view.getEdgeSelection().getSelectedItems().addListener((InvalidationListener) c -> isSelected.set(view.getEdgeSelection().isSelected(edge)));
-
-        MouseDragClosestNode.setup(curve, isSelected, view.getNode2View().get(edge.getSource()).getShapeGroup(), circle1,
-                view.getNode2View().get(edge.getTarget()).getShapeGroup(), circle2,
-                (circle, delta) -> view.getUndoManager().add(new EdgeShapeCommand(view, translatingControl.apply((Circle) circle), delta)));
-
-        curve.setOnMouseClicked(c -> {
-            if (!MouseDragClosestNode.wasMoved()) {
-                if (!c.isShiftDown()) {
-                    view.getNodeSelection().clearSelection();
-                    view.getEdgeSelection().clearAndSelect(edge);
-                } else
-                    view.getEdgeSelection().toggleSelection(edge);
-            }
-            c.consume();
-        });
-
         arrowHead = new Polygon(-3, -3, 5, 0, -3, 3);
         arrowHead.setStrokeWidth(curve.getStrokeWidth());
         arrowHead.setFill(curve.getFill());
@@ -120,26 +87,25 @@ public class EdgeView {
         arrowHead.fillProperty().bind(curve.strokeProperty());
         arrowHead.strokeProperty().bind(curve.strokeProperty());
 
-        final InvalidationListener invalidationListener = (e) -> {
-            final double angle = GeometryUtilsFX.computeAngle(new Point2D(curve.getEndX() - curve.getControlX2(), curve.getEndY() - curve.getControlY2()));
+        //arrowHead.setLayoutY(-arrowHead.getStrokeWidth());
+        InvalidationListener invalidationListener = (e) -> {
+            final var angle = GeometryUtilsFX.computeAngle(new Point2D(curve.getEndX() - curve.getControlX2(), curve.getEndY() - curve.getControlY2()));
             arrowHead.setLayoutX(-0.5 * arrowHead.getStrokeWidth());
             //arrowHead.setLayoutY(-arrowHead.getStrokeWidth());
 
             arrowHead.setRotationAxis(new Point3D(0, 0, 1));
             arrowHead.setRotate(angle);
-            final Point2D location = GeometryUtilsFX.translateByAngle(new Point2D(curve.getEndX(), curve.getEndY()), angle, -15);
+            final var location = GeometryUtilsFX.translateByAngle(new Point2D(curve.getEndX(), curve.getEndY()), angle, -15);
             arrowHead.setTranslateX(location.getX());
             arrowHead.setTranslateY(location.getY());
         };
 
         invalidationListener.invalidated(null);
 
-        curve.startXProperty().addListener(invalidationListener);
-        curve.startYProperty().addListener(invalidationListener);
-        curve.endXProperty().addListener(invalidationListener);
-        curve.endYProperty().addListener(invalidationListener);
         curve.controlX2Property().addListener(invalidationListener);
         curve.controlY2Property().addListener(invalidationListener);
+        curve.endXProperty().addListener(invalidationListener);
+        curve.endYProperty().addListener(invalidationListener);
 
         label = null;
 
@@ -160,8 +126,12 @@ public class EdgeView {
         return curve;
     }
 
-    public Label getLabel() {
+    public RichTextLabel label() {
         return label;
+    }
+
+    public void setLabel(RichTextLabel label) {
+        this.label = label;
     }
 
     public Circle getCircle1() {
@@ -177,30 +147,30 @@ public class EdgeView {
     }
 
     public void startMoved(double deltaX, double deltaY) {
-        final Point2D start = new Point2D(curve.getStartX(), curve.getStartY());
-        final Point2D end = new Point2D(curve.getEndX(), curve.getEndY());
-        final Point2D newStart = new Point2D(start.getX() + deltaX, start.getY() + deltaY);
+        final var start = new Point2D(curve.getStartX(), curve.getStartY());
+        final var end = new Point2D(curve.getEndX(), curve.getEndY());
+        final var newStart = new Point2D(start.getX() + deltaX, start.getY() + deltaY);
 
-        final double oldDistance = start.distance(end);
+        final var oldDistance = start.distance(end);
 
         if (oldDistance > 0) {
-            final double scaleFactor = newStart.distance(end) / oldDistance;
-            final double deltaAngle = GeometryUtilsFX.computeObservedAngle(end, start, newStart);
+            final var scaleFactor = newStart.distance(end) / oldDistance;
+            final var deltaAngle = GeometryUtilsFX.computeObservedAngle(end, start, newStart);
 
 
             if (scaleFactor != 0 || deltaAngle != 0) {
 
-                final Point2D oldControl1 = new Point2D(curve.getControlX1(), curve.getControlY1());
-                final double newAngle1 = GeometryUtilsFX.computeAngle(oldControl1.subtract(end)) + deltaAngle;
+                final var oldControl1 = new Point2D(curve.getControlX1(), curve.getControlY1());
+                final var newAngle1 = GeometryUtilsFX.computeAngle(oldControl1.subtract(end)) + deltaAngle;
 
-                final Point2D newControl1 = GeometryUtilsFX.translateByAngle(end, newAngle1, scaleFactor * oldControl1.distance(end));
+                final var newControl1 = GeometryUtilsFX.translateByAngle(end, newAngle1, scaleFactor * oldControl1.distance(end));
                 curve.setControlX1(newControl1.getX());
                 curve.setControlY1(newControl1.getY());
 
-                final Point2D oldControl2 = new Point2D(curve.getControlX2(), curve.getControlY2());
-                final double newAngle2 = GeometryUtilsFX.computeAngle(oldControl2.subtract(end)) + deltaAngle;
+                final var oldControl2 = new Point2D(curve.getControlX2(), curve.getControlY2());
+                final var newAngle2 = GeometryUtilsFX.computeAngle(oldControl2.subtract(end)) + deltaAngle;
 
-                final Point2D newControl2 = GeometryUtilsFX.translateByAngle(end, newAngle2, scaleFactor * oldControl2.distance(end));
+                final var newControl2 = GeometryUtilsFX.translateByAngle(end, newAngle2, scaleFactor * oldControl2.distance(end));
                 curve.setControlX2(newControl2.getX());
                 curve.setControlY2(newControl2.getY());
             }
@@ -208,28 +178,28 @@ public class EdgeView {
     }
 
     public void endMoved(double deltaX, double deltaY) {
-        final Point2D start = new Point2D(curve.getStartX(), curve.getStartY());
-        final Point2D end = new Point2D(curve.getEndX(), curve.getEndY());
-        final Point2D newEnd = new Point2D(end.getX() + deltaX, end.getY() + deltaY);
-        final double oldDistance = end.distance(start);
+        final var start = new Point2D(curve.getStartX(), curve.getStartY());
+        final var end = new Point2D(curve.getEndX(), curve.getEndY());
+        final var newEnd = new Point2D(end.getX() + deltaX, end.getY() + deltaY);
+        final var oldDistance = end.distance(start);
 
         if (oldDistance > 0) {
-            final double scaleFactor = newEnd.distance(start) / oldDistance;
-            final double deltaAngle = GeometryUtilsFX.computeObservedAngle(start, end, newEnd);
+            final var scaleFactor = newEnd.distance(start) / oldDistance;
+            final var deltaAngle = GeometryUtilsFX.computeObservedAngle(start, end, newEnd);
 
             if (scaleFactor != 0 || deltaAngle != 0) {
 
-                final Point2D oldControl1 = new Point2D(curve.getControlX1(), curve.getControlY1());
-                final double newAngle1 = GeometryUtilsFX.computeAngle(oldControl1.subtract(start)) + deltaAngle;
+                final var oldControl1 = new Point2D(curve.getControlX1(), curve.getControlY1());
+                final var newAngle1 = GeometryUtilsFX.computeAngle(oldControl1.subtract(start)) + deltaAngle;
 
-                final Point2D newControl1 = GeometryUtilsFX.translateByAngle(start, newAngle1, scaleFactor * oldControl1.distance(start));
+                final var newControl1 = GeometryUtilsFX.translateByAngle(start, newAngle1, scaleFactor * oldControl1.distance(start));
                 curve.setControlX1(newControl1.getX());
                 curve.setControlY1(newControl1.getY());
 
-                final Point2D oldControl2 = new Point2D(curve.getControlX2(), curve.getControlY2());
-                final double newAngle2 = GeometryUtilsFX.computeAngle(oldControl2.subtract(start)) + deltaAngle;
+                final var oldControl2 = new Point2D(curve.getControlX2(), curve.getControlY2());
+                final var newAngle2 = GeometryUtilsFX.computeAngle(oldControl2.subtract(start)) + deltaAngle;
 
-                final Point2D newControl2 = GeometryUtilsFX.translateByAngle(start, newAngle2, scaleFactor * oldControl2.distance(start));
+                final var newControl2 = GeometryUtilsFX.translateByAngle(start, newAngle2, scaleFactor * oldControl2.distance(start));
                 curve.setControlX2(newControl2.getX());
                 curve.setControlY2(newControl2.getY());
             }

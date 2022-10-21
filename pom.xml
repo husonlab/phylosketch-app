@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.husonlab</groupId>
             <artifactId>jloda</artifactId>
-            <version>1</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -99,12 +99,6 @@
             <groupId>com.gluonhq.attach</groupId>
             <artifactId>util</artifactId>
             <version>${attach.version}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/de.erichseifert.vectorgraphics2d/VectorGraphics2D -->
-        <dependency>
-            <groupId>de.erichseifert.vectorgraphics2d</groupId>
-            <artifactId>VectorGraphics2D</artifactId>
-            <version>0.13</version>
         </dependency>
     </dependencies>
 

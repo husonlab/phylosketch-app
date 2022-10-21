@@ -32,7 +32,8 @@ import jloda.util.Counter;
  */
 public class NetworkModel {
 	public enum NodeGlyph {Square, Circle}
-	public enum EdgeGlyph {StraightLine, RectangleLine, QuadCurveLine}
+
+	public enum EdgeGlyph {StraightLine, RectangleLine, CubicCurve}
 	private final PhyloTree tree;
 	private final NodeArray<NodeAttributes> nodeAttributesNodeMap;
 	private final EdgeArray<EdgeAttributes> edgeAttributesMap;

@@ -23,72 +23,59 @@ package org.husonlab.phylosketch.network;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
+import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Shape;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
 import jloda.graph.Edge;
-import jloda.graph.EdgeArray;
 import jloda.graph.Node;
-import jloda.graph.NodeArray;
 import jloda.phylo.PhyloTree;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * network view
  * Daniel Huson, 10.2022
  */
 public class NetworkView {
-	private final Group edgePathGroup=new Group();
-	private final Group nodeShapeGroup=new Group();
-	private final Group edgeLabelGroup=new Group();
-	private final Group nodeLabelGroup=new Group();
-	private final Group world=new Group(edgePathGroup,nodeShapeGroup,edgeLabelGroup,nodeLabelGroup);
+	private final Group edgePathGroup = new Group();
+	private final Group nodeShapeGroup = new Group();
+	private final Group edgeLabelGroup = new Group();
+	private final Group nodeLabelGroup = new Group();
+	private final Group world = new Group(edgePathGroup, nodeShapeGroup, edgeLabelGroup, nodeLabelGroup);
 
+	private final Document document;
 	private final PhyloTree tree;
-	private final NodeArray<NodeView> nodeViewMap;
-	private final EdgeArray<EdgeView> edgeViewMap;
+	private final Map<Node, NodeView> nodeViewMap;
+	private final Map<Edge, EdgeView> edgeViewMap;
 
-	private double xScale=1.0;
-	private double yScale=1.0;
+	private double xScale = 1.0;
+	private double yScale = 1.0;
 
-	private BiConsumer<Node,NodeView> nodeGroupAddedCallBack=(a,g)->{};
-	private BiConsumer<Node,NodeView> nodeViewRemovedCallBack =(a, g)->{};
-
-	private BiConsumer<Edge,EdgeView> edgeViewAddedCallBack =(a, g)->{};
-	private BiConsumer<Edge,EdgeView> edgeViewRemovedCallBack =(a, g)->{};
-
-	private Function<Node,Shape> createNewNodeShape = v-> {
-		var shape=new CircleShape(8);
-		shape.setStroke(Color.BLACK);
-		shape.setFill(Color.WHITE);
-		return shape;
+	private Consumer<Node> nodeViewAddedCallback = a -> {
+	};
+	private Consumer<Node> nodeViewRemoveCallback = a -> {
 	};
 
-	private Function<Edge,Path> createNewEdgePath = e->{
-		var start=new MoveTo();
-		start.xProperty().bind(getView(e.getSource()).shape().translateXProperty());
-		start.yProperty().bind(getView(e.getSource()).shape().translateYProperty());
-		var end=new LineTo();
-		end.xProperty().bind(getView(e.getTarget()).shape().translateXProperty());
-		end.yProperty().bind(getView(e.getTarget()).shape().translateYProperty());
-		return new Path(start,end);
+	private Consumer<Edge> edgeViewAddedCallback = a -> {
+	};
+	private Consumer<Edge> edgeViewRemoveCallback = a -> {
 	};
 
-	public NetworkView(PhyloTree tree) {
-		this.tree = tree;
-		nodeViewMap =tree.newNodeArray();
-		edgeViewMap = tree.newEdgeArray();
+
+	public NetworkView(Document document) {
+		this.document = document;
+		this.tree = document.getModel().getTree();
+		nodeViewMap = new HashMap<>();
+		edgeViewMap = new HashMap<>();
 	}
 
 	public void clear() {
-		for(var v:tree.nodes())
+		for (var v : tree.nodes())
 			removeView(v);
-		for(var e:tree.edges()) {
+		for (var e : tree.edges()) {
 			removeView(e);
 		}
 	}
@@ -108,24 +95,26 @@ public class NetworkView {
 					nodeShapeGroup.getChildren().remove(oldNodeView.shape());
 				if(oldNodeView.label()!=null)
 					nodeLabelGroup.getChildren().remove(oldNodeView.label());
+				nodeViewRemoveCallback.accept(v);
 				nodeViewMap.remove(v);
-				nodeViewRemovedCallBack.accept(v,oldNodeView);
 			}
 		if(nodeView!=null) {
 			if(nodeView.shape()!=null)
 				nodeShapeGroup.getChildren().add(nodeView.shape());
 			if(nodeView.label()!=null)
 				nodeLabelGroup.getChildren().add(nodeView.label());
-			nodeViewMap.put(v,nodeView);
-			nodeGroupAddedCallBack.accept(v, nodeView);
+			nodeViewMap.put(v, nodeView);
+			nodeViewAddedCallback.accept(v);
 		}
 	}
 
 	public void createShape(Node v, double x, double y) {
-		var shape=createNewNodeShape.apply(v);
+		var shape = new CircleShape(8);
+		shape.setStroke(Color.BLACK);
+		shape.setFill(Color.WHITE);
 		shape.setTranslateX(x);
 		shape.setTranslateY(y);
-		setView(v,new NodeView(shape,null));
+		setView(v, new NodeView(shape, null));
 	}
 
 	public void addLabel(Node v, String text, double dx, double dy) {
@@ -157,37 +146,37 @@ public class NetworkView {
 	public void setView(Edge e, EdgeView edgeView) {
 		var oldEdgeView= edgeViewMap.get(e);
 		if(oldEdgeView!=null) {
-			if(oldEdgeView.path()!=null)
-				edgePathGroup.getChildren().remove(oldEdgeView.path());
+			edgePathGroup.getChildren().removeAll(oldEdgeView.getChildren());
 			if(oldEdgeView.label()!=null)
 				edgeLabelGroup.getChildren().remove(oldEdgeView.label());
+			edgeViewRemoveCallback.accept(e);
 			edgeViewMap.remove(e);
-			edgeViewRemovedCallBack.accept(e,oldEdgeView);
 		}
-		if(edgeView!=null) {
-			if(edgeView.path()!=null)
-				edgePathGroup.getChildren().add(edgeView.path());
-			if(edgeView.label()!=null)
+		if (edgeView != null) {
+			edgePathGroup.getChildren().addAll(edgeView.getChildren());
+			if (edgeView.label() != null)
 				edgeLabelGroup.getChildren().add(edgeView.label());
 			edgeViewMap.put(e, edgeView);
-			edgeViewAddedCallBack.accept(e, edgeView);
+			edgeViewAddedCallback.accept(e);
 		}
 	}
 
-	public void createPath(Edge e) {
-		var path=createNewEdgePath.apply(e);
-		setView(e,new EdgeView(path,null));
+	public void createEdgeView(Edge e) {
+		var source = getView(e.getSource()).shape();
+		var target = getView(e.getTarget()).shape();
+		var edgeView = new EdgeView(document, e, source.translateXProperty(), source.translateYProperty(), target.translateXProperty(), target.translateYProperty());
+		setView(e, edgeView);
 	}
 
 	public void addLabel(Edge e, String text, double dx, double dy) {
-		var edgeView= getView(e);
-		if(edgeView.label()!=null) {
+		var edgeView = getView(e);
+		if (edgeView.label() != null) {
 			edgeView.label().translateXProperty().unbind();
 			edgeView.label().translateYProperty().unbind();
 			edgeLabelGroup.getChildren().remove(edgeView.label());
 		}
-		var path=edgeView.path();
-		var textLabel=new RichTextLabel(text);
+		var path = edgeView.getCurve();
+		var textLabel = new RichTextLabel(text);
 		textLabel.translateXProperty().bind(path.translateXProperty());
 		textLabel.translateYProperty().bind(path.translateYProperty());
 		textLabel.setLayoutX(dx);
@@ -198,38 +187,31 @@ public class NetworkView {
 
 
 	public void removeView(Edge e) {
-		setView(e,null);
+		setView(e, null);
 	}
 
-	public void setNodeViewAddedCallBack(BiConsumer<Node, NodeView> nodeGroupAddedCallBack) {
-		this.nodeGroupAddedCallBack = nodeGroupAddedCallBack;
+	public void setNodeViewAddedCallback(Consumer<Node> nodeGroupAddedCallBack) {
+		this.nodeViewAddedCallback = nodeGroupAddedCallBack;
 	}
 
-	public void setNodeViewRemovedCallBack(BiConsumer<Node, NodeView> nodeGroupRemovedCallBack) {
-		this.nodeViewRemovedCallBack = nodeGroupRemovedCallBack;
+	public void setNodeViewRemoveCallback(Consumer<Node> nodeGroupRemovedCallBack) {
+		this.nodeViewRemoveCallback = nodeGroupRemovedCallBack;
 	}
 
-	public void setEdgeViewAddedCallBack(BiConsumer<Edge, EdgeView> edgeViewAddedCallBack) {
-		this.edgeViewAddedCallBack = edgeViewAddedCallBack;
+	public void setEdgeViewAddedCallback(Consumer<Edge> edgeViewAddedCallback) {
+		this.edgeViewAddedCallback = edgeViewAddedCallback;
 	}
 
-	public void setEdgeViewRemovedCallBack(BiConsumer<Edge, EdgeView> edgeViewRemovedCallBack) {
-		this.edgeViewRemovedCallBack = edgeViewRemovedCallBack;
+	public void setEdgeViewRemoveCallback(Consumer<Edge> edgeViewRemoveCallback) {
+		this.edgeViewRemoveCallback = edgeViewRemoveCallback;
 	}
 
-	public void setCreateNewNodeShape(Function<Node, Shape> createNewNodeShape) {
-		this.createNewNodeShape = createNewNodeShape;
-	}
-
-	public void setCreateNewEdgePath(Function<Edge, Path> createNewEdgePath) {
-		this.createNewEdgePath = createNewEdgePath;
-	}
 
 	public Node findNodeIfHit(double xScreen, double yScreen) {
 		for (var v : tree.nodes()) {
-				final var shape = getView(v).shape();
-				if (shape.contains(shape.screenToLocal(xScreen, yScreen)))
-					return v;
+			final var shape = getView(v).shape();
+			if (shape.contains(shape.screenToLocal(xScreen, yScreen)))
+				return v;
 		}
 		return null;
 	}
@@ -255,25 +237,39 @@ public class NetworkView {
 	}
 
 	public void scale(double xFactor,double yFactor) {
-		if(xFactor<=0 || yFactor<=0)
+		if (xFactor <= 0 || yFactor <= 0)
 			throw new IllegalArgumentException();
-		this.xScale *=xFactor;
-		this.yScale *=yFactor;
-		for(var v:tree.nodes()) {
-			var shape=getView(v).shape();
-			shape.setTranslateX(shape.getTranslateX()*xFactor);
-			shape.setTranslateY(shape.getTranslateY()*yFactor);
+		this.xScale *= xFactor;
+		this.yScale *= yFactor;
+		for (var v : tree.nodes()) {
+			var shape = getView(v).shape();
+			shape.setTranslateX(shape.getTranslateX() * xFactor);
+			shape.setTranslateY(shape.getTranslateY() * yFactor);
+		}
+		for (var e : tree.edges()) {
+			final CubicCurve cubicCurve = getView(e).getCurve();
+			cubicCurve.setControlX1(xFactor * cubicCurve.getControlX1());
+			cubicCurve.setControlY1(yFactor * cubicCurve.getControlY1());
+			cubicCurve.setControlX2(xFactor * cubicCurve.getControlX2());
+			cubicCurve.setControlY2(yFactor * cubicCurve.getControlY2());
 		}
 	}
 
 	public void resetScale() {
-		for(var v:tree.nodes()) {
-			var shape=getView(v).shape();
-			shape.setTranslateX(shape.getTranslateX()/xScale);
-			shape.setTranslateY(shape.getTranslateY()/yScale);
+		for (var v : tree.nodes()) {
+			var shape = getView(v).shape();
+			shape.setTranslateX(shape.getTranslateX() / xScale);
+			shape.setTranslateY(shape.getTranslateY() / yScale);
 		}
-		xScale=1.0;
-		yScale=1.0;
+		for (var e : tree.edges()) {
+			final CubicCurve cubicCurve = getView(e).getCurve();
+			cubicCurve.setControlX1(cubicCurve.getControlX1() / xScale);
+			cubicCurve.setControlY1(cubicCurve.getControlY1() / yScale);
+			cubicCurve.setControlX2(cubicCurve.getControlX2() / xScale);
+			cubicCurve.setControlY2(cubicCurve.getControlY2() / yScale);
+		}
+		xScale = 1.0;
+		yScale = 1.0;
 	}
 
 
@@ -328,39 +324,6 @@ public class NetworkView {
 		public String toString() {
 			return "NodeView[" +
 				   "shape=" + shape + ", " +
-				   "label=" + label + ']';
-		}
-	}
-
-	public static final class EdgeView {
-		private  Path path;
-		private  RichTextLabel label;
-
-		public EdgeView(Path path, RichTextLabel label) {
-			this.path = path;
-			this.label = label;
-		}
-
-		public Path path() {
-			return path;
-		}
-
-		public RichTextLabel label() {
-			return label;
-		}
-
-		public void setPath(Path path) {
-			this.path = path;
-		}
-
-		public void setLabel(RichTextLabel label) {
-			this.label = label;
-		}
-
-		@Override
-		public String toString() {
-			return "EdgeView[" +
-				   "path=" + path + ", " +
 				   "label=" + label + ']';
 		}
 	}

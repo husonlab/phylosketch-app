@@ -27,7 +27,6 @@ import com.gluonhq.charm.glisten.control.FloatingActionButton;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.fxml.FXML;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.FlowPane;
 
 public class SecondaryController {
@@ -37,7 +36,6 @@ public class SecondaryController {
 
 	@FXML
 	private FlowPane flowPane;
-
 
 	@FXML
 	private void initialize() {

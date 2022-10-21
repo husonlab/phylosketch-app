@@ -20,7 +20,6 @@
 
 package org.husonlab.phylosketch.network;
 
-import javafx.scene.layout.Pane;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.selection.SetSelectionModel;
 import jloda.fx.undo.UndoManager;
@@ -29,15 +28,17 @@ import jloda.graph.Node;
 
 
 public class Document {
-	private final SelectionModel<Node> nodeSelection=new SetSelectionModel<>();
-	private final SelectionModel<Edge> edgeSelection=new SetSelectionModel<>();
+	private final UndoManager undoManager = new UndoManager();
+
+	private final SelectionModel<Node> nodeSelection = new SetSelectionModel<>();
+	private final SelectionModel<Edge> edgeSelection = new SetSelectionModel<>();
 
 	private final NetworkModel model;
 	private final NetworkView view;
 
 	public Document() {
-		model=new NetworkModel();
-		view=new NetworkView(model.getTree());
+		model = new NetworkModel();
+		view = new NetworkView(this);
 	}
 
 	public SelectionModel<Node> getNodeSelection() {
@@ -54,5 +55,9 @@ public class Document {
 
 	public NetworkView getView() {
 		return view;
+	}
+
+	public UndoManager getUndoManager() {
+		return undoManager;
 	}
 }

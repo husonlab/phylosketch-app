@@ -22,10 +22,7 @@ package org.husonlab.phylosketch.views.primary;
 
 import com.gluonhq.charm.glisten.mvc.View;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
-import jloda.fx.undo.UndoManager;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkPresenter;
 
@@ -36,8 +33,6 @@ public class PrimaryView {
 	private final Document document;
 	private final PrimaryController controller;
 	private final PrimaryPresenter presenter;
-
-	private final UndoManager undoManager = new UndoManager();
 
 	public PrimaryView() {
 		document=new Document();
@@ -52,9 +47,9 @@ public class PrimaryView {
 		}
 		controller = fxmlLoader.getController();
 
-		presenter = new PrimaryPresenter(this, controller);
+		presenter = new PrimaryPresenter(document, this, controller);
 
-		NetworkPresenter.setupView(controller.getMainPane(),document,undoManager,getPresenter().toolProperty());
+		NetworkPresenter.setupView(controller.getMainPane(), document, getPresenter().toolProperty());
 
 		if(true) {
 			Platform.runLater(()-> {
@@ -76,10 +71,6 @@ public class PrimaryView {
 
 	public PrimaryPresenter getPresenter() {
 		return presenter;
-	}
-
-	public UndoManager getUndoManager() {
-		return undoManager;
 	}
 
 	public View getView() {

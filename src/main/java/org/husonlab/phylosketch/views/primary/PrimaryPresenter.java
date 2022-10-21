@@ -20,16 +20,21 @@
 
 package org.husonlab.phylosketch.views.primary;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.util.Duration;
 import jloda.util.StringUtils;
+import org.husonlab.phylosketch.network.Document;
 
 public class PrimaryPresenter {
 	public enum Tool {AddNodesAndEdges, EraseNodesAndEdges, MoveNodes, AddLabels}
 
 	private final ObjectProperty<Tool> tool = new SimpleObjectProperty<>(this, "tool");
 
-	public PrimaryPresenter(PrimaryView view, PrimaryController controller) {
+	public PrimaryPresenter(Document document, PrimaryView view, PrimaryController controller) {
 		controller.getToggles().selectedToggleProperty().addListener((v, o, n) -> {
 			if (n == controller.getMoveToggleButton()) {
 				tool.set(PrimaryPresenter.Tool.MoveNodes);
@@ -45,22 +50,28 @@ public class PrimaryPresenter {
 		});
 
 		controller.getModeLabel().setText("");
-		tool.addListener((c, o, n) -> controller.getModeLabel().setText(n == null ? "" : StringUtils.fromCamelCase(n.name())));
+		tool.addListener((c, o, n) -> {
+			controller.getModeLabel().setText(n == null ? "" : StringUtils.fromCamelCase(n.name()));
+			controller.getModeLabel().setOpacity(1.0);
+			var fadeTransition = new FadeTransition(Duration.seconds(1), controller.getModeLabel());
+			fadeTransition.setToValue(0.0);
+			var transition = new SequentialTransition(new PauseTransition(Duration.seconds(3)), fadeTransition);
+			transition.play();
+		});
 
-		controller.getUndoButton().setOnAction(e -> view.getUndoManager().undo());
-		controller.getUndoButton().disableProperty().bind(view.getUndoManager().undoableProperty().not());
-		controller.getRedoButton().setOnAction(e -> view.getUndoManager().redo());
-		controller.getRedoButton().disableProperty().bind(view.getUndoManager().redoableProperty().not());
+		controller.getUndoButton().setOnAction(e -> document.getUndoManager().undo());
+		controller.getUndoButton().disableProperty().bind(document.getUndoManager().undoableProperty().not());
+		controller.getRedoButton().setOnAction(e -> document.getUndoManager().redo());
+		controller.getRedoButton().disableProperty().bind(document.getUndoManager().redoableProperty().not());
 
 		if (com.gluonhq.attach.util.Platform.isDesktop()) {
 			controller.getStackPane().setOnScroll(e -> {
 				var factor = (e.getDeltaY() > 0 ? 1.1 : 1 / 1.1);
 				var box = view.getDocument().getView().getBoundingBox();
-				if(factor<1 && Math.min(box.getWidth(), box.getHeight())<50 || factor>1 && Math.max(box.getWidth(), box.getHeight())>2000) {
+				if (factor < 1 && Math.min(box.getWidth(), box.getHeight()) < 50 || factor > 1 && Math.max(box.getWidth(), box.getHeight()) > 2000) {
 					controller.getLabel().setText("Zoom capped");
-				}
-				else {
-					controller.getLabel().setText(String.format("Factor: %.1f",factor));
+				} else {
+					controller.getLabel().setText(String.format("Factor: %.1f", factor));
 					view.getDocument().getView().scale(factor, factor);
 				}
 				e.consume();

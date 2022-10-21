@@ -47,14 +47,15 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 		final int bId = (b != null ? b.getId() : 0);
 
 		undo = () -> {
-			if (wId > 0) {
-				final Node w = tree.findNodeById(wId);
-				networkView.removeView(w);
-				tree.deleteNode(w);
-			} else if (edgeId > 0) {
-				final Edge e = tree.findEdgeById(edgeId);
+			if (edgeId > 0) {
+				var e = tree.findEdgeById(edgeId);
 				networkView.removeView(e);
 				tree.deleteEdge(e);
+			}
+			if (wId > 0) {
+				var w = tree.findNodeById(wId);
+				networkView.removeView(w);
+				tree.deleteNode(w);
 			}
 		};
 
@@ -79,7 +80,7 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 				} else {
 					e = tree.newEdge(v, w, null, edgeId);
 				}
-				networkView.createPath(e);
+				networkView.createEdgeView(e);
 			}
 			if (wId > 0) Platform.runLater(() ->{
 				nodeSelection.clearSelection();

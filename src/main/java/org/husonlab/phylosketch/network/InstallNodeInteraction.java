@@ -1,5 +1,5 @@
 /*
- * NodeMouseInteraction.java Copyright (C) 2022 Daniel H. Huson
+ * InstallNodeInteraction.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -40,11 +40,13 @@ import org.husonlab.phylosketch.views.primary.PrimaryPresenter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NodeMouseInteraction {
-	public static void install(Pane pane, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
-							   SelectionModel<Edge> edgeSelection, Node v, NetworkView.NodeView nv, ObjectProperty<PrimaryPresenter.Tool> tool) {
-
-		var shape = nv.shape();
+/**
+ * install node interaction
+ */
+public class InstallNodeInteraction {
+	public static void apply(boolean useTouch, Pane pane, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
+							 SelectionModel<Edge> edgeSelection, Node v, ObjectProperty<PrimaryPresenter.Tool> tool) {
+		var shape = networkView.getView(v).shape();
 		shape.setCursor(Cursor.CROSSHAIR);
 
 		final var mouseDownPosition = new double[2];
@@ -70,7 +72,7 @@ public class NodeMouseInteraction {
 			}
 		});
 
-		if (com.gluonhq.attach.util.Platform.isDesktop()) {
+		if (!useTouch) {
 			shape.setOnMousePressed(c -> {
 				currentTool.set(tool.get());
 				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
@@ -87,15 +89,17 @@ public class NodeMouseInteraction {
 					var yScreen = c.getScreenY();
 					var xScene = c.getSceneX();
 					var yScene = c.getSceneY();
-					if (handleDragged(currentTool.get(), xScreen, yScreen, xScene, yScene, previousMousePosition, nodeSelection, v, networkView, line, moved, shape, pane, target))
+					if (handleDragged(currentTool.get(), xScreen, yScreen, xScene, yScene, previousMousePosition,
+							oldControlPointLocations, newControlPointLocations, nodeSelection, v, networkView, line, moved, shape, pane, target))
 						c.consume();
 				}
 			});
 			shape.setOnMouseReleased(c -> {
 				shape.setEffect(null);
 				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
-					if (handleReleased(currentTool.get(), mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, nodeSelection, edgeSelection, v, networkView, c.isShiftDown(), c.isPopupTrigger(), line, moved,
-							shape, pane, target, undoManager))
+					if (handleReleased(currentTool.get(), mouseDownPosition, previousMousePosition,
+							oldControlPointLocations, newControlPointLocations, nodeSelection, edgeSelection, v,
+							networkView, c.isShiftDown(), c.isPopupTrigger(), line, moved, shape, pane, target, undoManager))
 						c.consume();
 				}
 			});
@@ -122,7 +126,8 @@ public class NodeMouseInteraction {
 						var yScreen = c.getTouchPoint().getScreenY();
 						var xScene = c.getTouchPoint().getSceneX();
 						var yScene = c.getTouchPoint().getSceneY();
-						if (handleDragged(currentTool.get(), xScreen, yScreen, xScene, yScene, previousMousePosition, nodeSelection, v, networkView, line, moved, shape, pane, target))
+						if (handleDragged(currentTool.get(), xScreen, yScreen, xScene, yScene, previousMousePosition, oldControlPointLocations, newControlPointLocations,
+								nodeSelection, v, networkView, line, moved, shape, pane, target))
 							c.consume();
 					}
 				}
@@ -170,7 +175,9 @@ public class NodeMouseInteraction {
 		return true;
 	}
 
-	private static boolean handleDragged(PrimaryPresenter.Tool  what, double screenX, double screenY, double sceneX, double sceneY, double[] previousMousePosition,
+	private static boolean handleDragged(PrimaryPresenter.Tool what, double screenX, double screenY, double sceneX, double sceneY, double[] previousMousePosition,
+										 Map<Integer, double[]> oldControlPointLocations,
+										 Map<Integer, double[]> newControlPointLocations,
 										 SelectionModel<Node> nodeSelection, Node v, NetworkView networkView,
 										 Line line, Single<Boolean> moved,
 										 Shape shape, Pane pane, ObjectProperty<Node> target) {
@@ -186,30 +193,29 @@ public class NodeMouseInteraction {
 
 			for (var u : nodeSelection.getSelectedItems()) {
 				var uShape = networkView.getView(u).shape();
-								/*	todo: reshape edges
-					{
+				{
 						final double deltaXReshapeEdge = (sceneX - previousMousePosition[0]);
 						final double deltaYReshapeEdge = (sceneY - previousMousePosition[1]);
 
-						for (var e : u.outEdges()) {
-							final EdgeView edgeView = edge2view.get(e);
+					for (var e : u.outEdges()) {
+						var edgeView = networkView.getView(e);
 
-							if (!oldControlPointLocations.containsKey(e.getId())) {
-								oldControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
-							}
-							edgeView.startMoved(deltaXReshapeEdge, deltaYReshapeEdge);
-							newControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
+						if (!oldControlPointLocations.containsKey(e.getId())) {
+							oldControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
 						}
-						for (Edge e : u.inEdges()) {
-							final EdgeView edgeView = edge2view.get(e);
-							if (!oldControlPointLocations.containsKey(e.getId())) {
-								oldControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
-							}
-							edgeView.endMoved(deltaXReshapeEdge, deltaYReshapeEdge);
-							newControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
-						}
+						edgeView.startMoved(deltaXReshapeEdge, deltaYReshapeEdge);
+						newControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
 					}
-					*/
+					for (var e : u.inEdges()) {
+						var edgeView = networkView.getView(e);
+						if (!oldControlPointLocations.containsKey(e.getId())) {
+							oldControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
+						}
+						edgeView.endMoved(deltaXReshapeEdge, deltaYReshapeEdge);
+						newControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
+					}
+				}
+
 				uShape.setTranslateX(shape.getTranslateX() + deltaX);
 				uShape.setTranslateY(shape.getTranslateY() + deltaY);
 			}

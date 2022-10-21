@@ -17,14 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.husonlab.phylosketch.unused.commands;
+package org.husonlab.phylosketch.network.commands;
 
 import javafx.geometry.Point2D;
 import javafx.scene.shape.CubicCurve;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
 import jloda.util.Pair;
-import org.husonlab.phylosketch.unused.view.PhyloView;
+import org.husonlab.phylosketch.network.NetworkView;
 
 /**
  * change edge shape command
@@ -34,13 +34,13 @@ public class EdgeShapeCommand extends UndoableRedoableCommand {
     private final Runnable undo;
     private final Runnable redo;
 
-    public EdgeShapeCommand(PhyloView phyloView, Pair<Edge, Integer> edgeAndControlId, Point2D delta) {
+    public EdgeShapeCommand(NetworkView networkView, Pair<Edge, Integer> edgeAndControlId, Point2D delta) {
         super("Edge Shape");
-        final int id = edgeAndControlId.getFirst().getId();
-        final int controlId = edgeAndControlId.getSecond();
+        final var id = edgeAndControlId.getFirst().getId();
+        final var controlId = edgeAndControlId.getSecond();
 
         undo = () -> {
-            final CubicCurve curve = phyloView.getCurve(phyloView.getGraph().findEdgeById(id));
+            final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).getCurve();
             if (controlId == 1) {
                 curve.setControlX1(curve.getControlX1() - delta.getX());
                 curve.setControlY1(curve.getControlY1() - delta.getY());
@@ -50,7 +50,7 @@ public class EdgeShapeCommand extends UndoableRedoableCommand {
             }
         };
         redo = () -> {
-            final CubicCurve curve = phyloView.getCurve(phyloView.getGraph().findEdgeById(id));
+            final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).getCurve();
             if (controlId == 1) {
                 curve.setControlX1(curve.getControlX1() + delta.getX());
                 curve.setControlY1(curve.getControlY1() + delta.getY());
