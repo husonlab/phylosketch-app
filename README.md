@@ -4,7 +4,8 @@ This is a re-implementation of my PhyloSketch desktop program that will target i
 
 The program allows the user to interactively construct a phylogenetic tree or network and then save it to Newick format.
 
-This Gluon sample was generated from https://start.gluon.io
+The basic framework for this code was generated using
+the [Gluon Intellij plugin](https://plugins.jetbrains.com/plugin/7864-gluon).
 
 ## Basic Requirements
 
@@ -26,6 +27,9 @@ A list of the basic requirements can be found online in the [Gluon documentation
 
 ### Run the sample as a native iOS image:
 
+Before you can run on a native iOS image on an iOS device, there are several configuration steps that one must go
+through, involving xCode and "provisioning", described [here](https://docs.gluonhq.com/#platforms_ios).
+
     mvn -Pios gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
 
 ### Run the sample as a native android image:
@@ -34,7 +38,9 @@ A list of the basic requirements can be found online in the [Gluon documentation
 
 ## Important:
 
-When adding controls to an FXML file, remember to add the corresponding classes to the reflectionList in the pom.xml file.
+When adding controls to an FXML file, remember to add the corresponding classes to the reflectionList in the pom.xml
+file. If you don't, then the program might fail with an exception indicating that "type coercion failed", or some other
+problem.
 
 ## Selected features
 
