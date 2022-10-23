@@ -1,9 +1,9 @@
 # PhyloSketch
 
 This is a re-implementation of my PhyloSketch desktop program that will target iOS and Android. This is my first attempt
-to write such an app.
+to write an app for mobile devices.
 
-The program allows the user to interactively construct a phylogenetic tree or network and then save it to Newick format.
+The app allows the user to interactively construct a phylogenetic tree or network and then save it to Newick format. Also, it will allow the user to enter a string in Newick format and obtain a visualization of the corresponding rooted phylogenetic tree or network, which then can be edited. The app will display some of the mathematical properties of the tree or network.
 
 The basic framework for this code was generated using
 the [Gluon Intellij plugin](https://plugins.jetbrains.com/plugin/7864-gluon).
