@@ -34,6 +34,7 @@ import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.graph.NodeArray;
 import org.husonlab.phylosketch.Main;
+import org.husonlab.phylosketch.utils.TouchUtils;
 import org.husonlab.phylosketch.views.primary.PrimaryPresenter;
 
 
@@ -75,7 +76,7 @@ public class NetworkPresenter {
 				ev.getCurve().setEffect(SelectionEffect.getInstance());
 				if(ev.label()!=null)
 					ev.label().setEffect(SelectionEffect.getInstance());
-			} else if(c.wasRemoved()) {
+			} else if (c.wasRemoved()) {
 				var ev = view.getView(c.getElementRemoved());
 				if (ev != null) {
 					ev.getCurve().setEffect(null);
@@ -85,17 +86,9 @@ public class NetworkPresenter {
 			}
 		});
 
-		// todo: catch close pressed and dispatch to a shape
-		pane.setOnTouchPressed(c->{
-			System.err.println("pane touched");
-				var a=document.getView().findNodeIfHit(c.getTouchPoint().getScreenX(),c.getTouchPoint().getScreenY(),25);
-				if(a!=null) {
-					System.err.println("shape dispatched");
-					var shape=document.getView().getView(a).shape();
-					shape.fireEvent(c.copyFor(c.getSource(),shape));
-					c.consume();
-				}
-			});
+		if (useTouch) {
+			TouchUtils.redirectTouchEventsToClosestShape(pane, 10);
+		}
 	}
 
 	public static void model2view(NetworkModel model, NetworkView view) {

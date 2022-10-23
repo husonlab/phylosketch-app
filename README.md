@@ -1,6 +1,7 @@
 # PhyloSketch
 
-This is a re-implementation of my PhyloSketch desktop program that will target iOS and Android. This is my first attempt to write such an app.
+This is a re-implementation of my PhyloSketch desktop program that will target iOS and Android. This is my first attempt
+to write such an app.
 
 The program allows the user to interactively construct a phylogenetic tree or network and then save it to Newick format.
 
@@ -9,9 +10,20 @@ the [Gluon Intellij plugin](https://plugins.jetbrains.com/plugin/7864-gluon).
 
 ## Basic Requirements
 
-A list of the basic requirements can be found online in the [Gluon documentation](https://docs.gluonhq.com/#_requirements).
+A list of the basic requirements can be found online in
+the [Gluon documentation](https://docs.gluonhq.com/#_requirements).
+
+### JLODA library required
+
+This project requires the jloda library to be present, available [here](https://github.com/husonlab/jloda). As jloda is
+not (yet) available via maven, you need to build jloda.jar from source and then place it in your local repository. You
+can modify the mvn-install-jloda.sh script to do that.
 
 ## Quick instructions
+
+You can run the project from within Intellij as usual. This is the best way to do basic development and debugging. To
+test different aspects of the code running as a mobile app, you can type one of the following maven commands into the
+Intellij terminal window. The commands that generate a native image for a mobile device take much longer to complete.
 
 ### Run the sample on JVM/HotSpot:
 

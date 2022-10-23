@@ -54,6 +54,7 @@ public class InstallNodeInteraction {
 		final var oldControlPointLocations = new HashMap<Integer, double[]>();
 		final var newControlPointLocations = new HashMap<Integer, double[]>();
 
+		final var touchCount = new Single<>(0);
 		final var moved = new Single<>(false);
 		final var currentTool = new Single<PrimaryPresenter.Tool>(null);
 		final var target = new SimpleObjectProperty<Node>(null);
@@ -79,8 +80,8 @@ public class InstallNodeInteraction {
 					var x = c.getSceneX();
 					var y = c.getSceneY();
 					handlePressed(currentTool.get(), x, y, mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, line, moved, shape, pane, networkView.getWorld(), target);
-					c.consume();
 				}
+				c.consume();
 			});
 
 			shape.setOnMouseDragged(c -> {
@@ -89,67 +90,70 @@ public class InstallNodeInteraction {
 					var yScreen = c.getScreenY();
 					var xScene = c.getSceneX();
 					var yScene = c.getSceneY();
-					if (handleDragged(currentTool.get(), xScreen, yScreen, xScene, yScene, previousMousePosition,
-							oldControlPointLocations, newControlPointLocations, nodeSelection, v, networkView, line, moved, shape, pane, target))
-						c.consume();
+					handleDragged(currentTool.get(), xScreen, yScreen, xScene, yScene, previousMousePosition,
+							oldControlPointLocations, newControlPointLocations, nodeSelection, v, networkView, line, moved, shape, pane, target);
 				}
+				c.consume();
 			});
 			shape.setOnMouseReleased(c -> {
 				shape.setEffect(null);
 				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
-					if (handleReleased(currentTool.get(), mouseDownPosition, previousMousePosition,
+					handleReleased(currentTool.get(), !c.isShiftDown(), mouseDownPosition, previousMousePosition,
 							oldControlPointLocations, newControlPointLocations, nodeSelection, edgeSelection, v,
-							networkView, c.isShiftDown(), c.isPopupTrigger(), line, moved, shape, pane, target, undoManager))
-						c.consume();
+							networkView, c.isShiftDown(), c.isPopupTrigger(), line, moved, shape, pane, target, undoManager);
 				}
+				c.consume();
 			});
 
 		} else {
+			final var pressStartTime = new Single<>(0L);
 			shape.setOnTouchPressed(c -> {
-				currentTool.set(tool.get());
-				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
-					if (c.getTouchCount() == 1) {
+				pressStartTime.set(System.currentTimeMillis());
+				touchCount.set(c.getTouchCount());
+				if (touchCount.get() == 1) {
+					currentTool.set(tool.get());
+					if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
 						System.err.println("shape touched");
 
 						var x = c.getTouchPoint().getSceneX();
 						var y = c.getTouchPoint().getSceneY();
-						if (handlePressed(currentTool.get(), x, y, mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, line, moved, shape, pane, networkView.getWorld(), target))
-							c.consume();
+						handlePressed(currentTool.get(), x, y, mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, line, moved, shape, pane, networkView.getWorld(), target);
 					}
+					c.consume();
 				}
 			});
 
 			shape.setOnTouchMoved(c -> {
-				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
-					if (c.getTouchCount() == 1) {
+				if (touchCount.get() == 1) {
+					if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
 						var xScreen = c.getTouchPoint().getScreenX();
 						var yScreen = c.getTouchPoint().getScreenY();
 						var xScene = c.getTouchPoint().getSceneX();
 						var yScene = c.getTouchPoint().getSceneY();
-						if (handleDragged(currentTool.get(), xScreen, yScreen, xScene, yScene, previousMousePosition, oldControlPointLocations, newControlPointLocations,
-								nodeSelection, v, networkView, line, moved, shape, pane, target))
-							c.consume();
+						handleDragged(currentTool.get(), xScreen, yScreen, xScene, yScene, previousMousePosition, oldControlPointLocations, newControlPointLocations,
+								nodeSelection, v, networkView, line, moved, shape, pane, target);
 					}
+					c.consume();
 				}
 			});
 
 			shape.setOnTouchReleased(c -> {
-				if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
-					if (c.getTouchCount() == 1) {
-						if (handleReleased(currentTool.get(), mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, nodeSelection, edgeSelection, v, networkView, false, false, line, moved,
-								shape, pane, target, undoManager))
-							c.consume();
+				if (touchCount.get() == 1) {
+					if (currentTool.get() == PrimaryPresenter.Tool.MoveNodes || currentTool.get() == PrimaryPresenter.Tool.AddNodesAndEdges) {
+						handleReleased(currentTool.get(), System.currentTimeMillis() - pressStartTime.get() > 1500, mouseDownPosition, previousMousePosition, oldControlPointLocations, newControlPointLocations, nodeSelection, edgeSelection, v, networkView, false, false, line, moved,
+								shape, pane, target, undoManager);
 					}
+					c.consume();
 				}
 			});
 		}
 	}
 
-	private static boolean handlePressed(PrimaryPresenter.Tool what, double xScene, double yScene, double[] mouseDownPosition, double[] previousMousePosition,
-										 Map<Integer, double[]> oldControlPointLocations,
-										 Map<Integer, double[]> newControlPointLocations,
-										 Line line, Single<Boolean> moved,
-										 Shape shape, Pane pane, Group world, ObjectProperty<Node> target) {
+	private static void handlePressed(PrimaryPresenter.Tool what, double xScene, double yScene, double[] mouseDownPosition, double[] previousMousePosition,
+									  Map<Integer, double[]> oldControlPointLocations,
+									  Map<Integer, double[]> newControlPointLocations,
+									  Line line, Single<Boolean> moved,
+									  Shape shape, Pane pane, Group world, ObjectProperty<Node> target) {
 		mouseDownPosition[0] = previousMousePosition[0] = xScene;
 		mouseDownPosition[1] = previousMousePosition[1] = yScene;
 		moved.set(false);
@@ -172,21 +176,20 @@ public class InstallNodeInteraction {
 			world.getChildren().add(line);
 			target.set(null);
 		}
-		return true;
 	}
 
-	private static boolean handleDragged(PrimaryPresenter.Tool what, double screenX, double screenY, double sceneX, double sceneY, double[] previousMousePosition,
-										 Map<Integer, double[]> oldControlPointLocations,
-										 Map<Integer, double[]> newControlPointLocations,
-										 SelectionModel<Node> nodeSelection, Node v, NetworkView networkView,
-										 Line line, Single<Boolean> moved,
-										 Shape shape, Pane pane, ObjectProperty<Node> target) {
+	private static void handleDragged(PrimaryPresenter.Tool what, double screenX, double screenY, double sceneX, double sceneY, double[] previousMousePosition,
+									  Map<Integer, double[]> oldControlPointLocations,
+									  Map<Integer, double[]> newControlPointLocations,
+									  SelectionModel<Node> nodeSelection, Node v, NetworkView networkView,
+									  Line line, Single<Boolean> moved,
+									  Shape shape, Pane pane, ObjectProperty<Node> target) {
 
 		shape.setScaleX(1);
 		shape.setScaleY(1);
 
 		if (what == PrimaryPresenter.Tool.MoveNodes) {
-			nodeSelection.clearSelection();
+			//nodeSelection.clearSelection();
 			nodeSelection.select(v);
 			final double deltaX = (sceneX - previousMousePosition[0]);
 			final double deltaY = (sceneY - previousMousePosition[1]);
@@ -216,8 +219,8 @@ public class InstallNodeInteraction {
 					}
 				}
 
-				uShape.setTranslateX(shape.getTranslateX() + deltaX);
-				uShape.setTranslateY(shape.getTranslateY() + deltaY);
+				uShape.setTranslateX(uShape.getTranslateX() + deltaX);
+				uShape.setTranslateY(uShape.getTranslateY() + deltaY);
 			}
 		} else if (what == PrimaryPresenter.Tool.AddNodesAndEdges) {
 			nodeSelection.clearSelection();
@@ -238,31 +241,25 @@ public class InstallNodeInteraction {
 		moved.set(true);
 		previousMousePosition[0] = sceneX;
 		previousMousePosition[1] = sceneY;
-		return true;
 	}
 
-	private static boolean handleReleased(PrimaryPresenter.Tool  what, double[] mouseDownPosition, double[] previousMousePosition,
-										  Map<Integer, double[]> oldControlPointLocations,
-										  Map<Integer, double[]> newControlPointLocations,
-										  SelectionModel<Node> nodeSelection, SelectionModel<Edge> edgeSelection,
-										  Node v, NetworkView networkView,
-										  boolean isShiftDown, boolean isPopupTrigger, Line line, Single<Boolean> moved,
-										  Shape shape, Pane pane, ObjectProperty<Node> target, UndoManager undoManager) {
+	private static void handleReleased(PrimaryPresenter.Tool what, boolean clearSelection, double[] mouseDownPosition, double[] previousMousePosition,
+									   Map<Integer, double[]> oldControlPointLocations,
+									   Map<Integer, double[]> newControlPointLocations,
+									   SelectionModel<Node> nodeSelection, SelectionModel<Edge> edgeSelection,
+									   Node v, NetworkView networkView,
+									   boolean isShiftDown, boolean isPopupTrigger, Line line, Single<Boolean> moved,
+									   Shape shape, Pane pane, ObjectProperty<Node> target, UndoManager undoManager) {
 		try {
 			if (!moved.get()) {
 				if (isPopupTrigger) {
-					return false;
+					return;
 				} else {
-					if (!isShiftDown) {
+					if (clearSelection) {
 						nodeSelection.clearSelection();
 						edgeSelection.clearSelection();
-						nodeSelection.select(v);
-					} else {
-						if (nodeSelection.isSelected(v))
-							nodeSelection.clearSelection(v);
-						else
-							nodeSelection.select(v);
 					}
+					nodeSelection.toggleSelection(v);
 				}
 			} else {
 				if (what == PrimaryPresenter.Tool.MoveNodes) {
@@ -284,7 +281,6 @@ public class InstallNodeInteraction {
 				moved.set(false);
 			}
 			networkView.getWorld().getChildren().remove(line);
-			return true;
 		}
 		finally {
 			shape.setScaleX(1);
