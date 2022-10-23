@@ -19,7 +19,7 @@ This project requires the jloda library to be present, available [here](https://
 not (yet) available via maven, you need to build jloda.jar from source and then place it in your local maven repository. You
 can modify the mvn-install-jloda.sh script to do that.
 
-## Quick instructions
+## Quick instructions for working with the code in Intellij
 
 You can run the project from within Intellij as usual. This is the best way to do basic development and debugging. To
 test different aspects of the code running as a mobile app, you can type one of the following maven commands into the
@@ -35,12 +35,14 @@ Intellij terminal window. The commands that generate a native image for a mobile
 
 ### Run the sample on an iOS simulator:
 
+First, you need to launch the iOS simulator from the Tools menu of XCode. Then the following maven command will install and run the app in the simulator:
+
     mvn -Pios-sim gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
 
 ### Run the sample as a native iOS image:
 
 Before you can run on a native iOS image on an iOS device, there are several configuration steps that one must go
-through, involving xCode and "provisioning", described [here](https://docs.gluonhq.com/#platforms_ios).
+through, involving setting up a corresponding xCode project and setting up "provisioning", described [here](https://docs.gluonhq.com/#platforms_ios). It may be that you require an Apple Developer account for this to work.
 
     mvn -Pios gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
 
@@ -56,7 +58,7 @@ problem.
 
 ## Selected features
 
-This is a list of all the features that were selected when creating the sample:
+This is a list of all the features that were selected when creating the project using the Gluon plugin:
 
 ### JavaFX 18.0.2 Modules
 
