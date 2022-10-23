@@ -1,12 +1,14 @@
 # PhyloSketch
 
-This is a re-implementation of my PhyloSketch desktop program that will target iOS and Android. This is my first attempt
-to write an app for mobile devices.
+This is going to be a reimplementation of my [PhyloSketch desktop program](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/phylosketch/) that will target iOS and Android.
+This is my first attempt to write an app for mobile devices.
 
 The app allows the user to interactively construct a phylogenetic tree or network and then save it to Newick format. Also, it will allow the user to enter a string in Newick format and obtain a visualization of the corresponding rooted phylogenetic tree or network, which then can be edited. The app will display some of the mathematical properties of the tree or network.
 
 The basic framework for this code was generated using
 the [Gluon Intellij plugin](https://plugins.jetbrains.com/plugin/7864-gluon).
+
+This readme is not intended for the end-user of the app, but rather outlines issues associated with implementing a Java+JavaFX using the Gluon framework that targets iOS and Android.
 
 ## Basic Requirements
 
