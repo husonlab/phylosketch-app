@@ -1,4 +1,4 @@
-# PhyloSketch
+# PhyloSketch App
 
 This is going to be a reimplementation of my [PhyloSketch desktop program](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/phylosketch/) that will target iOS and Android.
 This is my first attempt to write an app for mobile devices.
