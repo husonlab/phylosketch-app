@@ -22,10 +22,12 @@ package org.husonlab.phylosketch.network;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.SetChangeListener;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
 import jloda.fx.shapes.SquareShape;
@@ -43,6 +45,13 @@ import org.husonlab.phylosketch.views.primary.PrimaryPresenter;
  * Daniel Huson, 10.2022
  */
 public class NetworkPresenter {
+	public static DoubleProperty DEFAULT_FONT_SIZE = new SimpleDoubleProperty(RichTextLabel.DEFAULT_FONT.getSize());
+
+	static {
+		DEFAULT_FONT_SIZE.addListener((v, o, n) -> {
+			RichTextLabel.DEFAULT_FONT = new Font(RichTextLabel.DEFAULT_FONT.getName(), n.doubleValue());
+		});
+	}
 
 	public static void setupView(Pane pane, Document document, ObjectProperty<PrimaryPresenter.Tool> toolProperty) {
 		var useTouch = !Main.isDesktop();
@@ -106,22 +115,19 @@ public class NetworkPresenter {
 				shape.setFill(attributes.fill());
 				shape.setTranslateX(attributes.x());
 				shape.setTranslateY(attributes.y());
-				x.put(v,shape.translateXProperty());
-				y.put(v,shape.translateYProperty());
+				x.put(v, shape.translateXProperty());
+				y.put(v, shape.translateYProperty());
 
-				var nv=new NetworkView.NodeView(shape,null);
-
-				var label=attributes.label();
-				if(label!=null) {
-					var textLabel=new RichTextLabel(label.text());
-					textLabel.translateXProperty().bind(shape.translateXProperty());
-					textLabel.translateYProperty().bind(shape.translateYProperty());
-					textLabel.setLayoutX(label.dx());
-					textLabel.setLayoutY(label.dy());
-					textLabel.setRotate(label.angle()); // todo: not sure about this
-					nv.setLabel(textLabel);
-				}
-				view.setView(v,nv);
+				var label = attributes.label();
+				var text = label.text();
+				var textLabel = new RichTextLabel(text != null ? text : "");
+				textLabel.translateXProperty().bind(shape.translateXProperty());
+				textLabel.translateYProperty().bind(shape.translateYProperty());
+				textLabel.setLayoutX(label.dx());
+				textLabel.setLayoutY(label.dy());
+				textLabel.setRotate(label.angle()); // todo: not sure about this
+				var nv = new NodeView(shape, textLabel);
+				view.setView(v, nv);
 			}
 
 			for(var e:model.getTree().edges()) {
@@ -155,7 +161,7 @@ public class NetworkPresenter {
 			var nv = view.getView(v);
 		var shape=nv.shape();
 			var textLabel = nv.label();
-			var label = textLabel != null ? new NetworkModel.Label(textLabel.getLayoutX(), textLabel.getLayoutY(),textLabel.getRotate(), textLabel.getText()) : null;
+			var label = new NetworkModel.Label(textLabel.getLayoutX(), textLabel.getLayoutY(), textLabel.getRotate(), textLabel.getText());
 
 			var width = shape.getLayoutBounds().getWidth();
 			var height =  shape.getLayoutBounds().getHeight();

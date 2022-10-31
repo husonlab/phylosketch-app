@@ -74,7 +74,7 @@
                     <ToggleButton fx:id="labelToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="103.0" layoutY="10.0"
                                   mnemonicParsing="false" text="Label">
                         <graphic>
-                            <Icon content="FORMAT_LIST_NUMBERED"/>
+                            <Icon content="LABEL_OUTLINE"/>
                         </graphic>
                     </ToggleButton>
                 </children>

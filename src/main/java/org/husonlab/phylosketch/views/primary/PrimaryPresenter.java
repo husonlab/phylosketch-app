@@ -27,6 +27,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.Duration;
 import jloda.util.StringUtils;
+import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
 
 public class PrimaryPresenter {
@@ -95,7 +96,21 @@ public class PrimaryPresenter {
 			});
 		}
 
-		controller.getResetButton().setOnAction(e-> view.getDocument().getView().resetScale());
+		controller.getResetButton().setOnAction(e -> view.getDocument().getView().resetScale());
+
+		if (Main.isDesktop()) {
+			controller.getScrollPane().setOnMouseReleased(c -> {
+				if (c.isStillSincePress() && !c.isShiftDown()) {
+					view.getDocument().getNodeSelection().clearSelection();
+					view.getDocument().getEdgeSelection().clearSelection();
+				}
+			});
+		} else {
+			controller.getScrollPane().setOnTouchReleased(c -> {
+				view.getDocument().getNodeSelection().clearSelection();
+				view.getDocument().getEdgeSelection().clearSelection();
+			});
+		}
 	}
 
 	public ObjectProperty<Tool> toolProperty() {

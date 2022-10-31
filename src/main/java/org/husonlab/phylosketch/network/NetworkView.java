@@ -24,7 +24,6 @@ import javafx.geometry.BoundingBox;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CubicCurve;
-import javafx.scene.shape.Shape;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
 import jloda.graph.Edge;
@@ -130,7 +129,7 @@ public class NetworkView {
 		newLabel.translateXProperty().bind(shape.translateXProperty());
 		newLabel.translateYProperty().bind(shape.translateYProperty());
 		newLabel.setLayoutX(dx);
-		newLabel.setLayoutX(dy);
+		newLabel.setLayoutY(dy);
 		nodeView.setLabel(newLabel);
 		nodeLabelGroup.getChildren().add(newLabel);
 	}
@@ -231,12 +230,20 @@ public class NetworkView {
 	}
 
 	public void moveNode(Node v, double dx, double dy) {
-		var shape=getView(v).shape();
-		shape.setTranslateX(shape.getTranslateX()+dx);
-		shape.setTranslateY(shape.getTranslateY()+dy);
+		var shape = getView(v).shape();
+		shape.setTranslateX(shape.getTranslateX() + dx);
+		shape.setTranslateY(shape.getTranslateY() + dy);
 	}
 
-	public void scale(double xFactor,double yFactor) {
+	public void moveLabel(Node v, double dx, double dy) {
+		var label = getView(v).label();
+		if (label != null) {
+			label.setLayoutX(label.getLayoutX() + dx);
+			label.setLayoutY(label.getLayoutY() + dy);
+		}
+	}
+
+	public void scale(double xFactor, double yFactor) {
 		if (xFactor <= 0 || yFactor <= 0)
 			throw new IllegalArgumentException();
 		this.xScale *= xFactor;
@@ -295,36 +302,4 @@ public class NetworkView {
 
 	}
 
-	public static final class NodeView {
-		private  Shape shape;
-		private RichTextLabel label;
-
-		public NodeView(Shape shape, RichTextLabel label) {
-			this.shape = shape;
-			this.label = label;
-		}
-
-		public Shape shape() {
-			return shape;
-		}
-
-		public RichTextLabel label() {
-			return label;
-		}
-
-		public void setShape(Shape shape) {
-			this.shape = shape;
-		}
-
-		public void setLabel(RichTextLabel label) {
-			this.label = label;
-		}
-
-		@Override
-		public String toString() {
-			return "NodeView[" +
-				   "shape=" + shape + ", " +
-				   "label=" + label + ']';
-		}
-	}
 }

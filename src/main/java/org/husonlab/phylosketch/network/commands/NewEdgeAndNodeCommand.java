@@ -26,6 +26,7 @@ import jloda.fx.selection.SelectionModel;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
 import jloda.graph.Node;
+import org.husonlab.phylosketch.network.NetworkPresenter;
 import org.husonlab.phylosketch.network.NetworkView;
 
 public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
@@ -68,6 +69,7 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 				} else
 					w = tree.newNode(null, wId);
 				networkView.createShape(w, x, y);
+				networkView.addLabel(w, "", 10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get());
 			} else
 				w = tree.findNodeById(bId);
 

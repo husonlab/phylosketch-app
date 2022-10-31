@@ -34,7 +34,6 @@ import java.io.IOException;
 import static com.gluonhq.charm.glisten.application.AppManager.HOME_VIEW;
 
 public class Main extends Application {
-
 	public static final String PRIMARY_VIEW = HOME_VIEW;
 	public static final String SECONDARY_VIEW = "Configuration View";
 
