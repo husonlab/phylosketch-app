@@ -1,5 +1,5 @@
 /*
- * SecondaryView.java Copyright (C) 2022 Daniel H. Huson
+ * LabelEditor.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,30 +18,44 @@
  *
  */
 
-package org.husonlab.phylosketch.views.secondary;
+package org.husonlab.phylosketch.views.labeleditor;
 
-import com.gluonhq.charm.glisten.mvc.View;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.TextField;
+import org.husonlab.phylosketch.network.interaction.LabelEditingManager;
 
 import java.io.IOException;
 import java.util.Objects;
 
-public class SecondaryView {
-	final private SecondaryPresenter presenter;
-	final private SecondaryController controller;
+public class LabelEditor {
+	private final LabelEditorController controller;
+	private final Parent root;
 
-	public SecondaryView() {
+	public LabelEditor(LabelEditingManager labelEditingManager) {
 		var fxmlLoader = new FXMLLoader();
-		try (var ins = Objects.requireNonNull(SecondaryController.class.getResource("secondary.fxml")).openStream()) {
+		try (var ins = Objects.requireNonNull(LabelEditor.class.getResource("label_editor.fxml")).openStream()) {
 			fxmlLoader.load(ins);
 		} catch (IOException ex) {
+			System.err.println(ex);
 			throw new RuntimeException(ex);
 		}
 		controller = fxmlLoader.getController();
-		presenter = new SecondaryPresenter(this, controller);
+		root = fxmlLoader.getRoot();
+
+		new LabelEditorPresenter(controller, labelEditingManager);
 	}
 
-	public View getView() {
-		return controller.getSecondary();
+	public LabelEditorController getController() {
+		return controller;
+	}
+
+	public TextField getTextField() {
+		return controller.getTextField();
+	}
+
+	public Node getRoot() {
+		return root;
 	}
 }

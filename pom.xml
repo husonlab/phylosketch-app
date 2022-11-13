@@ -50,6 +50,12 @@
             <artifactId>jloda</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.39.3.0</version>
+        </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
@@ -135,10 +141,18 @@
                         <list>org.husonlab.phylosketch.views.primary.PrimaryView</list>
                         <list>org.husonlab.phylosketch.views.secondary.SecondaryController</list>
                         <list>org.husonlab.phylosketch.views.secondary.SecondaryView</list>
-                        <list>com.gluonhq.charm.glisten.control.ToggleButtonGroup</list>
+                        <list>org.husonlab.phylosketch.views.labeleditor.LabelEditor</list>
+                        <list>org.husonlab.phylosketch.views.labeleditor.LabelEditorController</list>
                         <list>javafx.scene.control.ToggleButton</list>
+                        <list>javafx.scene.control.TextArea</list>
                         <list>javafx.scene.control.ScrollPane</list>
                         <list>javafx.scene.control.Separator</list>
+                        <list>javafx.scene.control.MenuItem</list>
+                        <list>javafx.scene.control.MenuButton</list>
+                        <list>javafx.scene.control.TextField</list>
+                        <list>com.gluonhq.charm.glisten.control.ToggleButtonGroup</list>
+                        <list>com.gluonhq.charm.glisten.control.DropdownButton</list>
+
                     </reflectionList>
                 </configuration>
             </plugin>

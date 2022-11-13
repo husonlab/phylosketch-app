@@ -31,44 +31,44 @@ import org.husonlab.phylosketch.network.NetworkView;
  * Daniel Huson, 1.2020
  */
 public class EdgeShapeCommand extends UndoableRedoableCommand {
-    private final Runnable undo;
-    private final Runnable redo;
+	private final Runnable undo;
+	private final Runnable redo;
 
-    public EdgeShapeCommand(NetworkView networkView, Pair<Edge, Integer> edgeAndControlId, Point2D delta) {
-        super("Edge Shape");
-        final var id = edgeAndControlId.getFirst().getId();
-        final var controlId = edgeAndControlId.getSecond();
+	public EdgeShapeCommand(NetworkView networkView, Pair<Edge, Integer> edgeAndControlId, Point2D delta) {
+		super("Edge Shape");
+		final var id = edgeAndControlId.getFirst().getId();
+		final var controlId = edgeAndControlId.getSecond();
 
-        undo = () -> {
-            final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).getCurve();
-            if (controlId == 1) {
-                curve.setControlX1(curve.getControlX1() - delta.getX());
-                curve.setControlY1(curve.getControlY1() - delta.getY());
-            } else {
-                curve.setControlX2(curve.getControlX2() - delta.getX());
-                curve.setControlY2(curve.getControlY2() - delta.getY());
-            }
-        };
-        redo = () -> {
-            final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).getCurve();
-            if (controlId == 1) {
-                curve.setControlX1(curve.getControlX1() + delta.getX());
-                curve.setControlY1(curve.getControlY1() + delta.getY());
-            } else {
-                curve.setControlX2(curve.getControlX2() + delta.getX());
-                curve.setControlY2(curve.getControlY2() + delta.getY());
-            }
-        };
-    }
+		undo = () -> {
+			final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).getCurve();
+			if (controlId == 1) {
+				curve.setControlX1(curve.getControlX1() - delta.getX());
+				curve.setControlY1(curve.getControlY1() - delta.getY());
+			} else {
+				curve.setControlX2(curve.getControlX2() - delta.getX());
+				curve.setControlY2(curve.getControlY2() - delta.getY());
+			}
+		};
+		redo = () -> {
+			final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).getCurve();
+			if (controlId == 1) {
+				curve.setControlX1(curve.getControlX1() + delta.getX());
+				curve.setControlY1(curve.getControlY1() + delta.getY());
+			} else {
+				curve.setControlX2(curve.getControlX2() + delta.getX());
+				curve.setControlY2(curve.getControlY2() + delta.getY());
+			}
+		};
+	}
 
-    @Override
-    public void undo() {
-        undo.run();
-    }
+	@Override
+	public void undo() {
+		undo.run();
+	}
 
-    @Override
-    public void redo() {
-        redo.run();
+	@Override
+	public void redo() {
+		redo.run();
 
-    }
+	}
 }

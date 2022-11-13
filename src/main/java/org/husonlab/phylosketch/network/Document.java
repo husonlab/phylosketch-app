@@ -20,11 +20,13 @@
 
 package org.husonlab.phylosketch.network;
 
+import jloda.fx.graph.GraphFX;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.selection.SetSelectionModel;
 import jloda.fx.undo.UndoManager;
 import jloda.graph.Edge;
 import jloda.graph.Node;
+import jloda.phylo.PhyloTree;
 
 
 public class Document {
@@ -34,11 +36,16 @@ public class Document {
 	private final SelectionModel<Edge> edgeSelection = new SetSelectionModel<>();
 
 	private final NetworkModel model;
-	private final NetworkView view;
+	private final NetworkView networkView;
+
+	private final GraphFX<PhyloTree> graphFX;
+
 
 	public Document() {
 		model = new NetworkModel();
-		view = new NetworkView(this);
+		networkView = new NetworkView(this);
+		graphFX = new GraphFX<>(model.getTree());
+
 	}
 
 	public SelectionModel<Node> getNodeSelection() {
@@ -53,8 +60,12 @@ public class Document {
 		return model;
 	}
 
-	public NetworkView getView() {
-		return view;
+	public NetworkView getNetworkView() {
+		return networkView;
+	}
+
+	public GraphFX<PhyloTree> getGraphFX() {
+		return graphFX;
 	}
 
 	public UndoManager getUndoManager() {

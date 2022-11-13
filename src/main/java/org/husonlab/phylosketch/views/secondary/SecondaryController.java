@@ -37,6 +37,7 @@ public class SecondaryController {
 	@FXML
 	private FlowPane flowPane;
 
+
 	@FXML
 	private void initialize() {
 		secondary.setShowTransitionFactory(BounceInRightTransition::new);

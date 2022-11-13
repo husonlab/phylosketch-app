@@ -25,12 +25,15 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<View fx:id="primary" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.primary.PrimaryController">
+<?import javafx.scene.text.Font?>
+<View fx:id="primary" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.primary.PrimaryController">
     <center>
         <AnchorPane BorderPane.alignment="CENTER">
             <children>
-                <ScrollPane fx:id="scrollPane" pannable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <ScrollPane fx:id="scrollPane" hbarPolicy="ALWAYS" pannable="true" vbarPolicy="ALWAYS"
+                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="0.0">
                     <content>
                         <StackPane fx:id="stackPane">
                             <children>
@@ -49,69 +52,96 @@
         </AnchorPane>
     </center>
     <top>
-      <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <items>
-            <HBox fx:id="togglesBox">
-                <children>
-                    <ToggleButton fx:id="penToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="10.0" layoutY="10.0"
-                                  mnemonicParsing="false" text="Edit">
-                        <graphic>
-                            <Icon content="EDIT"/>
-                        </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="eraserToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="57.0" layoutY="10.0"
-                                  mnemonicParsing="false" text="Eraser">
-                        <graphic>
-                            <Icon content="REMOVE_CIRCLE"/>
-                        </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="moveToggleButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
-                                  text="Move">
-                        <graphic>
-                            <Icon content="IMPORT_EXPORT"/>
-                        </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="labelToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="103.0" layoutY="10.0"
-                                  mnemonicParsing="false" text="Label">
-                        <graphic>
-                            <Icon content="LABEL_OUTLINE"/>
-                        </graphic>
-                    </ToggleButton>
-                </children>
-            </HBox>
-             <Button fx:id="undoButton" contentDisplay="GRAPHIC_ONLY" layoutX="150.0" layoutY="10.0" mnemonicParsing="false" text="Undo">
-               <graphic>
-                  <Icon content="UNDO" />
-               </graphic>
-            </Button>
-            <Button fx:id="redoButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0" mnemonicParsing="false" text="Redo">
-               <graphic>
-                  <Icon content="REDO" />
-               </graphic>
-            </Button>
-            <Separator orientation="VERTICAL" />
-            <Button fx:id="resetButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0" mnemonicParsing="false" text="Reset Zoom">
-                <graphic>
-                    <Icon content="HOME" />
-                </graphic>
-            </Button>
+        <VBox BorderPane.alignment="CENTER">
+            <children>
+                <ToolBar prefHeight="40.0" prefWidth="200.0">
+                    <items>
+                        <MenuButton fx:id="menuButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false">
+                            <items>
+                                <RadioMenuItem fx:id="panMenuItem" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="PAN_TOOL"/>
+                                    </graphic>
+                                </RadioMenuItem>
+                                <RadioMenuItem fx:id="editMenuItem" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="EDIT"/>
+                                    </graphic>
+                                </RadioMenuItem>
+                                <RadioMenuItem fx:id="eraseMenuItem" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="REMOVE_CIRCLE"/>
+                                    </graphic>
+                                </RadioMenuItem>
+                                <RadioMenuItem fx:id="moveMenuItem" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="SWAP_VERT"/>
+                                    </graphic>
+                                </RadioMenuItem>
+                                <RadioMenuItem fx:id="editLabelMenuItem" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="LABEL_OUTLINE"/>
+                                    </graphic>
+                                </RadioMenuItem>
+                            </items>
+                            <graphic>
+                                <Icon content="HELP_OUTLINE"/>
+                            </graphic>
+                        </MenuButton>
+                        <Separator layoutX="167.0" layoutY="10.0" orientation="VERTICAL"/>
+                        <Button fx:id="undoButton" contentDisplay="GRAPHIC_ONLY" layoutX="150.0" layoutY="10.0"
+                                mnemonicParsing="false" text="Undo">
+                            <graphic>
+                                <Icon content="UNDO"/>
+                            </graphic>
+                        </Button>
+                        <Button fx:id="redoButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0"
+                                mnemonicParsing="false" text="Redo">
+                            <graphic>
+                                <Icon content="REDO"/>
+                            </graphic>
+                        </Button>
+                        <Separator orientation="VERTICAL"/>
+                        <Button fx:id="resetButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0"
+                                mnemonicParsing="false" text="Reset Zoom">
+                            <graphic>
+                                <Icon content="HOME"/>
+                            </graphic>
+                        </Button>
 
-        </items>
-      </ToolBar>
-   </top>
-   <bottom>
-      <VBox alignment="CENTER" spacing="15.0" BorderPane.alignment="CENTER">
-         <children>
-            <Label fx:id="label" text="Welcome to PhyloSketch" />
-            <Button mnemonicParsing="false" onAction="#buttonClick" text="PhyloSketch sucks">
-               <graphic>
-                  <Icon content="LANGUAGE" />
-               </graphic>
-            </Button>
-         </children>
-         <padding>
-            <Insets bottom="10.0" />
-         </padding>
-      </VBox>
-   </bottom>
+                    </items>
+                </ToolBar>
+                <HBox alignment="CENTER">
+                    <children>
+                        <TextField fx:id="newickTextField" alignment="CENTER" editable="false" HBox.hgrow="ALWAYS">
+                            <font>
+                                <Font size="14.0"/>
+                            </font>
+                            <HBox.margin>
+                                <Insets/>
+                            </HBox.margin>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </TextField>
+                        <Button fx:id="showNewickButton" mnemonicParsing="false" prefHeight="34.0" text=" ">
+                            <graphic>
+                                <Icon content="INFO"/>
+                            </graphic>
+                            <HBox.margin>
+                                <Insets/>
+                            </HBox.margin>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+    <bottom>
+        <VBox alignment="CENTER" BorderPane.alignment="CENTER">
+            <children>
+                <TextField fx:id="propertiesTextField" editable="false" promptText="Properties"/>
+            </children>
+        </VBox>
+    </bottom>
 </View>

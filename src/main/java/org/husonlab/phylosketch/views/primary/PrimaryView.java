@@ -35,13 +35,12 @@ public class PrimaryView {
 	private final PrimaryPresenter presenter;
 
 	public PrimaryView() {
-		document=new Document();
+		document = new Document();
 
 		var fxmlLoader = new FXMLLoader();
 		try (var ins = Objects.requireNonNull(PrimaryController.class.getResource("primary.fxml")).openStream()) {
 			fxmlLoader.load(ins);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			System.err.println(ex);
 			throw new RuntimeException(ex);
 		}
@@ -49,15 +48,15 @@ public class PrimaryView {
 
 		presenter = new PrimaryPresenter(document, this, controller);
 
-		NetworkPresenter.setupView(controller.getMainPane(), document, getPresenter().toolProperty());
+		NetworkPresenter.setupView(controller.getMainPane(), document, getPresenter().interactionModeProperty());
 
-		if(true) {
-			Platform.runLater(()-> {
+		if (true) {
+			Platform.runLater(() -> {
 				try {
 					var model = document.getModel();
 					model.getTree().parseBracketNotation("((a,b),(c,(d,e)));", true);
-					model.computeEmbedding(true,200,200);
-					NetworkPresenter.model2view(model, document.getView());
+					model.computeEmbedding(true, 200, 200);
+					NetworkPresenter.model2view(model, document.getNetworkView());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

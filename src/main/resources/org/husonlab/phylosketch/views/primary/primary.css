@@ -19,5 +19,24 @@
  */
 
 .view {
+}
 
+.menu-button .arrow {
+    -fx-background-color: -fx-mark-color, #FFFFFF;
+}
+
+.menu-button {
+    -fx-background-color: -primary-swatch-500;
+}
+
+.menu-item {
+    -fx-background-color: -primary-swatch-500;
+}
+
+.menu-item:focused {
+    -fx-background-color: #969A9F;
+}
+
+.icon {
+    -fx-text-fill: white;
 }

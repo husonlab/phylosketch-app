@@ -1,5 +1,5 @@
 /*
- * NodeView.java Copyright (C) 2022 Daniel H. Huson
+ * Utilities.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,14 +18,24 @@
  *
  */
 
-package org.husonlab.phylosketch.network;
+package org.husonlab.phylosketch.utils;
 
-import javafx.scene.shape.Shape;
-import jloda.fx.control.RichTextLabel;
+import javafx.application.Platform;
+import jloda.fx.util.ProgramExecutorService;
+
+import java.util.function.Supplier;
 
 /**
- * node view
- * Daniel Huson, 10.2022
+ * some utilties
+ * Daniel Huson, 11.2022
  */
-public final record NodeView(Shape shape, RichTextLabel label) {
+public class Utilities {
+
+	public static void waitAndThenRunFX(Supplier<Boolean> check, Runnable runnable) {
+		ProgramExecutorService.submit(1500, () -> Platform.runLater(() -> {
+			if (check.get()) {
+				runnable.run();
+			}
+		}));
+	}
 }

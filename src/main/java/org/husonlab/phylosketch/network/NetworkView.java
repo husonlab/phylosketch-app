@@ -20,12 +20,17 @@
 
 package org.husonlab.phylosketch.network;
 
+import javafx.collections.ListChangeListener;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.CubicCurve;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
+import jloda.fx.util.BasicFX;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
@@ -39,11 +44,15 @@ import java.util.function.Consumer;
  * Daniel Huson, 10.2022
  */
 public class NetworkView {
+	private final Group edgeBelowWaterGroup = new Group();
+	private final Group nodeBelowWaterGroup = new Group();
+	private final Group labelBelowWaterGroup = new Group();
 	private final Group edgePathGroup = new Group();
 	private final Group nodeShapeGroup = new Group();
 	private final Group edgeLabelGroup = new Group();
 	private final Group nodeLabelGroup = new Group();
-	private final Group world = new Group(edgePathGroup, nodeShapeGroup, edgeLabelGroup, nodeLabelGroup);
+
+	private final Group world = new Group(edgeBelowWaterGroup, nodeBelowWaterGroup, labelBelowWaterGroup, edgePathGroup, nodeShapeGroup, edgeLabelGroup, nodeLabelGroup);
 
 	private final Document document;
 	private final PhyloTree tree;
@@ -63,12 +72,258 @@ public class NetworkView {
 	private Consumer<Edge> edgeViewRemoveCallback = a -> {
 	};
 
-
 	public NetworkView(Document document) {
 		this.document = document;
 		this.tree = document.getModel().getTree();
+
 		nodeViewMap = new HashMap<>();
 		edgeViewMap = new HashMap<>();
+
+		edgePathGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
+			while (c.next()) {
+				for (var node : c.getRemoved()) {
+					if (node instanceof CubicCurve cubicCurve && cubicCurve.getUserData() instanceof CubicCurve belowWater) {
+						belowWater.startXProperty().unbind();
+						belowWater.startYProperty().unbind();
+						belowWater.controlX1Property().unbind();
+						belowWater.controlY1Property().unbind();
+						belowWater.controlX2Property().unbind();
+						belowWater.controlY2Property().unbind();
+						belowWater.endXProperty().unbind();
+						belowWater.endYProperty().unbind();
+						belowWater.translateXProperty().unbind();
+						belowWater.translateYProperty().unbind();
+						edgeBelowWaterGroup.getChildren().remove(belowWater);
+					}
+				}
+				for (var node : c.getAddedSubList()) {
+					if (node instanceof CubicCurve shape) {
+						var belowWater = new CubicCurve();
+						belowWater.setPickOnBounds(false);
+						shape.setUserData(belowWater);
+						belowWater.setStrokeWidth(25);
+						belowWater.setFill(Color.TRANSPARENT);
+						belowWater.setStroke(Color.WHITE); // todo: make this the current background color
+
+						belowWater.startXProperty().bind(shape.startXProperty());
+						belowWater.startYProperty().bind(shape.startYProperty());
+						belowWater.controlX1Property().bind(shape.controlX1Property());
+						belowWater.controlY1Property().bind(shape.controlY1Property());
+						belowWater.controlX2Property().bind(shape.controlX2Property());
+						belowWater.controlY2Property().bind(shape.controlY2Property());
+						belowWater.endXProperty().bind(shape.endXProperty());
+						belowWater.endYProperty().bind(shape.endYProperty());
+						belowWater.translateXProperty().bind(shape.translateXProperty());
+						belowWater.translateYProperty().bind(shape.translateYProperty());
+
+						belowWater.setOnTouchPressed(a -> {
+							if (shape.getOnTouchPressed() != null) {
+								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
+								var copy = a.copyFor(null, shape);
+								a.consume();
+								shape.getOnTouchPressed().handle(copy);
+								copy.consume();
+							}
+						});
+						belowWater.setOnTouchMoved(a -> {
+							if (shape.getOnTouchMoved() != null) {
+								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
+								var copy = a.copyFor(null, shape);
+								a.consume();
+								shape.getOnTouchMoved().handle(copy);
+								copy.consume();
+							}
+						});
+						belowWater.setOnTouchReleased(a -> {
+							if (shape.getOnTouchReleased() != null) {
+								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
+								var copy = a.copyFor(null, shape);
+								a.consume();
+								shape.getOnTouchReleased().handle(copy);
+								copy.consume();
+							}
+						});
+
+						belowWater.setOnMouseClicked(a -> {
+							if (shape.getOnMouseClicked() != null) {
+								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
+								var copy = a.copyFor(null, shape);
+								a.consume();
+								shape.getOnMouseClicked().handle(copy);
+								copy.consume();
+							}
+						});
+						belowWater.setOnMousePressed(a -> {
+							if (shape.getOnMousePressed() != null) {
+								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
+								var copy = a.copyFor(null, shape);
+								a.consume();
+								shape.getOnMousePressed().handle(copy);
+								copy.consume();
+							}
+						});
+						belowWater.setOnMouseDragged(a -> {
+							if (shape.getOnMouseDragged() != null) {
+								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
+								var copy = a.copyFor(null, shape);
+								a.consume();
+								shape.getOnMouseDragged().handle(copy);
+								copy.consume();
+							}
+						});
+						belowWater.setOnMouseReleased(a -> {
+							if (shape.getOnMouseReleased() != null) {
+								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
+								var copy = a.copyFor(null, shape);
+								a.consume();
+								shape.getOnMouseReleased().handle(copy);
+								copy.consume();
+							}
+						});
+
+						edgeBelowWaterGroup.getChildren().add(belowWater);
+					}
+				}
+			}
+		});
+
+		nodeShapeGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
+			while (c.next()) {
+				for (var node : c.getRemoved()) {
+					if (node instanceof Shape shape && shape.getUserData() instanceof Shape belowWater) {
+						belowWater.translateXProperty().unbind();
+						belowWater.translateYProperty().unbind();
+						nodeBelowWaterGroup.getChildren().remove(belowWater);
+					}
+				}
+				for (var node : c.getAddedSubList()) {
+					if (node instanceof Shape shape) {
+						var belowWater = new Circle(15);
+						shape.setUserData(belowWater);
+						belowWater.setStroke(Color.TRANSPARENT);
+						belowWater.setFill(Color.WHITE); // todo: make this the current background color
+						belowWater.translateXProperty().bind(shape.translateXProperty());
+						belowWater.translateYProperty().bind(shape.translateYProperty());
+
+						belowWater.setOnTouchPressed(a -> {
+							if (shape.getOnTouchPressed() != null) {
+								shape.getOnTouchPressed().handle(a.copyFor(null, shape));
+								a.consume();
+							}
+						});
+						belowWater.setOnTouchMoved(a -> {
+							if (shape.getOnTouchMoved() != null) {
+								shape.getOnTouchMoved().handle(a.copyFor(null, shape));
+								a.consume();
+							}
+						});
+						belowWater.setOnTouchReleased(a -> {
+							if (shape.getOnTouchReleased() != null) {
+								shape.getOnTouchReleased().handle(a.copyFor(null, shape));
+								a.consume();
+							}
+						});
+
+						belowWater.setOnMouseClicked(a -> {
+							if (shape.getOnMouseClicked() != null) {
+								shape.getOnMouseClicked().handle(a.copyFor(null, shape));
+								a.consume();
+							}
+						});
+						belowWater.setOnMousePressed(a -> {
+							if (shape.getOnMousePressed() != null) {
+								shape.getOnMousePressed().handle(a.copyFor(null, shape));
+								a.consume();
+							}
+						});
+						belowWater.setOnMouseDragged(a -> {
+							if (shape.getOnMouseDragged() != null) {
+								shape.getOnMouseDragged().handle(a.copyFor(null, shape));
+								a.consume();
+							}
+						});
+						belowWater.setOnMouseReleased(a -> {
+							if (shape.getOnMouseReleased() != null) {
+								shape.getOnMouseReleased().handle(a.copyFor(null, shape));
+								a.consume();
+							}
+						});
+						nodeBelowWaterGroup.getChildren().add(belowWater);
+					}
+				}
+			}
+		});
+
+		nodeLabelGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
+			while (c.next()) {
+				for (var node : c.getRemoved()) {
+					if (node instanceof RichTextLabel label && label.getUserData() instanceof Rectangle belowWater) {
+						belowWater.translateXProperty().unbind();
+						belowWater.translateYProperty().unbind();
+						belowWater.widthProperty().unbind();
+						belowWater.heightProperty().unbind();
+						labelBelowWaterGroup.getChildren().remove(belowWater);
+					}
+				}
+				for (var node : c.getAddedSubList()) {
+					if (node instanceof RichTextLabel label) {
+						var belowWater = new Rectangle(20, 20);
+						label.setUserData(belowWater);
+						belowWater.setStroke(Color.TRANSPARENT);
+						belowWater.setFill(Color.WHITE); // todo: make this the current background color
+						belowWater.widthProperty().bind(label.widthProperty().add(10));
+						belowWater.heightProperty().bind(label.heightProperty().add(10));
+						belowWater.translateXProperty().bind(label.translateXProperty().add(label.layoutXProperty()).subtract(5));
+						belowWater.translateYProperty().bind(label.translateYProperty().add(label.layoutYProperty()).subtract(5));
+
+						belowWater.setOnTouchPressed(a -> {
+							if (label.getOnTouchPressed() != null) {
+								label.getOnTouchPressed().handle(a.copyFor(null, label));
+								a.consume();
+							}
+						});
+						belowWater.setOnTouchMoved(a -> {
+							if (label.getOnTouchMoved() != null) {
+								label.getOnTouchMoved().handle(a.copyFor(null, label));
+								a.consume();
+							}
+						});
+						belowWater.setOnTouchReleased(a -> {
+							if (label.getOnTouchReleased() != null) {
+								label.getOnTouchReleased().handle(a.copyFor(null, label));
+								a.consume();
+							}
+						});
+
+						belowWater.setOnMouseClicked(a -> {
+							if (label.getOnMouseClicked() != null) {
+								label.getOnMouseClicked().handle(a.copyFor(null, label));
+								a.consume();
+							}
+						});
+						belowWater.setOnMousePressed(a -> {
+							if (label.getOnMousePressed() != null) {
+								label.getOnMousePressed().handle(a.copyFor(null, label));
+								a.consume();
+							}
+						});
+						belowWater.setOnMouseDragged(a -> {
+							if (label.getOnMouseDragged() != null) {
+								label.getOnMouseDragged().handle(a.copyFor(null, label));
+								a.consume();
+							}
+						});
+						belowWater.setOnMouseReleased(a -> {
+							if (label.getOnMouseReleased() != null) {
+								label.getOnMouseReleased().handle(a.copyFor(null, label));
+								a.consume();
+							}
+						});
+						labelBelowWaterGroup.getChildren().add(belowWater);
+					}
+				}
+			}
+		});
 	}
 
 	public void clear() {
@@ -86,56 +341,44 @@ public class NetworkView {
 	public NodeView getView(Node v) {
 		return nodeViewMap.get(v);
 	}
-	
+
 	public void setView(Node v, NodeView nodeView) {
-			var oldNodeView= nodeViewMap.get(v);
-			if(oldNodeView!=null) {
-				if(oldNodeView.shape()!=null)
-					nodeShapeGroup.getChildren().remove(oldNodeView.shape());
-				if(oldNodeView.label()!=null)
-					nodeLabelGroup.getChildren().remove(oldNodeView.label());
-				nodeViewRemoveCallback.accept(v);
-				nodeViewMap.remove(v);
-			}
-		if(nodeView!=null) {
-			if(nodeView.shape()!=null)
+		var oldNodeView = nodeViewMap.get(v);
+		if (oldNodeView != null) {
+			if (oldNodeView.shape() != null)
+				nodeShapeGroup.getChildren().remove(oldNodeView.shape());
+			if (oldNodeView.label() != null)
+				nodeLabelGroup.getChildren().remove(oldNodeView.label());
+			nodeViewRemoveCallback.accept(v);
+			nodeViewMap.remove(v);
+		}
+		if (nodeView != null) {
+			if (nodeView.shape() != null)
 				nodeShapeGroup.getChildren().add(nodeView.shape());
-			if(nodeView.label()!=null)
+			if (nodeView.label() != null)
 				nodeLabelGroup.getChildren().add(nodeView.label());
 			nodeViewMap.put(v, nodeView);
 			nodeViewAddedCallback.accept(v);
 		}
 	}
 
-	public void createShape(Node v, double x, double y) {
+	public void createShapeAndLabel(Node v, double x, double y, String text, double labelDx, double labelDy) {
 		var shape = new CircleShape(8);
+		shape.setId("graph-node");
 		shape.setStroke(Color.BLACK);
 		shape.setFill(Color.WHITE);
 		shape.setTranslateX(x);
 		shape.setTranslateY(y);
-		setView(v, new NodeView(shape, null));
-	}
-
-	public void addLabel(Node v, String text, double dx, double dy) {
-		var nodeView= getView(v);
-		var oldLabel=nodeView.label();
-		if(oldLabel!=null) {
-			oldLabel.translateXProperty().unbind();
-			oldLabel.translateYProperty().unbind();
-			nodeLabelGroup.getChildren().remove(oldLabel);
-		}
-		var shape=nodeView.shape();
-		var newLabel=new RichTextLabel(text);
-		newLabel.translateXProperty().bind(shape.translateXProperty());
-		newLabel.translateYProperty().bind(shape.translateYProperty());
-		newLabel.setLayoutX(dx);
-		newLabel.setLayoutY(dy);
-		nodeView.setLabel(newLabel);
-		nodeLabelGroup.getChildren().add(newLabel);
+		var label = new RichTextLabel(text);
+		label.translateXProperty().bind(shape.translateXProperty());
+		label.translateYProperty().bind(shape.translateYProperty());
+		label.setLayoutX(labelDx);
+		label.setLayoutY(labelDy);
+		setView(v, new NodeView(shape, label));
 	}
 
 	public void removeView(Node v) {
-		setView(v,null);
+		setView(v, null);
 	}
 
 	public EdgeView getView(Edge e) {
@@ -143,10 +386,10 @@ public class NetworkView {
 	}
 
 	public void setView(Edge e, EdgeView edgeView) {
-		var oldEdgeView= edgeViewMap.get(e);
-		if(oldEdgeView!=null) {
+		var oldEdgeView = edgeViewMap.get(e);
+		if (oldEdgeView != null) {
 			edgePathGroup.getChildren().removeAll(oldEdgeView.getChildren());
-			if(oldEdgeView.label()!=null)
+			if (oldEdgeView.label() != null)
 				edgeLabelGroup.getChildren().remove(oldEdgeView.label());
 			edgeViewRemoveCallback.accept(e);
 			edgeViewMap.remove(e);
@@ -163,7 +406,7 @@ public class NetworkView {
 	public void createEdgeView(Edge e) {
 		var source = getView(e.getSource()).shape();
 		var target = getView(e.getTarget()).shape();
-		var edgeView = new EdgeView(document, e, source.translateXProperty(), source.translateYProperty(), target.translateXProperty(), target.translateYProperty());
+		var edgeView = new EdgeView(e, source.translateXProperty(), source.translateYProperty(), target.translateXProperty(), target.translateYProperty());
 		setView(e, edgeView);
 	}
 
@@ -215,15 +458,11 @@ public class NetworkView {
 		return null;
 	}
 
-	public Node findNodeIfHit(double xScreen, double yScreen,double tolerance) {
+	public Node findNodeIfHit(double xScreen, double yScreen, double tolerance) {
 		for (var v : tree.nodes()) {
 			final var shape = getView(v).shape();
-			var bounds=shape.screenToLocal(new BoundingBox(xScreen-0.5*tolerance,yScreen-0.5*tolerance,tolerance,tolerance));
-			System.err.println("xScreen: "+xScreen);
-			System.err.println("yScreen: "+yScreen);
-			System.err.println("bounds: "+bounds);
-			System.err.println("shape: "+shape.getLayoutBounds());
-			if(shape.intersects(bounds))
+			var bounds = shape.screenToLocal(new BoundingBox(xScreen - 0.5 * tolerance, yScreen - 0.5 * tolerance, tolerance, tolerance));
+			if (shape.intersects(bounds))
 				return v;
 		}
 		return null;
@@ -260,6 +499,11 @@ public class NetworkView {
 			cubicCurve.setControlX2(xFactor * cubicCurve.getControlX2());
 			cubicCurve.setControlY2(yFactor * cubicCurve.getControlY2());
 		}
+		for (var textField : BasicFX.getAllRecursively(world, v -> "text-field".equals(v.getId()))) {
+			textField.setTranslateX(textField.getTranslateX() * xFactor);
+			textField.setTranslateY(textField.getTranslateY() * yFactor);
+
+		}
 	}
 
 	public void resetScale() {
@@ -285,21 +529,19 @@ public class NetworkView {
 	}
 
 	public BoundingBox getBoundingBox() {
-		var minX=Double.MAX_VALUE;
-		var maxX=Double.MIN_VALUE;
-		var minY=Double.MAX_VALUE;
-		var maxY=Double.MIN_VALUE;
-		for(var v:tree.nodes()) {
-			var shape=getView(v).shape();
-			if(shape!=null) {
+		var minX = Double.MAX_VALUE;
+		var maxX = Double.MIN_VALUE;
+		var minY = Double.MAX_VALUE;
+		var maxY = Double.MIN_VALUE;
+		for (var v : tree.nodes()) {
+			var shape = getView(v).shape();
+			if (shape != null) {
 				minX = Math.min(minX, shape.getTranslateX());
 				maxX = Math.max(maxX, shape.getTranslateX());
 				minY = Math.min(minY, shape.getTranslateY());
 				maxY = Math.max(maxY, shape.getTranslateY());
 			}
-			}
-		return new BoundingBox(minX,minY,maxX-minX,maxY-minY);
-
+		}
+		return new BoundingBox(minX, minY, maxX - minX, maxY - minY);
 	}
-
 }

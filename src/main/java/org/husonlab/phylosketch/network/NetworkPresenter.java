@@ -35,9 +35,11 @@ import jloda.fx.util.SelectionEffect;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.graph.NodeArray;
-import org.husonlab.phylosketch.Main;
-import org.husonlab.phylosketch.utils.TouchUtils;
-import org.husonlab.phylosketch.views.primary.PrimaryPresenter;
+import org.husonlab.phylosketch.network.interaction.EdgeShapeInteraction;
+import org.husonlab.phylosketch.network.interaction.LabelEditingManager;
+import org.husonlab.phylosketch.network.interaction.NodeLabeInteraction;
+import org.husonlab.phylosketch.network.interaction.NodeShapeInteraction;
+import org.husonlab.phylosketch.views.primary.InteractionMode;
 
 
 /**
@@ -53,24 +55,31 @@ public class NetworkPresenter {
 		});
 	}
 
-	public static void setupView(Pane pane, Document document, ObjectProperty<PrimaryPresenter.Tool> toolProperty) {
-		var useTouch = !Main.isDesktop();
-		var view = document.getView();
-		pane.getChildren().setAll(view.getWorld());
+	public static void setupView(Pane pane, Document document, ObjectProperty<InteractionMode> modeProperty) {
+		var networkView = document.getNetworkView();
+		pane.getChildren().setAll(networkView.getWorld());
 		var nodeSelection = document.getNodeSelection();
 		var edgeSelection = document.getEdgeSelection();
-		view.setNodeViewAddedCallback(v -> InstallNodeInteraction.apply(useTouch, pane, document.getUndoManager(), view, nodeSelection, edgeSelection, v, toolProperty));
 
-		view.setEdgeViewAddedCallback(e -> InstallEdgeInteraction.apply(useTouch, pane, document.getUndoManager(), view, nodeSelection, edgeSelection, e, toolProperty));
+		var labelEditingManager = new LabelEditingManager(networkView, nodeSelection, document.getUndoManager());
+		modeProperty.addListener(a -> labelEditingManager.finishEditing());
+
+		networkView.setNodeViewAddedCallback(v -> {
+			NodeLabeInteraction.install(labelEditingManager, document.getUndoManager(), networkView, nodeSelection, edgeSelection, v, modeProperty);
+			// todo: need to edit this method
+			NodeShapeInteraction.install(labelEditingManager, pane, document.getUndoManager(), networkView, nodeSelection, edgeSelection, v, modeProperty);
+		});
+
+		networkView.setEdgeViewAddedCallback(e -> EdgeShapeInteraction.apply(pane, document.getUndoManager(), networkView, nodeSelection, edgeSelection, e, modeProperty));
 
 		nodeSelection.getSelectedItems().addListener((SetChangeListener<? super Node>) c -> {
 			if (c.wasAdded()) {
-				var nv=view.getView(c.getElementAdded());
+				var nv = networkView.getView(c.getElementAdded());
 				nv.shape().setEffect(SelectionEffect.getInstance());
-				if(nv.label()!=null)
+				if (nv.label() != null)
 					nv.label().setEffect(SelectionEffect.getInstance());
-			} else if(c.wasRemoved()) {
-				var nv = view.getView(c.getElementRemoved());
+			} else if (c.wasRemoved()) {
+				var nv = networkView.getView(c.getElementRemoved());
 				if (nv != null) {
 					nv.shape().setEffect(null);
 					if (nv.label() != null)
@@ -79,14 +88,14 @@ public class NetworkPresenter {
 			}
 		});
 
-		edgeSelection.getSelectedItems().addListener((SetChangeListener<? super Edge>) c->{
-			if(c.wasAdded()) {
-				var ev=view.getView(c.getElementAdded());
+		edgeSelection.getSelectedItems().addListener((SetChangeListener<? super Edge>) c -> {
+			if (c.wasAdded()) {
+				var ev = networkView.getView(c.getElementAdded());
 				ev.getCurve().setEffect(SelectionEffect.getInstance());
-				if(ev.label()!=null)
+				if (ev.label() != null)
 					ev.label().setEffect(SelectionEffect.getInstance());
 			} else if (c.wasRemoved()) {
-				var ev = view.getView(c.getElementRemoved());
+				var ev = networkView.getView(c.getElementRemoved());
 				if (ev != null) {
 					ev.getCurve().setEffect(null);
 					if (ev.label() != null)
@@ -94,23 +103,20 @@ public class NetworkPresenter {
 				}
 			}
 		});
-
-		if (useTouch) {
-			TouchUtils.redirectTouchEventsToClosestShape(pane, 10);
-		}
 	}
 
 	public static void model2view(NetworkModel model, NetworkView view) {
 		view.clear();
 
-		try(NodeArray<DoubleProperty> x=model.getTree().newNodeArray();
-			NodeArray<DoubleProperty> y=model.getTree().newNodeArray()) {
+		try (NodeArray<DoubleProperty> x = model.getTree().newNodeArray();
+			 NodeArray<DoubleProperty> y = model.getTree().newNodeArray()) {
 			for (var v : model.getTree().nodes()) {
-				var attributes=model.getAttributes(v);
-				var shape=switch (attributes.glyph()) {
-					case Square -> new SquareShape(attributes.height(),(Color)attributes.stroke(),(Color)attributes.fill());
+				var attributes = model.getAttributes(v);
+				var shape = switch (attributes.glyph()) {
+					case Square -> new SquareShape(attributes.height(), (Color) attributes.stroke(), (Color) attributes.fill());
 					case Circle -> new CircleShape(attributes.height());
 				};
+				shape.setId("graph-node");
 				shape.setStroke(attributes.stroke());
 				shape.setFill(attributes.fill());
 				shape.setTranslateX(attributes.x());
@@ -130,12 +136,12 @@ public class NetworkPresenter {
 				view.setView(v, nv);
 			}
 
-			for(var e:model.getTree().edges()) {
-				var attributes=model.getAttributes(e);
-				var v=e.getSource();
-				var w=e.getTarget();
+			for (var e : model.getTree().edges()) {
+				var attributes = model.getAttributes(e);
+				var v = e.getSource();
+				var w = e.getTarget();
 
-				var label=attributes.label();
+				var label = attributes.label();
 
 				switch (attributes.glyph()) {
 					case StraightLine -> {
@@ -149,36 +155,36 @@ public class NetworkPresenter {
 					case CubicCurve -> {
 						throw new RuntimeException("Not implemented");
 					}
-				};
+				}
 			}
 		}
 	}
 
-	public static void view2model(NetworkView view,NetworkModel model){
+	public static void view2model(NetworkView view, NetworkModel model) {
 		model.clear();
 
-		for(var v:view.getTree().nodes()) {
+		for (var v : view.getTree().nodes()) {
 			var nv = view.getView(v);
-		var shape=nv.shape();
+			var shape = nv.shape();
 			var textLabel = nv.label();
 			var label = new NetworkModel.Label(textLabel.getLayoutX(), textLabel.getLayoutY(), textLabel.getRotate(), textLabel.getText());
 
 			var width = shape.getLayoutBounds().getWidth();
-			var height =  shape.getLayoutBounds().getHeight();
+			var height = shape.getLayoutBounds().getHeight();
 
 			var attributes = new NetworkModel.NodeAttributes(shape.getTranslateX(), shape.getTranslateY(), shape instanceof Rectangle ? NetworkModel.NodeGlyph.Square : NetworkModel.NodeGlyph.Circle, width, height,
 					shape.getStroke(), shape.getFill(), label);
-				model.setAttributes(v,attributes);
+			model.setAttributes(v, attributes);
 		}
 
-		for(var e:view.getTree().edges()) {
+		for (var e : view.getTree().edges()) {
 			var ev = view.getView(e);
 			var curve = ev.getCurve();
 			var textLabel = ev.label();
 			var label = textLabel != null ? new NetworkModel.Label(textLabel.getLayoutX(), textLabel.getLayoutY(), textLabel.getRotate(), textLabel.getText()) : null;
 
 			var attributes = new NetworkModel.EdgeAttributes(NetworkModel.EdgeGlyph.StraightLine, curve.getStrokeWidth(), curve.getStroke(), label);
-			model.setAttributes(e,attributes);
+			model.setAttributes(e, attributes);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * NodeView.java Copyright (C) 2022 Daniel H. Huson
+ * InteractionMode.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,14 +18,21 @@
  *
  */
 
-package org.husonlab.phylosketch.network;
+package org.husonlab.phylosketch.views.primary;
 
-import javafx.scene.shape.Shape;
-import jloda.fx.control.RichTextLabel;
+public enum InteractionMode {
+	Pan("Pan"), //MaterialDesignIcon.PAN_TOOL,
+	CreateNewEdges("Press node and move to create new edge"), // MaterialDesignIcon.EDIT,
+	Erase("Erase nodes and edges"), // MaterialDesignIcon.REMOVE_CIRCLE,
+	Move("Move nodes, edges and labels"), // MaterialDesignIcon.SWAP_VERT,
+	EditLabels("Edit node labels"); // MaterialDesignIcon.LABEL_OUTLINE,
+	private final String description;
 
-/**
- * node view
- * Daniel Huson, 10.2022
- */
-public final record NodeView(Shape shape, RichTextLabel label) {
+	InteractionMode(String description) {
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
+	}
 }

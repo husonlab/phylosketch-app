@@ -25,12 +25,10 @@ import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import jloda.phylo.PhyloTree;
 
-import java.io.IOException;
+import java.util.Objects;
 
 public class PrimaryController {
 
@@ -42,28 +40,21 @@ public class PrimaryController {
 	private Label modeLabel;
 
 	@FXML
-	private Label label;
+	private TextField newickTextField;
+
 
 	@FXML
-	private ToggleButton eraserToggleButton;
+	private TextField propertiesTextField;
 
 	@FXML
-	private ToggleButton labelToggleButton;
+	private Button showNewickButton;
 
 	@FXML
 	private Pane mainPane;
 
-	@FXML
-	private ToggleButton penToggleButton;
-
-	@FXML
-	private ToggleButton moveToggleButton;
 
 	@FXML
 	private Button redoButton;
-
-	@FXML
-	private HBox togglesBox;
 
 	@FXML
 	private Button undoButton;
@@ -78,21 +69,29 @@ public class PrimaryController {
 	private Button resetButton;
 
 	@FXML
-	void buttonClick() {
-		var tree = new PhyloTree();
-		try {
-			tree.parseBracketNotation("((a,b),(c,d));", true);
-			label.setText("Sketch a phylogenetic tree or network! " + tree.toBracketString(false));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+	private MenuButton menuButton;
 
 	private final ToggleGroup toggles = new ToggleGroup();
 
+	@FXML
+	private RadioMenuItem editLabelMenuItem;
+
+	@FXML
+	private RadioMenuItem editMenuItem;
+
+	@FXML
+	private RadioMenuItem eraseMenuItem;
+
+	@FXML
+	private RadioMenuItem moveMenuItem;
+
+	@FXML
+	private RadioMenuItem panMenuItem;
 
 	@FXML
 	private void initialize() {
+		primary.getStylesheets().add(Objects.requireNonNull(PrimaryController.class.getResource("primary.css")).toExternalForm());
+
 		primary.showingProperty().addListener((obs, oldValue, newValue) -> {
 			if (newValue) {
 				var appBar = AppManager.getInstance().getAppBar();
@@ -103,12 +102,17 @@ public class PrimaryController {
 						System.err.println("Search")));
 			}
 		});
-		for(var item:togglesBox.getChildren()) {
-			if(item instanceof Toggle)
-				toggles.getToggles().add((Toggle)item);
+		scrollPane.viewportBoundsProperty().addListener((v, o, n) -> {
+			stackPane.setMinSize(n.getWidth(), n.getHeight());
+		});
+
+		for (var item : menuButton.getItems()) {
+			if (item instanceof RadioMenuItem radioMenuItem) {
+				toggles.getToggles().add(radioMenuItem);
+			}
 		}
-		scrollPane.viewportBoundsProperty().addListener((v,o,n)-> {
-				stackPane.setMinSize(n.getWidth(), n.getHeight());
+		toggles.selectedToggleProperty().addListener((v, o, n) -> {
+
 		});
 	}
 
@@ -116,28 +120,16 @@ public class PrimaryController {
 		return primary;
 	}
 
-	public Label getLabel() {
-		return label;
+	public TextField getNewickTextField() {
+		return newickTextField;
 	}
 
-	public ToggleButton getEraserToggleButton() {
-		return eraserToggleButton;
-	}
-
-	public ToggleButton getLabelToggleButton() {
-		return labelToggleButton;
+	public Button getShowNewickButton() {
+		return showNewickButton;
 	}
 
 	public Pane getMainPane() {
 		return mainPane;
-	}
-
-	public ToggleButton getPenToggleButton() {
-		return penToggleButton;
-	}
-
-	public ToggleButton getMoveToggleButton() {
-		return moveToggleButton;
 	}
 
 	public Button getRedoButton() {
@@ -146,14 +138,6 @@ public class PrimaryController {
 
 	public Button getUndoButton() {
 		return undoButton;
-	}
-
-	public ToggleGroup getToggles() {
-		return toggles;
-	}
-
-	public HBox getTogglesBox() {
-		return togglesBox;
 	}
 
 	public ScrollPane getScrollPane() {
@@ -170,5 +154,37 @@ public class PrimaryController {
 
 	public Label getModeLabel() {
 		return modeLabel;
+	}
+
+	public TextField getPropertiesTextField() {
+		return propertiesTextField;
+	}
+
+	public MenuButton getMenuButton() {
+		return menuButton;
+	}
+
+	public ToggleGroup getToggles() {
+		return toggles;
+	}
+
+	public RadioMenuItem getEditLabelMenuItem() {
+		return editLabelMenuItem;
+	}
+
+	public RadioMenuItem getEditMenuItem() {
+		return editMenuItem;
+	}
+
+	public RadioMenuItem getEraseMenuItem() {
+		return eraseMenuItem;
+	}
+
+	public RadioMenuItem getMoveMenuItem() {
+		return moveMenuItem;
+	}
+
+	public RadioMenuItem getPanMenuItem() {
+		return panMenuItem;
 	}
 }

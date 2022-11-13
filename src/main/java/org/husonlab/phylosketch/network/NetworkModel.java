@@ -34,26 +34,28 @@ public class NetworkModel {
 	public enum NodeGlyph {Square, Circle}
 
 	public enum EdgeGlyph {StraightLine, RectangleLine, CubicCurve}
+
 	private final PhyloTree tree;
 	private final NodeArray<NodeAttributes> nodeAttributesNodeMap;
 	private final EdgeArray<EdgeAttributes> edgeAttributesMap;
 
-	public NetworkModel(){
-		this.tree=new PhyloTree();
+	public NetworkModel() {
+		this.tree = new PhyloTree();
 		nodeAttributesNodeMap = tree.newNodeArray();
 		edgeAttributesMap = tree.newEdgeArray();
 	}
 
 	/**
 	 * computes a simple left-to-right embedding
+	 *
 	 * @param fitWidth
 	 * @param fitHeight
 	 */
-	public void computeEmbedding(boolean toScale,double fitWidth,double fitHeight) {
+	public void computeEmbedding(boolean toScale, double fitWidth, double fitHeight) {
 		clear();
-		if(!tree.hasReticulateEdges()) {
-			try(var x=tree.newNodeDoubleArray();var y=tree.newNodeDoubleArray()) {
-				if(toScale) {
+		if (!tree.hasReticulateEdges()) {
+			try (var x = tree.newNodeDoubleArray(); var y = tree.newNodeDoubleArray()) {
+				if (toScale) {
 					var root = tree.getRoot();
 					x.put(root, 0.0);
 					y.put(root, 0.0);
@@ -64,12 +66,12 @@ public class NetworkModel {
 						}
 					});
 				} else {
-					tree.postorderTraversal(v->{
-						if(v.isLeaf())
-							x.put(v,0.0);
+					tree.postorderTraversal(v -> {
+						if (v.isLeaf())
+							x.put(v, 0.0);
 						else {
-							var min=v.childrenStream().mapToDouble(c->x.get(v)).min().orElse(0);
-							x.put(v,min-1.0);
+							var min = v.childrenStream().mapToDouble(c -> x.get(v)).min().orElse(0);
+							x.put(v, min - 1.0);
 						}
 					});
 				}
@@ -77,43 +79,65 @@ public class NetworkModel {
 				var count = new Counter();
 				tree.postorderTraversal(v -> {
 					if (v.isLeaf())
-						y.put(v,(double)count.incrementAndGet());
+						y.put(v, (double) count.incrementAndGet());
 					else {
-						y.put(v,v.childrenStream().mapToDouble(y::get).average().orElse(0.0));
+						y.put(v, v.childrenStream().mapToDouble(y::get).average().orElse(0.0));
 					}
 				});
 
-				fit(fitWidth,fitHeight,x,y);
+				fit(fitWidth, fitHeight, x, y);
 
-				for(var v:tree.nodes()) {
-					var vx=x.get(v);
-					var vy=y.get(v);
+				for (var v : tree.nodes()) {
+					var vx = x.get(v);
+					var vy = y.get(v);
 					var text = tree.getLabel(v);
 					var label = new Label(10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get(), 0, text != null ? text : "");
-					setAttributes(v,new NodeAttributes(vx,vy,NodeGlyph.Circle,8,8,Color.BLACK,Color.WHITE,label));
+					setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, 8, 8, Color.BLACK, Color.WHITE, label));
 				}
-				for(var e:tree.edges()) {
-					edgeAttributesMap.put(e,new EdgeAttributes(EdgeGlyph.StraightLine,1.0,Color.BLACK,null));
+				for (var e : tree.edges()) {
+					edgeAttributesMap.put(e, new EdgeAttributes(EdgeGlyph.StraightLine, 1.0, Color.BLACK, null));
 				}
 			}
 		}
+
+		tree.addGraphUpdateListener(new GraphUpdateAdapter() {
+			@Override
+			public void newEdge(Edge e) {
+				if (e.getTarget().getInDegree() == 2) {
+					for (var f : e.getTarget().inEdges()) {
+						tree.setReticulate(f, true);
+					}
+				}
+			}
+
+			@Override
+			public void deleteEdge(Edge e) {
+				tree.setReticulate(e, false);
+
+				if (e.getTarget().getInDegree() == 2) {
+					for (var f : e.getTarget().inEdges()) {
+						tree.setReticulate(f, false);
+					}
+				}
+			}
+		});
 	}
 
 	private static void fit(double fitWidth, double fitHeight, NodeDoubleArray x, NodeDoubleArray y) {
-		if(fitWidth>0) {
+		if (fitWidth > 0) {
 			var min = x.values().stream().mapToDouble(a -> a).min().orElse(0);
 			var max = x.values().stream().mapToDouble(a -> a).max().orElse(0);
-			var diff=max-min>0?max-min:1.0;
-			for(var v:x.keySet()) {
-				x.computeIfPresent(v,(k,o)->(o-min)/diff*fitWidth);
+			var diff = max - min > 0 ? max - min : 1.0;
+			for (var v : x.keySet()) {
+				x.computeIfPresent(v, (k, o) -> (o - min) / diff * fitWidth);
 			}
 		}
-		if(fitHeight>0) {
+		if (fitHeight > 0) {
 			var min = y.values().stream().mapToDouble(a -> a).min().orElse(0);
 			var max = y.values().stream().mapToDouble(a -> a).max().orElse(0);
-			var diff=max-min>0?max-min:1.0;
-			for(var v:y.keySet()) {
-				y.computeIfPresent(v,(k,o)->(o-min)/diff*fitHeight);
+			var diff = max - min > 0 ? max - min : 1.0;
+			for (var v : y.keySet()) {
+				y.computeIfPresent(v, (k, o) -> (o - min) / diff * fitHeight);
 			}
 		}
 
@@ -132,22 +156,25 @@ public class NetworkModel {
 		return nodeAttributesNodeMap.get(v);
 	}
 
-	public void setAttributes(Node v,NodeAttributes attributes) {
-		nodeAttributesNodeMap.put(v,attributes);
+	public void setAttributes(Node v, NodeAttributes attributes) {
+		nodeAttributesNodeMap.put(v, attributes);
 	}
 
 	public EdgeAttributes getAttributes(Edge e) {
 		return edgeAttributesMap.get(e);
 	}
 
-	public void setAttributes(Edge e,EdgeAttributes attributes) {
-		edgeAttributesMap.put(e,attributes);
+	public void setAttributes(Edge e, EdgeAttributes attributes) {
+		edgeAttributesMap.put(e, attributes);
 	}
 
 	public static record NodeAttributes(double x, double y, NodeGlyph glyph, double width, double height, Paint stroke,
-										Paint fill,Label label){}
+										Paint fill, Label label) {
+	}
 
-	public static record Label(double dx, double dy, double angle, String text){}
+	public static record Label(double dx, double dy, double angle, String text) {
+	}
 
-	public static record EdgeAttributes(EdgeGlyph glyph, double strokeWidth, Paint stroke, Label label){}
+	public static record EdgeAttributes(EdgeGlyph glyph, double strokeWidth, Paint stroke, Label label) {
+	}
 }

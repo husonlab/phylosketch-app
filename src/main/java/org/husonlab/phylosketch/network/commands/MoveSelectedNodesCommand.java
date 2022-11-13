@@ -41,7 +41,6 @@ public class MoveSelectedNodesCommand extends UndoableRedoableCommand {
 
 	/**
 	 * constructor
-	 *
 	 */
 	public MoveSelectedNodesCommand(double dx, double dy, NetworkView networkView, ObservableSet<Node> selectedItems,
 									Map<Integer, double[]> oldEdgeControlCoordinates0, Map<Integer, double[]> newEdgeControlCoordinates0) {

@@ -40,10 +40,10 @@ public class Main extends Application {
 	private final AppManager appManager = AppManager.initialize(this::postInit);
 
 	@Override
-	public void init()  {
-		System.setProperty(com.gluonhq.attach.util.Constants.ATTACH_DEBUG,"true");
-		appManager.addViewFactory(PRIMARY_VIEW, ()->(new PrimaryView()).getView());
-		appManager.addViewFactory(SECONDARY_VIEW, ()->(new SecondaryView()).getView());
+	public void init() {
+		System.setProperty(com.gluonhq.attach.util.Constants.ATTACH_DEBUG, "true");
+		appManager.addViewFactory(PRIMARY_VIEW, () -> (new PrimaryView()).getView());
+		appManager.addViewFactory(SECONDARY_VIEW, () -> (new SecondaryView()).getView());
 		DrawerManager.buildDrawer(appManager);
 	}
 
