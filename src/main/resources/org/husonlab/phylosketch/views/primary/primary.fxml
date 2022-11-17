@@ -112,7 +112,7 @@
                         <javafx.scene.control.TextField fx:id="textField" alignment="CENTER" editable="false"
                                                         HBox.hgrow="ALWAYS">
                             <font>
-                                <Font size="14.0"/>
+                                <Font size="18.0"/>
                             </font>
                             <HBox.margin>
                                 <Insets/>

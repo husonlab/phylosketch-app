@@ -30,6 +30,9 @@ import org.husonlab.phylosketch.network.interaction.LabelEditingManager;
 public class LabelEditorPresenter {
 
 	public LabelEditorPresenter(LabelEditorController controller, LabelEditingManager manager) {
+
+		controller.getTextField().prefColumnCountProperty().bind(controller.getTextField().textProperty().length().add(1));
+
 		controller.getTextField().addEventFilter(KeyEvent.KEY_PRESSED, a -> {
 			switch (a.getCode()) {
 				case ENTER -> manager.finishEditing();

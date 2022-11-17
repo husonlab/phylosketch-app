@@ -126,6 +126,8 @@ public class LabelEditingManager {
 			if (!networkView.getWorld().getChildren().contains(editorPane)) {
 				editorPane.translateXProperty().bind(currentNodeView.shape().translateXProperty());
 				editorPane.translateYProperty().bind(currentNodeView.shape().translateYProperty().add(box.getHeight()));
+				editorPane.setLayoutX(0);
+				editorPane.setLayoutY(0);
 				networkView.getWorld().getChildren().add(editorPane);
 			} else {
 				editorPane.translateXProperty().unbind();
@@ -154,10 +156,9 @@ public class LabelEditingManager {
 
 	private void saveCurrent() {
 		if (currentNode != null) {
-			var textLabel = networkView.getView(currentNode).label();
 			var newText = editor.getController().getTextField().getText();
 			if (!newText.equals(originalText)) {
-				undoManager.doAndAdd(new NodeLabelCommand(currentNode, textLabel.textProperty(), originalText, newText));
+				undoManager.doAndAdd(new NodeLabelCommand(currentNode, networkView, originalText, newText));
 			}
 		}
 	}

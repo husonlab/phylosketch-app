@@ -22,3 +22,8 @@
     -fx-background-color: transparent;
     -fx-text-fill: -primary-swatch-500;
 }
+
+.text-field {
+    -fx-font-family: "Courier New";
+    -fx-font-size: 16;
+}

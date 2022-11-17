@@ -20,29 +20,32 @@
 
 package org.husonlab.phylosketch.network.commands;
 
-import javafx.beans.property.StringProperty;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
+import org.husonlab.phylosketch.network.NetworkView;
 
 public class NodeLabelCommand extends UndoableRedoableCommand {
 	private final Runnable undo;
 	private final Runnable redo;
 
-	public NodeLabelCommand(Node v, StringProperty label, String oldValue, String newValue) {
+	public NodeLabelCommand(Node a, NetworkView networkView, String oldValue, String newValue) {
 		super("change label");
 
+		final var tree = (PhyloTree) a.getOwner();
+		final var id = a.getId();
+
 		undo = () -> {
-			var tree = (PhyloTree) v.getOwner();
+			final var v = tree.findNodeById(id);
 			tree.setLabel(v, RichTextLabel.getRawText(oldValue));
-			label.set(oldValue);
+			networkView.getView(v).label().setText(oldValue);
 		};
 
 		redo = () -> {
-			var tree = (PhyloTree) v.getOwner();
+			final var v = tree.findNodeById(id);
 			tree.setLabel(v, RichTextLabel.getRawText(newValue));
-			label.set(newValue);
+			networkView.getView(v).label().setText(newValue);
 		};
 	}
 
