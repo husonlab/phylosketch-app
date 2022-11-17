@@ -169,7 +169,7 @@ public class TouchNodeShapes {
 					line.setEndX(location.getX());
 					line.setEndY(location.getY());
 
-					final var w = networkView.findNodeIfHit(touchPoint.getScreenX(), touchPoint.getScreenY(), 8);
+					final var w = networkView.findNodeIfHit(touchPoint.getScreenX(), touchPoint.getScreenY());
 					if ((w == null || w == v || w != target.get()) && target.get() != null) {
 						target.set(null);
 					}

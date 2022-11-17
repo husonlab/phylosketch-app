@@ -29,17 +29,13 @@
 <View fx:id="primary" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.primary.PrimaryController">
     <center>
-        <AnchorPane BorderPane.alignment="CENTER">
+        <AnchorPane fx:id="anchorPane" BorderPane.alignment="CENTER">
             <children>
                 <ScrollPane fx:id="scrollPane" hbarPolicy="ALWAYS" pannable="true" vbarPolicy="ALWAYS"
                             AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="0.0">
                     <content>
-                        <StackPane fx:id="stackPane">
-                            <children>
-                                <Pane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="100.0"
-                                      minWidth="100.0" style="-fx-background-color: lightyellow"/>
-                            </children>
+                        <StackPane fx:id="stackPane" style="-fx-background-color: lightblue;">
                             <padding>
                                 <Insets bottom="50.0" left="50.0" right="50.0" top="50.0"/>
                             </padding>
@@ -63,16 +59,6 @@
                                         <Icon content="PAN_TOOL"/>
                                     </graphic>
                                 </RadioMenuItem>
-                                <RadioMenuItem fx:id="editMenuItem" mnemonicParsing="false">
-                                    <graphic>
-                                        <Icon content="EDIT"/>
-                                    </graphic>
-                                </RadioMenuItem>
-                                <RadioMenuItem fx:id="eraseMenuItem" mnemonicParsing="false">
-                                    <graphic>
-                                        <Icon content="REMOVE_CIRCLE"/>
-                                    </graphic>
-                                </RadioMenuItem>
                                 <RadioMenuItem fx:id="moveMenuItem" mnemonicParsing="false">
                                     <graphic>
                                         <Icon content="SWAP_VERT"/>
@@ -81,6 +67,16 @@
                                 <RadioMenuItem fx:id="editLabelMenuItem" mnemonicParsing="false">
                                     <graphic>
                                         <Icon content="LABEL_OUTLINE"/>
+                                    </graphic>
+                                </RadioMenuItem>
+                                <RadioMenuItem fx:id="editMenuItem" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="EDIT"/>
+                                    </graphic>
+                                </RadioMenuItem>
+                                <RadioMenuItem fx:id="eraseMenuItem" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="REMOVE_CIRCLE"/>
                                     </graphic>
                                 </RadioMenuItem>
                             </items>
@@ -113,7 +109,7 @@
                 </ToolBar>
                 <HBox alignment="CENTER">
                     <children>
-                        <TextField fx:id="newickTextField" alignment="CENTER" editable="false" HBox.hgrow="ALWAYS">
+                        <TextField fx:id="textField" alignment="CENTER" editable="false" HBox.hgrow="ALWAYS">
                             <font>
                                 <Font size="14.0"/>
                             </font>
@@ -124,24 +120,10 @@
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </padding>
                         </TextField>
-                        <Button fx:id="showNewickButton" mnemonicParsing="false" prefHeight="34.0" text=" ">
-                            <graphic>
-                                <Icon content="INFO"/>
-                            </graphic>
-                            <HBox.margin>
-                                <Insets/>
-                            </HBox.margin>
-                        </Button>
+                        <ToggleButton fx:id="showNewickToggleButton" mnemonicParsing="false" text="Newick"/>
                     </children>
                 </HBox>
             </children>
         </VBox>
     </top>
-    <bottom>
-        <VBox alignment="CENTER" BorderPane.alignment="CENTER">
-            <children>
-                <TextField fx:id="propertiesTextField" editable="false" promptText="Properties"/>
-            </children>
-        </VBox>
-    </bottom>
 </View>

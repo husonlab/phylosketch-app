@@ -21,57 +21,29 @@
 package org.husonlab.phylosketch.views.labeleditor;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+
+import java.util.Objects;
 
 public class LabelEditorController {
 
 	@FXML
-	private AnchorPane rootPane;
-	@FXML
-	private Button doneButton;
-
-	@FXML
-	private Button downButton;
-
-	@FXML
-	private Button leftButton;
-
-	@FXML
-	private Button rightButton;
+	private Pane rootPane;
 
 	@FXML
 	private TextField textField;
 
-	@FXML
-	private Button upButton;
-
-	public AnchorPane getRootPane() {
+	public Pane getRootPane() {
 		return rootPane;
 	}
 
-	public Button getDoneButton() {
-		return doneButton;
-	}
-
-	public Button getDownButton() {
-		return downButton;
-	}
-
-	public Button getLeftButton() {
-		return leftButton;
-	}
-
-	public Button getRightButton() {
-		return rightButton;
+	@FXML
+	private void initialize() {
+		rootPane.getStylesheets().add(Objects.requireNonNull(LabelEditorController.class.getResource("label_editor.css")).toExternalForm());
 	}
 
 	public TextField getTextField() {
 		return textField;
-	}
-
-	public Button getUpButton() {
-		return upButton;
 	}
 }

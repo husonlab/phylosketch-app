@@ -40,7 +40,7 @@ public class EdgeShapeCommand extends UndoableRedoableCommand {
 		final var controlId = edgeAndControlId.getSecond();
 
 		undo = () -> {
-			final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).getCurve();
+			final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).curve();
 			if (controlId == 1) {
 				curve.setControlX1(curve.getControlX1() - delta.getX());
 				curve.setControlY1(curve.getControlY1() - delta.getY());
@@ -50,7 +50,7 @@ public class EdgeShapeCommand extends UndoableRedoableCommand {
 			}
 		};
 		redo = () -> {
-			final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).getCurve();
+			final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).curve();
 			if (controlId == 1) {
 				curve.setControlX1(curve.getControlX1() + delta.getX());
 				curve.setControlY1(curve.getControlY1() + delta.getY());

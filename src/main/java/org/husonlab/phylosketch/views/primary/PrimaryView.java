@@ -48,7 +48,7 @@ public class PrimaryView {
 
 		presenter = new PrimaryPresenter(document, this, controller);
 
-		NetworkPresenter.setupView(controller.getMainPane(), document, getPresenter().interactionModeProperty());
+		NetworkPresenter.setupView(controller.getStackPane(), document, getPresenter().interactionModeProperty());
 
 		if (true) {
 			Platform.runLater(() -> {

@@ -24,10 +24,7 @@ import javafx.collections.ListChangeListener;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.CubicCurve;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
 import jloda.fx.util.BasicFX;
@@ -52,7 +49,7 @@ public class NetworkView {
 	private final Group edgeLabelGroup = new Group();
 	private final Group nodeLabelGroup = new Group();
 
-	private final Group world = new Group(edgeBelowWaterGroup, nodeBelowWaterGroup, labelBelowWaterGroup, edgePathGroup, nodeShapeGroup, edgeLabelGroup, nodeLabelGroup);
+	private final Group world = new Group(edgeBelowWaterGroup, labelBelowWaterGroup, nodeBelowWaterGroup, edgePathGroup, nodeShapeGroup, edgeLabelGroup, nodeLabelGroup);
 
 	private final Document document;
 	private final PhyloTree tree;
@@ -82,106 +79,13 @@ public class NetworkView {
 		edgePathGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
 			while (c.next()) {
 				for (var node : c.getRemoved()) {
-					if (node instanceof CubicCurve cubicCurve && cubicCurve.getUserData() instanceof CubicCurve belowWater) {
-						belowWater.startXProperty().unbind();
-						belowWater.startYProperty().unbind();
-						belowWater.controlX1Property().unbind();
-						belowWater.controlY1Property().unbind();
-						belowWater.controlX2Property().unbind();
-						belowWater.controlY2Property().unbind();
-						belowWater.endXProperty().unbind();
-						belowWater.endYProperty().unbind();
-						belowWater.translateXProperty().unbind();
-						belowWater.translateYProperty().unbind();
-						edgeBelowWaterGroup.getChildren().remove(belowWater);
+					if (node.getUserData() instanceof EdgeView edgeView) {
+						edgeBelowWaterGroup.getChildren().remove(edgeView.curveBelow());
 					}
 				}
 				for (var node : c.getAddedSubList()) {
-					if (node instanceof CubicCurve shape) {
-						var belowWater = new CubicCurve();
-						belowWater.setPickOnBounds(false);
-						shape.setUserData(belowWater);
-						belowWater.setStrokeWidth(25);
-						belowWater.setFill(Color.TRANSPARENT);
-						belowWater.setStroke(Color.WHITE); // todo: make this the current background color
-
-						belowWater.startXProperty().bind(shape.startXProperty());
-						belowWater.startYProperty().bind(shape.startYProperty());
-						belowWater.controlX1Property().bind(shape.controlX1Property());
-						belowWater.controlY1Property().bind(shape.controlY1Property());
-						belowWater.controlX2Property().bind(shape.controlX2Property());
-						belowWater.controlY2Property().bind(shape.controlY2Property());
-						belowWater.endXProperty().bind(shape.endXProperty());
-						belowWater.endYProperty().bind(shape.endYProperty());
-						belowWater.translateXProperty().bind(shape.translateXProperty());
-						belowWater.translateYProperty().bind(shape.translateYProperty());
-
-						belowWater.setOnTouchPressed(a -> {
-							if (shape.getOnTouchPressed() != null) {
-								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
-								var copy = a.copyFor(null, shape);
-								a.consume();
-								shape.getOnTouchPressed().handle(copy);
-								copy.consume();
-							}
-						});
-						belowWater.setOnTouchMoved(a -> {
-							if (shape.getOnTouchMoved() != null) {
-								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
-								var copy = a.copyFor(null, shape);
-								a.consume();
-								shape.getOnTouchMoved().handle(copy);
-								copy.consume();
-							}
-						});
-						belowWater.setOnTouchReleased(a -> {
-							if (shape.getOnTouchReleased() != null) {
-								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
-								var copy = a.copyFor(null, shape);
-								a.consume();
-								shape.getOnTouchReleased().handle(copy);
-								copy.consume();
-							}
-						});
-
-						belowWater.setOnMouseClicked(a -> {
-							if (shape.getOnMouseClicked() != null) {
-								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
-								var copy = a.copyFor(null, shape);
-								a.consume();
-								shape.getOnMouseClicked().handle(copy);
-								copy.consume();
-							}
-						});
-						belowWater.setOnMousePressed(a -> {
-							if (shape.getOnMousePressed() != null) {
-								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
-								var copy = a.copyFor(null, shape);
-								a.consume();
-								shape.getOnMousePressed().handle(copy);
-								copy.consume();
-							}
-						});
-						belowWater.setOnMouseDragged(a -> {
-							if (shape.getOnMouseDragged() != null) {
-								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
-								var copy = a.copyFor(null, shape);
-								a.consume();
-								shape.getOnMouseDragged().handle(copy);
-								copy.consume();
-							}
-						});
-						belowWater.setOnMouseReleased(a -> {
-							if (shape.getOnMouseReleased() != null) {
-								//System.err.println("Transferring to: "+a.getEventType()+" to: "+shape);
-								var copy = a.copyFor(null, shape);
-								a.consume();
-								shape.getOnMouseReleased().handle(copy);
-								copy.consume();
-							}
-						});
-
-						edgeBelowWaterGroup.getChildren().add(belowWater);
+					if (node.getUserData() instanceof EdgeView edgeView) {
+						edgeBelowWaterGroup.getChildren().add(edgeView.curveBelow());
 					}
 				}
 			}
@@ -190,65 +94,13 @@ public class NetworkView {
 		nodeShapeGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
 			while (c.next()) {
 				for (var node : c.getRemoved()) {
-					if (node instanceof Shape shape && shape.getUserData() instanceof Shape belowWater) {
-						belowWater.translateXProperty().unbind();
-						belowWater.translateYProperty().unbind();
-						nodeBelowWaterGroup.getChildren().remove(belowWater);
+					if (node.getUserData() instanceof NodeView nodeView) {
+						nodeBelowWaterGroup.getChildren().remove(nodeView.shapeBelow());
 					}
 				}
 				for (var node : c.getAddedSubList()) {
-					if (node instanceof Shape shape) {
-						var belowWater = new Circle(15);
-						shape.setUserData(belowWater);
-						belowWater.setStroke(Color.TRANSPARENT);
-						belowWater.setFill(Color.WHITE); // todo: make this the current background color
-						belowWater.translateXProperty().bind(shape.translateXProperty());
-						belowWater.translateYProperty().bind(shape.translateYProperty());
-
-						belowWater.setOnTouchPressed(a -> {
-							if (shape.getOnTouchPressed() != null) {
-								shape.getOnTouchPressed().handle(a.copyFor(null, shape));
-								a.consume();
-							}
-						});
-						belowWater.setOnTouchMoved(a -> {
-							if (shape.getOnTouchMoved() != null) {
-								shape.getOnTouchMoved().handle(a.copyFor(null, shape));
-								a.consume();
-							}
-						});
-						belowWater.setOnTouchReleased(a -> {
-							if (shape.getOnTouchReleased() != null) {
-								shape.getOnTouchReleased().handle(a.copyFor(null, shape));
-								a.consume();
-							}
-						});
-
-						belowWater.setOnMouseClicked(a -> {
-							if (shape.getOnMouseClicked() != null) {
-								shape.getOnMouseClicked().handle(a.copyFor(null, shape));
-								a.consume();
-							}
-						});
-						belowWater.setOnMousePressed(a -> {
-							if (shape.getOnMousePressed() != null) {
-								shape.getOnMousePressed().handle(a.copyFor(null, shape));
-								a.consume();
-							}
-						});
-						belowWater.setOnMouseDragged(a -> {
-							if (shape.getOnMouseDragged() != null) {
-								shape.getOnMouseDragged().handle(a.copyFor(null, shape));
-								a.consume();
-							}
-						});
-						belowWater.setOnMouseReleased(a -> {
-							if (shape.getOnMouseReleased() != null) {
-								shape.getOnMouseReleased().handle(a.copyFor(null, shape));
-								a.consume();
-							}
-						});
-						nodeBelowWaterGroup.getChildren().add(belowWater);
+					if (node.getUserData() instanceof NodeView nodeView) {
+						nodeBelowWaterGroup.getChildren().add(nodeView.shapeBelow());
 					}
 				}
 			}
@@ -257,69 +109,15 @@ public class NetworkView {
 		nodeLabelGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
 			while (c.next()) {
 				for (var node : c.getRemoved()) {
-					if (node instanceof RichTextLabel label && label.getUserData() instanceof Rectangle belowWater) {
-						belowWater.translateXProperty().unbind();
-						belowWater.translateYProperty().unbind();
-						belowWater.widthProperty().unbind();
-						belowWater.heightProperty().unbind();
-						labelBelowWaterGroup.getChildren().remove(belowWater);
+					if (node.getUserData() instanceof NodeView nodeView) {
+						labelBelowWaterGroup.getChildren().remove(nodeView.labelShapeBelow());
 					}
 				}
 				for (var node : c.getAddedSubList()) {
 					if (node instanceof RichTextLabel label) {
-						var belowWater = new Rectangle(20, 20);
-						label.setUserData(belowWater);
-						belowWater.setStroke(Color.TRANSPARENT);
-						belowWater.setFill(Color.WHITE); // todo: make this the current background color
-						belowWater.widthProperty().bind(label.widthProperty().add(10));
-						belowWater.heightProperty().bind(label.heightProperty().add(10));
-						belowWater.translateXProperty().bind(label.translateXProperty().add(label.layoutXProperty()).subtract(5));
-						belowWater.translateYProperty().bind(label.translateYProperty().add(label.layoutYProperty()).subtract(5));
-
-						belowWater.setOnTouchPressed(a -> {
-							if (label.getOnTouchPressed() != null) {
-								label.getOnTouchPressed().handle(a.copyFor(null, label));
-								a.consume();
-							}
-						});
-						belowWater.setOnTouchMoved(a -> {
-							if (label.getOnTouchMoved() != null) {
-								label.getOnTouchMoved().handle(a.copyFor(null, label));
-								a.consume();
-							}
-						});
-						belowWater.setOnTouchReleased(a -> {
-							if (label.getOnTouchReleased() != null) {
-								label.getOnTouchReleased().handle(a.copyFor(null, label));
-								a.consume();
-							}
-						});
-
-						belowWater.setOnMouseClicked(a -> {
-							if (label.getOnMouseClicked() != null) {
-								label.getOnMouseClicked().handle(a.copyFor(null, label));
-								a.consume();
-							}
-						});
-						belowWater.setOnMousePressed(a -> {
-							if (label.getOnMousePressed() != null) {
-								label.getOnMousePressed().handle(a.copyFor(null, label));
-								a.consume();
-							}
-						});
-						belowWater.setOnMouseDragged(a -> {
-							if (label.getOnMouseDragged() != null) {
-								label.getOnMouseDragged().handle(a.copyFor(null, label));
-								a.consume();
-							}
-						});
-						belowWater.setOnMouseReleased(a -> {
-							if (label.getOnMouseReleased() != null) {
-								label.getOnMouseReleased().handle(a.copyFor(null, label));
-								a.consume();
-							}
-						});
-						labelBelowWaterGroup.getChildren().add(belowWater);
+						if (node.getUserData() instanceof NodeView nodeView) {
+							labelBelowWaterGroup.getChildren().add(nodeView.labelShapeBelow());
+						}
 					}
 				}
 			}
@@ -417,7 +215,7 @@ public class NetworkView {
 			edgeView.label().translateYProperty().unbind();
 			edgeLabelGroup.getChildren().remove(edgeView.label());
 		}
-		var path = edgeView.getCurve();
+		var path = edgeView.curve();
 		var textLabel = new RichTextLabel(text);
 		textLabel.translateXProperty().bind(path.translateXProperty());
 		textLabel.translateYProperty().bind(path.translateYProperty());
@@ -451,18 +249,8 @@ public class NetworkView {
 
 	public Node findNodeIfHit(double xScreen, double yScreen) {
 		for (var v : tree.nodes()) {
-			final var shape = getView(v).shape();
-			if (shape.contains(shape.screenToLocal(xScreen, yScreen)))
-				return v;
-		}
-		return null;
-	}
-
-	public Node findNodeIfHit(double xScreen, double yScreen, double tolerance) {
-		for (var v : tree.nodes()) {
-			final var shape = getView(v).shape();
-			var bounds = shape.screenToLocal(new BoundingBox(xScreen - 0.5 * tolerance, yScreen - 0.5 * tolerance, tolerance, tolerance));
-			if (shape.intersects(bounds))
+			final var shapeBelow = getView(v).shapeBelow();
+			if (shapeBelow.contains(shapeBelow.screenToLocal(xScreen, yScreen)))
 				return v;
 		}
 		return null;
@@ -493,7 +281,7 @@ public class NetworkView {
 			shape.setTranslateY(shape.getTranslateY() * yFactor);
 		}
 		for (var e : tree.edges()) {
-			final CubicCurve cubicCurve = getView(e).getCurve();
+			final CubicCurve cubicCurve = getView(e).curve();
 			cubicCurve.setControlX1(xFactor * cubicCurve.getControlX1());
 			cubicCurve.setControlY1(yFactor * cubicCurve.getControlY1());
 			cubicCurve.setControlX2(xFactor * cubicCurve.getControlX2());
@@ -513,7 +301,7 @@ public class NetworkView {
 			shape.setTranslateY(shape.getTranslateY() / yScale);
 		}
 		for (var e : tree.edges()) {
-			final CubicCurve cubicCurve = getView(e).getCurve();
+			final CubicCurve cubicCurve = getView(e).curve();
 			cubicCurve.setControlX1(cubicCurve.getControlX1() / xScale);
 			cubicCurve.setControlY1(cubicCurve.getControlY1() / yScale);
 			cubicCurve.setControlX2(cubicCurve.getControlX2() / xScale);

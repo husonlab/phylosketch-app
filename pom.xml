@@ -149,9 +149,12 @@
                         <list>javafx.scene.control.Separator</list>
                         <list>javafx.scene.control.MenuItem</list>
                         <list>javafx.scene.control.MenuButton</list>
+                        <list>javafx.scene.control.RadioMenuItem</list>
                         <list>javafx.scene.control.TextField</list>
+                        <list>javafx.scene.layout.HBox</list>
                         <list>com.gluonhq.charm.glisten.control.ToggleButtonGroup</list>
                         <list>com.gluonhq.charm.glisten.control.DropdownButton</list>
+                        <list>com.gluonhq.charm.glisten.control.Icon</list>
 
                     </reflectionList>
                 </configuration>

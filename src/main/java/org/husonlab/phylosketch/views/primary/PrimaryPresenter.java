@@ -27,11 +27,11 @@ import javafx.animation.SequentialTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.Event;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.InputEvent;
 import javafx.util.Duration;
-import jloda.fx.util.RunAfterAWhile;
 import jloda.phylo.algorithms.RootedNetworkProperties;
 import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
@@ -41,25 +41,35 @@ public class PrimaryPresenter {
 	private final ObjectProperty<InteractionMode> interactionMode = new SimpleObjectProperty<>(this, "tool", InteractionMode.Pan);
 
 	public PrimaryPresenter(Document document, PrimaryView view, PrimaryController controller) {
-		var scrollPaneTouchPressedHandler = controller.getScrollPane().getOnTouchPressed();
+
+		if (!Main.isDesktop()) {
+			controller.getScrollPane().addEventFilter(InputEvent.ANY, a -> {
+				if (interactionModeProperty().get() != InteractionMode.Pan) {
+					var name = a.getEventType().getName();
+					if ((name.startsWith("SCROLL")) && (document.getNodeSelection().size() > 0 || document.getEdgeSelection().size() > 0)) {
+						a.consume();
+					}
+				}
+			});
+		}
 
 		interactionMode.addListener((v, o, n) -> {
-			var allowPanning = interactionMode.get() == InteractionMode.Pan || interactionMode.get() == InteractionMode.EditLabels;
-
-			if (allowPanning) {
-				controller.getScrollPane().setOnTouchPressed(scrollPaneTouchPressedHandler);
-				controller.getScrollPane().setPannable(true);
-			} else {
-				controller.getScrollPane().setOnTouchPressed(Event::consume);
-				controller.getScrollPane().setPannable(false);
-			}
-
+			controller.getScrollPane().setPannable(n == InteractionMode.Pan);
 			controller.getModeLabel().setText(n == null ? "" : n.getDescription());
 			controller.getModeLabel().setOpacity(1.0);
 			var fadeTransition = new FadeTransition(Duration.seconds(1), controller.getModeLabel());
 			fadeTransition.setToValue(0.0);
 			var transition = new SequentialTransition(new PauseTransition(Duration.seconds(5)), fadeTransition);
 			transition.play();
+			if (n != null) {
+				switch (n) {
+					case Pan -> controller.getScrollPane().setCursor(Cursor.OPEN_HAND);
+					case EditLabels -> controller.getScrollPane().setCursor(Cursor.TEXT);
+					case Move -> controller.getScrollPane().setCursor(Cursor.HAND);
+					case CreateNewEdges -> controller.getScrollPane().setCursor(Cursor.CROSSHAIR);
+					default -> controller.getScrollPane().setCursor(Cursor.DEFAULT);
+				}
+			}
 		});
 
 		controller.getModeLabel().setText("");
@@ -92,44 +102,33 @@ public class PrimaryPresenter {
 
 		controller.getResetButton().setOnAction(e -> view.getDocument().getNetworkView().resetScale());
 
-		if (Main.isDesktop()) {
-			controller.getScrollPane().setOnMouseReleased(c -> {
-				if (c.isStillSincePress() && !c.isShiftDown()) {
-					view.getDocument().getNodeSelection().clearSelection();
-					view.getDocument().getEdgeSelection().clearSelection();
-				}
-			});
-		} else {
-			controller.getScrollPane().setOnTouchReleased(c -> {
+		controller.getScrollPane().setOnMouseReleased(c -> {
+			if (c.isStillSincePress() && !c.isShiftDown()) {
 				view.getDocument().getNodeSelection().clearSelection();
 				view.getDocument().getEdgeSelection().clearSelection();
-			});
-		}
-
-		controller.getShowNewickButton().setOnAction(a -> {
-			var newick = document.getModel().getTree().toBracketString(false);
-			controller.getNewickTextField().setText(newick + ";");
+			}
 		});
 
-		InvalidationListener invalidationListener = c -> {
-			RunAfterAWhile.applyInFXThread(this,
-					() -> {
-						controller.getNewickTextField().clear();
-						var tree = document.getModel().getTree();
-						String heading;
-						if (tree.getNumberOfNodes() > 0 && tree.isConnected()) {
-							if (tree.hasReticulateEdges())
-								heading = "Network: ";
-							else
-								heading = "Tree: ";
-						} else
-							heading = "";
-						controller.getPropertiesTextField().setText(heading + RootedNetworkProperties.computeInfoString(tree).replace(", network", ""));
-					});
-		};
-		document.getGraphFX().getNodeList().addListener(invalidationListener);
-		document.getGraphFX().getEdgeList().addListener(invalidationListener);
 
+		controller.getShowNewickToggleButton().selectedProperty().addListener((v, o, n) -> {
+			if (n) {
+				controller.getTextField().setText(document.getModel().getTree().toBracketString(false) + ";");
+			} else {
+				var tree = document.getModel().getTree();
+				String heading;
+				if (tree.getNumberOfNodes() > 0 && tree.isConnected()) {
+					if (tree.hasReticulateEdges())
+						heading = "Network: ";
+					else
+						heading = "Tree: ";
+				} else
+					heading = "";
+				controller.getTextField().setText(heading + RootedNetworkProperties.computeInfoString(tree).replace(", network", ""));
+			}
+		});
+		document.getGraphFX().getNodeList().addListener((InvalidationListener) a -> controller.getShowNewickToggleButton().setSelected(false));
+		document.getGraphFX().getEdgeList().addListener((InvalidationListener) a -> controller.getShowNewickToggleButton().setSelected(false));
+		controller.getShowNewickToggleButton().setSelected(true);
 
 		controller.getToggles().selectedToggleProperty().addListener((v, o, n) -> {
 			Node graphic = null;

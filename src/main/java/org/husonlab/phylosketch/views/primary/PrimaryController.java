@@ -25,7 +25,7 @@ import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
 import java.util.Objects;
@@ -35,23 +35,17 @@ public class PrimaryController {
 	@FXML
 	private View primary;
 
+	@FXML
+	private AnchorPane anchorPane;
 
 	@FXML
 	private Label modeLabel;
 
 	@FXML
-	private TextField newickTextField;
-
-
-	@FXML
-	private TextField propertiesTextField;
+	private ToggleButton showNewickToggleButton;
 
 	@FXML
-	private Button showNewickButton;
-
-	@FXML
-	private Pane mainPane;
-
+	private TextField textField;
 
 	@FXML
 	private Button redoButton;
@@ -102,6 +96,7 @@ public class PrimaryController {
 						System.err.println("Search")));
 			}
 		});
+
 		scrollPane.viewportBoundsProperty().addListener((v, o, n) -> {
 			stackPane.setMinSize(n.getWidth(), n.getHeight());
 		});
@@ -120,17 +115,6 @@ public class PrimaryController {
 		return primary;
 	}
 
-	public TextField getNewickTextField() {
-		return newickTextField;
-	}
-
-	public Button getShowNewickButton() {
-		return showNewickButton;
-	}
-
-	public Pane getMainPane() {
-		return mainPane;
-	}
 
 	public Button getRedoButton() {
 		return redoButton;
@@ -154,10 +138,6 @@ public class PrimaryController {
 
 	public Label getModeLabel() {
 		return modeLabel;
-	}
-
-	public TextField getPropertiesTextField() {
-		return propertiesTextField;
 	}
 
 	public MenuButton getMenuButton() {
@@ -186,5 +166,13 @@ public class PrimaryController {
 
 	public RadioMenuItem getPanMenuItem() {
 		return panMenuItem;
+	}
+
+	public ToggleButton getShowNewickToggleButton() {
+		return showNewickToggleButton;
+	}
+
+	public TextField getTextField() {
+		return textField;
 	}
 }

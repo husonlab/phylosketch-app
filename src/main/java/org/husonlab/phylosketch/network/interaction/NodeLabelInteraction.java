@@ -31,17 +31,23 @@ import org.husonlab.phylosketch.network.NetworkView;
 import org.husonlab.phylosketch.network.commands.MoveSelectedNodeLabelsCommand;
 import org.husonlab.phylosketch.views.primary.InteractionMode;
 
+import static org.husonlab.phylosketch.network.interaction.NodeShapeInteraction.consumeAllScrollAndTouchEvents;
 import static org.husonlab.phylosketch.network.interaction.NodeShapeInteraction.selectOnlyService;
 
 /**
  * apply mouse interaction for node labels
  * Daniel Huson, 11.2022
  */
-public class NodeLabeInteraction {
+public class NodeLabelInteraction {
 
 	public static void install(LabelEditingManager editingManager, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
 							   SelectionModel<Edge> edgeSelection, Node v, ObjectProperty<InteractionMode> tool) {
 		var label = networkView.getView(v).label();
+		var labelShapeBelow = networkView.getView(v).labelShapeBelow();
+
+		label.setMouseTransparent(true);
+		consumeAllScrollAndTouchEvents(label);
+		consumeAllScrollAndTouchEvents(labelShapeBelow);
 
 		final var currentTool = new Single<InteractionMode>(null);
 
@@ -49,18 +55,13 @@ public class NodeLabeInteraction {
 		final var previousScenePosition = new double[2];
 		final var moved = new Single<>(false);
 
-		label.setOnMousePressed(a -> {
-			if (a.getClickCount() == 1 && !moved.get()) {
-				if (!a.isShiftDown() && Main.isDesktop()) {
-					nodeSelection.clearSelection();
-					edgeSelection.clearSelection();
-					nodeSelection.select(v);
-				} else if (!nodeSelection.isSelected(v))
-					nodeSelection.select(v);
-			}
+		labelShapeBelow.setOnMousePressed(a -> {
+			if (Main.isDesktop() && a.isShiftDown())
+				nodeSelection.toggleSelection(v);
+			else
+				nodeSelection.select(v);
 
 			selectOnlyService.restart(nodeSelection, edgeSelection, v);
-
 
 			currentTool.set(tool.get());
 			if (currentTool.get() == InteractionMode.Move) { // move label
@@ -73,7 +74,7 @@ public class NodeLabeInteraction {
 			a.consume();
 		});
 
-		label.setOnMouseDragged(a -> {
+		labelShapeBelow.setOnMouseDragged(a -> {
 			selectOnlyService.cancel();
 
 			if (!moved.get() && !nodeSelection.isSelected(v)) {
@@ -85,8 +86,17 @@ public class NodeLabeInteraction {
 			if (currentTool.get() == InteractionMode.Move) {
 				final double deltaX = (a.getSceneX() - previousScenePosition[0]);
 				final double deltaY = (a.getSceneY() - previousScenePosition[1]);
-				label.setLayoutX(label.getLayoutX() + deltaX);
-				label.setLayoutY(label.getLayoutY() + deltaY);
+
+				if (false) {
+					label.setLayoutX(label.getLayoutX() + deltaX);
+					label.setLayoutY(label.getLayoutY() + deltaY);
+				} else {
+					for (var u : nodeSelection.getSelectedItems()) {
+						var uLabel = networkView.getView(u).label();
+						uLabel.setLayoutX(uLabel.getLayoutX() + deltaX);
+						uLabel.setLayoutY(uLabel.getLayoutY() + deltaY);
+					}
+				}
 				moved.set(true);
 				previousScenePosition[0] = a.getSceneX();
 				previousScenePosition[1] = a.getSceneY();
@@ -94,8 +104,14 @@ public class NodeLabeInteraction {
 			a.consume();
 		});
 
-		label.setOnMouseReleased(a -> {
+		labelShapeBelow.setOnMouseReleased(a -> {
 			selectOnlyService.cancel();
+
+			if (Main.isDesktop() && !moved.get() && !a.isShiftDown()) {
+				nodeSelection.clearSelection();
+				edgeSelection.clearSelection();
+				nodeSelection.select(v);
+			}
 
 			if (currentTool.get() == InteractionMode.Move) {
 				undoManager.add(new MoveSelectedNodeLabelsCommand(a.getSceneX() - startScenePosition[0],

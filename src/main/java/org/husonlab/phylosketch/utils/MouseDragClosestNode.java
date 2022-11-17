@@ -41,14 +41,15 @@ public class MouseDragClosestNode {
 	private boolean target1AlreadyPresent = false;
 	private boolean target2AlreadyPresent = false;
 
-	public static void setup(Node node, Node reference1, Node target1, Node reference2, Node target2, BiConsumer<Node, Point2D> totalTranslation, Group world,
-							 Consumer<MouseEvent> onMouseMoved, Supplier<Boolean> allow) {
-		new MouseDragClosestNode(node, onMouseMoved, reference1, target1, reference2, target2, totalTranslation, world, allow);
+	public static void setup(Node node, Node reference1, Node target1, Node reference2, Node target2, Group world, BiConsumer<Node, Point2D> totalTranslation,
+							 Consumer<MouseEvent> onMousePressed, Consumer<MouseEvent> onMouseFirstMoved, Consumer<MouseEvent> oneMouseReleased, Supplier<Boolean> allow) {
+		new MouseDragClosestNode(node, onMousePressed, onMouseFirstMoved, oneMouseReleased, reference1, target1, reference2, target2, totalTranslation, world, allow);
 	}
 
-	private MouseDragClosestNode(Node node, Consumer<MouseEvent> onMouseMoved, Node reference1, Node target1, Node reference2, Node target2, BiConsumer<Node, Point2D> totalTranslation2,
+	private MouseDragClosestNode(Node node, Consumer<MouseEvent> onMousePressed, Consumer<MouseEvent> onMouseFirstMoved, Consumer<MouseEvent> oneMouseReleased, Node reference1, Node target1, Node reference2, Node target2, BiConsumer<Node, Point2D> totalTranslation2,
 								 Group world, Supplier<Boolean> allow) {
 		node.setOnMousePressed(a -> {
+			onMousePressed.accept(a);
 			if (allow.get()) {
 				this.mouseDownX = this.mouseX = a.getScreenX();
 				this.mouseDownY = this.mouseY = a.getScreenY();
@@ -74,12 +75,15 @@ public class MouseDragClosestNode {
 			a.consume();
 		});
 		node.setOnMouseDragged(a -> {
-			if (allow.get()) {
-				if (!moved)
-					onMouseMoved.accept(a);
+			if (!moved)
+				onMouseFirstMoved.accept(a);
 
-				this.target.setTranslateX(this.target.getTranslateX() + (a.getScreenX() - this.mouseX));
-				this.target.setTranslateY(this.target.getTranslateY() + (a.getScreenY() - this.mouseY));
+			if (allow.get()) {
+				try {
+					this.target.setTranslateX(this.target.getTranslateX() + (a.getScreenX() - this.mouseX));
+					this.target.setTranslateY(this.target.getTranslateY() + (a.getScreenY() - this.mouseY));
+				} catch (NullPointerException ignored) {
+				}
 				this.mouseX = a.getScreenX();
 				this.mouseY = a.getScreenY();
 				moved = true;
@@ -88,6 +92,7 @@ public class MouseDragClosestNode {
 			a.consume();
 		});
 		node.setOnMouseReleased(a -> {
+			oneMouseReleased.accept(a);
 			if (allow.get()) {
 				if (moved) {
 					double dx = a.getScreenX() - this.mouseDownX;

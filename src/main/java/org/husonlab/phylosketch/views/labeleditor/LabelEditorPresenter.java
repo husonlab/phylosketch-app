@@ -30,20 +30,6 @@ import org.husonlab.phylosketch.network.interaction.LabelEditingManager;
 public class LabelEditorPresenter {
 
 	public LabelEditorPresenter(LabelEditorController controller, LabelEditingManager manager) {
-		controller.getDoneButton().setOnAction(a -> manager.finishEditing());
-
-		controller.getLeftButton().setOnAction(a -> manager.continueEditing(LabelEditingManager.Direction.Left));
-		controller.getLeftButton().disableProperty().bind(manager.leftNeighborProperty().isNull());
-
-		controller.getRightButton().setOnAction(a -> manager.continueEditing(LabelEditingManager.Direction.Right));
-		controller.getRightButton().disableProperty().bind(manager.rightNeighborProperty().isNull());
-
-		controller.getUpButton().setOnAction(a -> manager.continueEditing(LabelEditingManager.Direction.Up));
-		controller.getUpButton().disableProperty().bind(manager.upNeighborProperty().isNull());
-
-		controller.getDownButton().setOnAction(a -> manager.continueEditing(LabelEditingManager.Direction.Down));
-		controller.getDownButton().disableProperty().bind(manager.downNeighborProperty().isNull());
-
 		controller.getTextField().addEventFilter(KeyEvent.KEY_PRESSED, a -> {
 			switch (a.getCode()) {
 				case ENTER -> manager.finishEditing();
@@ -58,23 +44,6 @@ public class LabelEditorPresenter {
 						manager.continueEditing(LabelEditingManager.Direction.Right);
 				}
 			}
-		});
-
-		controller.getTextField().setOnSwipeUp(a -> {
-			manager.continueEditing(LabelEditingManager.Direction.Up);
-			a.consume();
-		});
-		controller.getTextField().setOnSwipeDown(a -> {
-			manager.continueEditing(LabelEditingManager.Direction.Down);
-			a.consume();
-		});
-		controller.getTextField().setOnSwipeLeft(a -> {
-			manager.continueEditing(LabelEditingManager.Direction.Left);
-			a.consume();
-		});
-		controller.getTextField().setOnSwipeRight(a -> {
-			manager.continueEditing(LabelEditingManager.Direction.Right);
-			a.consume();
 		});
 	}
 }

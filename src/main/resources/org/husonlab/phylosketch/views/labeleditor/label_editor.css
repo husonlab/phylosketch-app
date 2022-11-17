@@ -1,5 +1,5 @@
 /*
- * SecondaryPresenter.java Copyright (C) 2022 Daniel H. Huson
+ * primary.css Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,19 +18,7 @@
  *
  */
 
-package org.husonlab.phylosketch.views.secondary;
-
-
-import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-
-public class SecondaryPresenter {
-	public SecondaryPresenter(SecondaryView view, SecondaryController controller) {
-		for (var icon : MaterialDesignIcon.values()) {
-			var label = new Label(icon.name());
-			label.setStyle("-fx-font-size: 9;");
-			controller.getFlowPane().getChildren().add(new VBox(icon.graphic(), label));
-		}
-	}
+.icon {
+    -fx-background-color: transparent;
+    -fx-text-fill: -primary-swatch-500;
 }

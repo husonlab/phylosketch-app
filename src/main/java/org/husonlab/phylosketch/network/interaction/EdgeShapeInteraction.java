@@ -28,12 +28,15 @@ import jloda.fx.undo.UndoManager;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.util.Pair;
+import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.NetworkView;
 import org.husonlab.phylosketch.network.commands.EdgeShapeCommand;
 import org.husonlab.phylosketch.utils.MouseDragClosestNode;
 import org.husonlab.phylosketch.views.primary.InteractionMode;
 
 import java.util.function.Function;
+
+import static org.husonlab.phylosketch.network.interaction.NodeShapeInteraction.consumeAllScrollAndTouchEvents;
 
 /**
  * apply mouse interaction for edge shapes
@@ -44,16 +47,13 @@ public class EdgeShapeInteraction {
 	public static void apply(Pane pane, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
 							 SelectionModel<Edge> edgeSelection, Edge e, ObjectProperty<InteractionMode> tool) {
 		var ev = networkView.getView(e);
-		var curve = ev.getCurve();
+		var curve = ev.curve();
+		var curveBelow = ev.curveBelow();
 
-		curve.setOnMouseClicked(a -> {
-			if (!a.isShiftDown()) {
-				nodeSelection.clearSelection();
-				edgeSelection.clearSelection();
-				edgeSelection.select(e);
-			} else
-				edgeSelection.toggleSelection(e);
-		});
+		curve.setMouseTransparent(true);
+		consumeAllScrollAndTouchEvents(curve);
+		consumeAllScrollAndTouchEvents(curveBelow);
+
 
 		// reference current translating control
 		final Function<Circle, Pair<Edge, Integer>> translatingControl = circle -> {
@@ -63,13 +63,30 @@ public class EdgeShapeInteraction {
 				return new Pair<>(e, 2);
 		};
 
-		MouseDragClosestNode.setup(curve,
-				networkView.getView(e.getSource()).shape(), ev.getCircle1(), networkView.getView(e.getTarget()).shape(), ev.getCircle2(),
-				(circle, delta) -> undoManager.add(new EdgeShapeCommand(networkView, translatingControl.apply((Circle) circle), delta)), networkView.getWorld(),
+		var sourceShape = networkView.getView(e.getSource()).shape();
+		var targetShape = networkView.getView(e.getTarget()).shape();
+
+		MouseDragClosestNode.setup(curveBelow, sourceShape, ev.getCircle1(), targetShape, ev.getCircle2(), networkView.getWorld(),
+				(circle, delta) -> undoManager.add(new EdgeShapeCommand(networkView, translatingControl.apply((Circle) circle), delta)),
 				a -> {
-					nodeSelection.clearSelection();
-					edgeSelection.clearSelection();
-					edgeSelection.select(e);
+					if (Main.isDesktop() && a.isShiftDown())
+						edgeSelection.toggleSelection(e);
+					else
+						edgeSelection.select(e);
+				},
+				a -> {
+					if (edgeSelection.isSelected(e)) {
+						nodeSelection.clearSelection();
+						edgeSelection.clearSelection();
+						edgeSelection.select(e);
+					}
+				},
+				a -> {
+					if (Main.isDesktop() && a.isStillSincePress() && !a.isShiftDown()) {
+						nodeSelection.clearSelection();
+						edgeSelection.clearSelection();
+						edgeSelection.select(e);
+					}
 				},
 				() -> tool.get() == InteractionMode.Move);
 	}

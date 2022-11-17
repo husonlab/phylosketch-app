@@ -28,6 +28,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.Duration;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.undo.UndoManager;
+import jloda.fx.util.DraggableUtils;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
 import jloda.util.Pair;
@@ -74,6 +75,8 @@ public class LabelEditingManager {
 		this.undoManager = undoManager;
 
 		editor = new LabelEditor(this);
+
+		DraggableUtils.setupDragMouseLayout(editor.getRoot());
 	}
 
 	public void startEditing(Node v) {
@@ -119,16 +122,21 @@ public class LabelEditingManager {
 			originalText = currentNodeView.label().getText();
 			textField.textProperty().bindBidirectional(currentNodeView.label().textProperty());
 
-			var ux = currentNodeView.shape().getTranslateX();
-			var uy = currentNodeView.shape().getTranslateY();
+			var box = currentNodeView.shape().getBoundsInLocal();
 			if (!networkView.getWorld().getChildren().contains(editorPane)) {
-				editorPane.setTranslateX(ux);
-				editorPane.setTranslateY(uy);
+				editorPane.translateXProperty().bind(currentNodeView.shape().translateXProperty());
+				editorPane.translateYProperty().bind(currentNodeView.shape().translateYProperty().add(box.getHeight()));
 				networkView.getWorld().getChildren().add(editorPane);
 			} else {
+				editorPane.translateXProperty().unbind();
+				editorPane.translateYProperty().unbind();
 				var translate = new TranslateTransition(Duration.millis(500), editorPane);
-				translate.setToX(ux);
-				translate.setToY(uy);
+				translate.setToX(currentNodeView.shape().getTranslateX());
+				translate.setToY(currentNodeView.shape().getTranslateY() + box.getHeight());
+				translate.setOnFinished(a -> {
+					editorPane.translateXProperty().bind(currentNodeView.shape().translateXProperty());
+					editorPane.translateYProperty().bind(currentNodeView.shape().translateYProperty().add(box.getHeight()));
+				});
 				translate.play();
 			}
 

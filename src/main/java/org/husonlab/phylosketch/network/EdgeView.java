@@ -21,6 +21,7 @@
 package org.husonlab.phylosketch.network;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -40,7 +41,11 @@ import jloda.graph.Edge;
 public class EdgeView {
 	final private int id;
 	final private CubicCurve curve;
+	final private CubicCurve curveBelow;
+
 	private RichTextLabel label;
+	private Shape labelShapeBelow;
+
 	final private Circle circle1;
 	final private Circle circle2;
 	final private Shape arrowHead;
@@ -52,6 +57,7 @@ public class EdgeView {
 	public EdgeView(Edge edge, ReadOnlyDoubleProperty aX, ReadOnlyDoubleProperty aY, ReadOnlyDoubleProperty bX, ReadOnlyDoubleProperty bY) {
 		curve = new CubicCurve();
 		curve.setId("graph-edge");
+		curve.setUserData(this);
 		curve.setFill(Color.TRANSPARENT);
 		curve.setStroke(Color.BLACK);
 		curve.setStrokeWidth(1);
@@ -113,6 +119,8 @@ public class EdgeView {
 		children = FXCollections.observableArrayList();
 		children.add(curve);
 		children.add(arrowHead);
+
+		curveBelow = createCubicCurveBelow(curve);
 	}
 
 	public ObservableList<Node> getChildren() {
@@ -123,7 +131,7 @@ public class EdgeView {
 		return id;
 	}
 
-	public CubicCurve getCurve() {
+	public CubicCurve curve() {
 		return curve;
 	}
 
@@ -133,6 +141,10 @@ public class EdgeView {
 
 	public void setLabel(RichTextLabel label) {
 		this.label = label;
+		if (label == null)
+			labelShapeBelow = null;
+		else
+			labelShapeBelow = NodeView.createShapeBelow(label);
 	}
 
 	public Circle getCircle1() {
@@ -216,5 +228,37 @@ public class EdgeView {
 		curve.setControlY1(coordinates[1]);
 		curve.setControlX2(coordinates[2]);
 		curve.setControlY2(coordinates[3]);
+	}
+
+	public CubicCurve curveBelow() {
+		return curveBelow;
+	}
+
+	public Shape getLabelShapeBelow() {
+		return labelShapeBelow;
+	}
+
+	public static CubicCurve createCubicCurveBelow(CubicCurve curve) {
+		var curveBelow = new CubicCurve();
+		curveBelow.setUserData(curve.getUserData());
+		curveBelow.setPickOnBounds(false);
+		curveBelow.setStrokeWidth(Math.max(25, curve.getStrokeWidth()));
+		curveBelow.setFill(Color.TRANSPARENT);
+		curveBelow.setStroke(Color.WHITE); // todo: make this the current background color
+
+		curveBelow.strokeWidthProperty().bind(Bindings.createDoubleBinding(() -> Math.max(25, curve.getStrokeWidth()), curve.strokeProperty()));
+
+		curveBelow.startXProperty().bind(curve.startXProperty());
+		curveBelow.startYProperty().bind(curve.startYProperty());
+		curveBelow.controlX1Property().bind(curve.controlX1Property());
+		curveBelow.controlY1Property().bind(curve.controlY1Property());
+		curveBelow.controlX2Property().bind(curve.controlX2Property());
+		curveBelow.controlY2Property().bind(curve.controlY2Property());
+		curveBelow.endXProperty().bind(curve.endXProperty());
+		curveBelow.endYProperty().bind(curve.endYProperty());
+		curveBelow.translateXProperty().bind(curve.translateXProperty());
+		curveBelow.translateYProperty().bind(curve.translateYProperty());
+
+		return curveBelow;
 	}
 }

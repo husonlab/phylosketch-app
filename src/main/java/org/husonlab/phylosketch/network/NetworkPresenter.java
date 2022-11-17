@@ -37,7 +37,7 @@ import jloda.graph.Node;
 import jloda.graph.NodeArray;
 import org.husonlab.phylosketch.network.interaction.EdgeShapeInteraction;
 import org.husonlab.phylosketch.network.interaction.LabelEditingManager;
-import org.husonlab.phylosketch.network.interaction.NodeLabeInteraction;
+import org.husonlab.phylosketch.network.interaction.NodeLabelInteraction;
 import org.husonlab.phylosketch.network.interaction.NodeShapeInteraction;
 import org.husonlab.phylosketch.views.primary.InteractionMode;
 
@@ -65,7 +65,7 @@ public class NetworkPresenter {
 		modeProperty.addListener(a -> labelEditingManager.finishEditing());
 
 		networkView.setNodeViewAddedCallback(v -> {
-			NodeLabeInteraction.install(labelEditingManager, document.getUndoManager(), networkView, nodeSelection, edgeSelection, v, modeProperty);
+			NodeLabelInteraction.install(labelEditingManager, document.getUndoManager(), networkView, nodeSelection, edgeSelection, v, modeProperty);
 			// todo: need to edit this method
 			NodeShapeInteraction.install(labelEditingManager, pane, document.getUndoManager(), networkView, nodeSelection, edgeSelection, v, modeProperty);
 		});
@@ -91,13 +91,13 @@ public class NetworkPresenter {
 		edgeSelection.getSelectedItems().addListener((SetChangeListener<? super Edge>) c -> {
 			if (c.wasAdded()) {
 				var ev = networkView.getView(c.getElementAdded());
-				ev.getCurve().setEffect(SelectionEffect.getInstance());
+				ev.curve().setEffect(SelectionEffect.getInstance());
 				if (ev.label() != null)
 					ev.label().setEffect(SelectionEffect.getInstance());
 			} else if (c.wasRemoved()) {
 				var ev = networkView.getView(c.getElementRemoved());
 				if (ev != null) {
-					ev.getCurve().setEffect(null);
+					ev.curve().setEffect(null);
 					if (ev.label() != null)
 						ev.label().setEffect(null);
 				}
@@ -179,7 +179,7 @@ public class NetworkPresenter {
 
 		for (var e : view.getTree().edges()) {
 			var ev = view.getView(e);
-			var curve = ev.getCurve();
+			var curve = ev.curve();
 			var textLabel = ev.label();
 			var label = textLabel != null ? new NetworkModel.Label(textLabel.getLayoutX(), textLabel.getLayoutY(), textLabel.getRotate(), textLabel.getText()) : null;
 

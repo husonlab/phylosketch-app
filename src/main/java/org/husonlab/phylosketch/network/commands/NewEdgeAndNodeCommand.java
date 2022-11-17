@@ -39,7 +39,7 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 	/**
 	 * construct
 	 */
-	public NewEdgeAndNodeCommand(Pane pane, NetworkView networkView, SelectionModel<Node> nodeSelection, Node a, final Node b, double x, double y) {
+	public NewEdgeAndNodeCommand(Pane pane, NetworkView networkView, SelectionModel<Node> nodeSelection, Node a, final Node b, double translateX, double translateY) {
 		super("Add Edge");
 		final var tree = networkView.getTree();
 
@@ -67,7 +67,7 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 					wId = w.getId();
 				} else
 					w = tree.newNode(null, wId);
-				networkView.createShapeAndLabel(w, x, y, "", 10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get());
+				networkView.createShapeAndLabel(w, translateX, translateY, "", 10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get());
 			} else
 				w = tree.findNodeById(bId);
 

@@ -47,7 +47,7 @@ public class TouchEdgeShapes {
 	public static void install(Pane pane, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
 							   SelectionModel<Edge> edgeSelection, Edge e, ObjectProperty<InteractionMode> tool) {
 		var ev = networkView.getView(e);
-		var curve = ev.getCurve();
+		var curve = ev.curve();
 
 		// reference current translating control
 		final Function<Circle, Pair<Edge, Integer>> translatingControl = circle -> {

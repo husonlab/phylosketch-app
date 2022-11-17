@@ -24,9 +24,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.geometry.Point2D;
-import javafx.scene.Cursor;
+import javafx.scene.input.InputEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.undo.UndoManager;
@@ -48,12 +49,28 @@ import java.util.HashMap;
  * Daniel Huson, 11.2022
  */
 public class NodeShapeInteraction {
+	static private final Line line = new Line();
+	static private final Circle circle = new Circle(5);
+
+	static {
+		circle.setStroke(Color.BLACK);
+		circle.setFill(Color.WHITE);
+		circle.setMouseTransparent(true);
+		line.endXProperty().bind(circle.translateXProperty());
+		line.endYProperty().bind(circle.translateYProperty());
+		line.setMouseTransparent(true);
+	}
+
 	public final static SelectOnlyService selectOnlyService = new SelectOnlyService();
 
 	public static void install(LabelEditingManager editingManager, Pane pane, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
 							   SelectionModel<Edge> edgeSelection, Node v, ObjectProperty<InteractionMode> tool) {
 		var shape = networkView.getView(v).shape();
-		var label = networkView.getView(v).label();
+		var shapeBelow = networkView.getView(v).shapeBelow();
+
+		shape.setMouseTransparent(true);
+		consumeAllScrollAndTouchEvents(shape);
+		consumeAllScrollAndTouchEvents(shapeBelow);
 
 		// these are required to keep edge shapes when moving nodes
 		final var oldControlPointLocations = new HashMap<Integer, double[]>();
@@ -61,7 +78,6 @@ public class NodeShapeInteraction {
 
 		// these are used when creating new edge and node:
 		final var target = new SimpleObjectProperty<Node>(null);
-		final var line = new Line();
 
 		target.addListener((a, o, n) -> {
 			if (o != null) {
@@ -82,15 +98,13 @@ public class NodeShapeInteraction {
 		final var previousScenePosition = new double[2];
 		final var moved = new Single<>(false);
 
-		shape.setOnMousePressed(a -> {
-			if (a.getClickCount() == 1 && !moved.get()) {
-				if (!a.isShiftDown() && Main.isDesktop()) {
-					nodeSelection.clearSelection();
-					edgeSelection.clearSelection();
-					nodeSelection.select(v);
-				} else if (!nodeSelection.isSelected(v))
-					nodeSelection.select(v);
-			}
+		shapeBelow.setOnMousePressed(a -> {
+			System.err.println("Pressed");
+
+			if (Main.isDesktop() && a.isShiftDown()) {
+				nodeSelection.toggleSelection(v);
+			} else
+				nodeSelection.select(v);
 
 			selectOnlyService.restart(nodeSelection, edgeSelection, v);
 
@@ -104,24 +118,31 @@ public class NodeShapeInteraction {
 				oldControlPointLocations.clear();
 				newControlPointLocations.clear();
 			} else if (currentTool.get() == InteractionMode.CreateNewEdges) {
-				shape.setCursor(Cursor.CLOSED_HAND);
-
 				line.setStartX(shape.getTranslateX());
 				line.setStartY(shape.getTranslateY());
 
-				final Point2D location = pane.sceneToLocal(previousScenePosition[0], previousScenePosition[1]);
+				circle.setTranslateX(shape.getTranslateX());
+				circle.setTranslateY(shape.getTranslateY());
 
-				line.setEndX(location.getX());
-				line.setEndY(location.getY());
-				networkView.getWorld().getChildren().add(line);
 				target.set(null);
 			} else if (currentTool.get() == InteractionMode.EditLabels) {// edit labels
 				editingManager.startEditing(v);
 			}
+			networkView.getWorld().getChildren().remove(line);
+			networkView.getWorld().getChildren().remove(circle);
+			circle.setOnMouseReleased(z -> {
+				networkView.getWorld().getChildren().remove(circle);
+				networkView.getWorld().getChildren().remove(line);
+			});
+			networkView.getWorld().getChildren().remove(circle);
+			networkView.getWorld().getChildren().remove(line);
+
 			a.consume();
 		});
 
-		shape.setOnMouseDragged(a -> {
+		shapeBelow.setOnMouseDragged(a -> {
+			System.err.println("Dragged");
+
 			shape.setScaleX(1);
 			shape.setScaleY(1);
 
@@ -133,10 +154,10 @@ public class NodeShapeInteraction {
 				nodeSelection.select(v);
 			}
 
-			if (currentTool.get() == InteractionMode.Move) {
-				final double deltaX = (a.getSceneX() - previousScenePosition[0]);
-				final double deltaY = (a.getSceneY() - previousScenePosition[1]);
+			final var deltaX = (a.getSceneX() - previousScenePosition[0]);
+			final var deltaY = (a.getSceneY() - previousScenePosition[1]);
 
+			if (currentTool.get() == InteractionMode.Move) {
 				for (var u : nodeSelection.getSelectedItems()) {
 					var uShape = networkView.getView(u).shape();
 					{
@@ -162,9 +183,14 @@ public class NodeShapeInteraction {
 					uShape.setTranslateY(uShape.getTranslateY() + deltaY);
 				}
 			} else if (currentTool.get() == InteractionMode.CreateNewEdges) {
-				final var location = pane.sceneToLocal(a.getSceneX(), a.getSceneY());
-				line.setEndX(location.getX());
-				line.setEndY(location.getY());
+				if (!moved.get()) {
+					if (!networkView.getWorld().getChildren().contains(line))
+						networkView.getWorld().getChildren().add(line);
+					if (!networkView.getWorld().getChildren().contains(circle))
+						networkView.getWorld().getChildren().add(circle);
+				}
+				circle.setTranslateX(circle.getTranslateX() + deltaX);
+				circle.setTranslateY(circle.getTranslateY() + deltaY);
 
 				final var w = networkView.findNodeIfHit(a.getScreenX(), a.getScreenY());
 				if ((w == null || w == v || w != target.get()) && target.get() != null) {
@@ -180,8 +206,15 @@ public class NodeShapeInteraction {
 			a.consume();
 		});
 
-		shape.setOnMouseReleased(a -> {
+		shapeBelow.setOnMouseReleased(a -> {
+			System.err.println("Released");
 			selectOnlyService.cancel();
+
+			if (Main.isDesktop() && !moved.get() && !a.isShiftDown()) {
+				nodeSelection.clearSelection();
+				edgeSelection.clearSelection();
+				nodeSelection.select(v);
+			}
 
 			if (currentTool.get() == InteractionMode.Move) {
 				if (moved.get()) {
@@ -191,11 +224,9 @@ public class NodeShapeInteraction {
 							nodeSelection.getSelectedItems(), oldControlPointLocations, newControlPointLocations));
 				}
 			} else if (currentTool.get() == InteractionMode.CreateNewEdges) {
-				networkView.getWorld().getChildren().remove(line);
-				var x = line.getEndX();
-				var y = line.getEndY();
-				if (GeometryUtilsFX.distance(line.getStartX(), line.getStartY(), x, y) >= 5) {
-					var w = networkView.findNodeIfHit(x, y, 8);
+
+				if (GeometryUtilsFX.distance(shape.getTranslateX(), shape.getTranslateY(), circle.getTranslateX(), circle.getTranslateY()) >= 5) {
+					var w = networkView.findNodeIfHit(a.getScreenX(), a.getScreenY());
 					if (w == null && target.get() != null)
 						w = target.get();
 
@@ -210,39 +241,30 @@ public class NodeShapeInteraction {
 						}
 					}
 					if (isDag) {
-						undoManager.doAndAdd(new NewEdgeAndNodeCommand(pane, networkView, nodeSelection, v, w, x, y));
+						undoManager.doAndAdd(new NewEdgeAndNodeCommand(pane, networkView, nodeSelection, v, w, circle.getTranslateX(), circle.getTranslateY()));
 					}
 				}
-				shape.setCursor(Cursor.CROSSHAIR);
 			}
+			networkView.getWorld().getChildren().remove(line);
+			networkView.getWorld().getChildren().remove(circle);
 			moved.set(false);
 			target.set(null);
 			a.consume();
-		});
-
-		shape.setOnMouseEntered(a -> {
-			shape.setScaleX(2);
-			shape.setScaleY(2);
-		});
-
-		shape.setOnMouseExited(a -> {
-			shape.setScaleX(1);
-			shape.setScaleY(1);
 		});
 	}
 
 	public static class SelectOnlyService extends Service<Boolean> {
 		private SelectionModel<Node> nodeSelectionModel;
 		private SelectionModel<Edge> edgeSelectionModel;
-		private Node node;
+		private Node v;
 
 		public SelectOnlyService() {
 		}
 
-		public void restart(SelectionModel<Node> nodeSelectionModel, SelectionModel<Edge> edgeSelectionModel, Node node) {
+		public void restart(SelectionModel<Node> nodeSelectionModel, SelectionModel<Edge> edgeSelectionModel, Node v) {
 			this.nodeSelectionModel = nodeSelectionModel;
 			this.edgeSelectionModel = edgeSelectionModel;
-			this.node = node;
+			this.v = v;
 			restart();
 		}
 
@@ -254,11 +276,19 @@ public class NodeShapeInteraction {
 					Thread.sleep(1000);
 					nodeSelectionModel.clearSelection();
 					edgeSelectionModel.clearSelection();
-					nodeSelectionModel.select(node);
+					nodeSelectionModel.select(v);
 					return true;
 				}
 			};
 		}
 	}
 
+	public static void consumeAllScrollAndTouchEvents(javafx.scene.Node node) {
+		node.addEventFilter(InputEvent.ANY, a -> {
+			var name = a.getEventType().getName();
+			if ((name.startsWith("SCROLL")) || name.startsWith("TOUCH")) {
+				a.consume();
+			}
+		});
+	}
 }
