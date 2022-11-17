@@ -109,7 +109,8 @@
                 </ToolBar>
                 <HBox alignment="CENTER">
                     <children>
-                        <TextField fx:id="textField" alignment="CENTER" editable="false" HBox.hgrow="ALWAYS">
+                        <javafx.scene.control.TextField fx:id="textField" alignment="CENTER" editable="false"
+                                                        HBox.hgrow="ALWAYS">
                             <font>
                                 <Font size="14.0"/>
                             </font>
@@ -119,7 +120,7 @@
                             <padding>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </padding>
-                        </TextField>
+                        </javafx.scene.control.TextField>
                         <ToggleButton fx:id="showNewickToggleButton" mnemonicParsing="false" text="Newick"/>
                     </children>
                 </HBox>
