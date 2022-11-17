@@ -223,11 +223,45 @@ public class EdgeView {
 		return new double[]{curve.getControlX1(), curve.getControlY1(), curve.getControlX2(), curve.getControlY2()};
 	}
 
+	public double[] getControlCoordinatesNormalized() {
+		return computeNormalizedControlCoordinates(getControlCoordinates());
+	}
+
 	public void setControlCoordinates(double[] coordinates) {
 		curve.setControlX1(coordinates[0]);
 		curve.setControlY1(coordinates[1]);
 		curve.setControlX2(coordinates[2]);
 		curve.setControlY2(coordinates[3]);
+	}
+
+	public void setControlCoordinatesFromNormalized(double[] normalized) {
+		var coordinates = new double[4];
+		coordinates[0] = curve.getStartX() + (curve.getEndX() - curve.getStartX()) * normalized[0];
+		coordinates[2] = curve.getStartX() + (curve.getEndX() - curve.getStartX()) * normalized[2];
+		coordinates[1] = curve.getStartY() + (curve.getEndY() - curve.getStartY()) * normalized[1];
+		coordinates[3] = curve.getStartY() + (curve.getEndY() - curve.getStartY()) * normalized[3];
+		setControlCoordinates(coordinates);
+	}
+
+	public double[] computeNormalizedControlCoordinates(double[] coordinates) {
+		var normalized = new double[4];
+		var xDiff = curve.getEndX() - curve.getStartX();
+		if (Math.abs(xDiff) > 0.0001) {
+			normalized[0] = (coordinates[0] - curve.getStartX()) / xDiff;
+			normalized[2] = (coordinates[2] - curve.getStartX()) / xDiff;
+		} else {
+			normalized[0] = 0.5;
+			normalized[2] = 0.5;
+		}
+		var yDiff = curve.getEndY() - curve.getStartY();
+		if (Math.abs(yDiff) > 0.0001) {
+			normalized[1] = (coordinates[1] - curve.getStartY()) / yDiff;
+			normalized[3] = (coordinates[3] - curve.getStartY()) / yDiff;
+		} else {
+			normalized[1] = 0.5;
+			normalized[3] = 0.5;
+		}
+		return normalized;
 	}
 
 	public CubicCurve curveBelow() {

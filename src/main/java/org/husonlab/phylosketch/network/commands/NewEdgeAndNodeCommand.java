@@ -20,8 +20,9 @@
 
 package org.husonlab.phylosketch.network.commands;
 
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.scene.layout.Pane;
+import javafx.util.Duration;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
@@ -30,6 +31,7 @@ import org.husonlab.phylosketch.network.NetworkPresenter;
 import org.husonlab.phylosketch.network.NetworkView;
 
 public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
+	private boolean firstTime = true;
 	final private Runnable undo;
 	final private Runnable redo;
 
@@ -39,27 +41,40 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 	/**
 	 * construct
 	 */
-	public NewEdgeAndNodeCommand(Pane pane, NetworkView networkView, SelectionModel<Node> nodeSelection, Node a, final Node b, double translateX, double translateY) {
+	public NewEdgeAndNodeCommand(NetworkView networkView, SelectionModel<Node> nodeSelection, Node a, final Node b, double translateX, double translateY) {
 		super("Add Edge");
 		final var tree = networkView.getTree();
+
 
 		final int aId = a.getId();
 		final int bId = (b != null ? b.getId() : 0);
 
 		undo = () -> {
-			if (edgeId > 0) {
+			if (wId > 0) {
+				final var v = tree.findNodeById(aId);
+				var w = tree.findNodeById(wId);
+				var translateTransition = new TranslateTransition(Duration.millis(100), networkView.getView(w).shape());
+				translateTransition.setToX(networkView.getView(v).shape().getTranslateX());
+				translateTransition.setToY(networkView.getView(v).shape().getTranslateY());
+				translateTransition.setOnFinished(z -> {
+					if (edgeId > 0) {
+						var e = tree.findEdgeById(edgeId);
+						networkView.removeView(e);
+						tree.deleteEdge(e);
+					}
+					networkView.removeView(w);
+					tree.deleteNode(w);
+				});
+				translateTransition.play();
+			} else if (edgeId > 0) {
 				var e = tree.findEdgeById(edgeId);
 				networkView.removeView(e);
 				tree.deleteEdge(e);
 			}
-			if (wId > 0) {
-				var w = tree.findNodeById(wId);
-				networkView.removeView(w);
-				tree.deleteNode(w);
-			}
 		};
 
 		redo = () -> {
+			final var v = tree.findNodeById(aId);
 			Node w;
 			if (bId == 0) {
 				if (wId == 0) {
@@ -67,11 +82,19 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 					wId = w.getId();
 				} else
 					w = tree.newNode(null, wId);
-				networkView.createShapeAndLabel(w, translateX, translateY, "", 10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get());
+				if (firstTime) {
+					networkView.createShapeAndLabel(w, translateX, translateY, "", 10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get());
+					firstTime = false;
+				} else {
+					networkView.createShapeAndLabel(w, networkView.getView(v).shape().getTranslateX(), networkView.getView(v).shape().getTranslateY(), "", 10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get());
+					var translateTransition = new TranslateTransition(Duration.millis(100), networkView.getView(w).shape());
+					translateTransition.setToX(translateX);
+					translateTransition.setToY(translateY);
+					translateTransition.play();
+				}
 			} else
 				w = tree.findNodeById(bId);
 
-			final var v = tree.findNodeById(aId);
 			if (v.getCommonEdge(w) == null && v != w) {
 				Edge e;
 				if (edgeId == 0) {

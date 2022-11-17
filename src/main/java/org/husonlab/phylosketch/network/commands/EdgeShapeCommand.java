@@ -20,7 +20,6 @@
 package org.husonlab.phylosketch.network.commands;
 
 import javafx.geometry.Point2D;
-import javafx.scene.shape.CubicCurve;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
 import jloda.util.Pair;
@@ -39,25 +38,28 @@ public class EdgeShapeCommand extends UndoableRedoableCommand {
 		final var id = edgeAndControlId.getFirst().getId();
 		final var controlId = edgeAndControlId.getSecond();
 
+		var ev = networkView.getView(networkView.getTree().findEdgeById(id));
+		var oldCoordinates = ev.getControlCoordinates();
+		var newCoordinates = ev.getControlCoordinates();
+		if (controlId == 1) {
+			oldCoordinates[0] -= delta.getX();
+			oldCoordinates[1] -= delta.getY();
+			newCoordinates[0] += delta.getX();
+			newCoordinates[1] += delta.getY();
+		} else {
+			oldCoordinates[2] -= delta.getX();
+			oldCoordinates[3] -= delta.getY();
+			newCoordinates[2] += delta.getX();
+			newCoordinates[3] += delta.getY();
+		}
+		var oldNormalized = ev.computeNormalizedControlCoordinates(oldCoordinates);
+		var newNormalized = ev.computeNormalizedControlCoordinates(newCoordinates);
+
 		undo = () -> {
-			final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).curve();
-			if (controlId == 1) {
-				curve.setControlX1(curve.getControlX1() - delta.getX());
-				curve.setControlY1(curve.getControlY1() - delta.getY());
-			} else {
-				curve.setControlX2(curve.getControlX2() - delta.getX());
-				curve.setControlY2(curve.getControlY2() - delta.getY());
-			}
+			networkView.getView(networkView.getTree().findEdgeById(id)).setControlCoordinatesFromNormalized(oldNormalized);
 		};
 		redo = () -> {
-			final CubicCurve curve = networkView.getView(networkView.getTree().findEdgeById(id)).curve();
-			if (controlId == 1) {
-				curve.setControlX1(curve.getControlX1() + delta.getX());
-				curve.setControlY1(curve.getControlY1() + delta.getY());
-			} else {
-				curve.setControlX2(curve.getControlX2() + delta.getX());
-				curve.setControlY2(curve.getControlY2() + delta.getY());
-			}
+			networkView.getView(networkView.getTree().findEdgeById(id)).setControlCoordinatesFromNormalized(newNormalized);
 		};
 	}
 

@@ -99,8 +99,6 @@ public class NodeShapeInteraction {
 		final var moved = new Single<>(false);
 
 		shapeBelow.setOnMousePressed(a -> {
-			System.err.println("Pressed");
-
 			if (Main.isDesktop() && a.isShiftDown()) {
 				nodeSelection.toggleSelection(v);
 			} else
@@ -141,8 +139,6 @@ public class NodeShapeInteraction {
 		});
 
 		shapeBelow.setOnMouseDragged(a -> {
-			System.err.println("Dragged");
-
 			shape.setScaleX(1);
 			shape.setScaleY(1);
 
@@ -165,18 +161,18 @@ public class NodeShapeInteraction {
 							var edgeView = networkView.getView(e);
 
 							if (!oldControlPointLocations.containsKey(e.getId())) {
-								oldControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
+								oldControlPointLocations.put(e.getId(), edgeView.getControlCoordinatesNormalized());
 							}
 							edgeView.startMoved(deltaX, deltaY);
-							newControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
+							newControlPointLocations.put(e.getId(), edgeView.getControlCoordinatesNormalized());
 						}
 						for (var e : u.inEdges()) {
 							var edgeView = networkView.getView(e);
 							if (!oldControlPointLocations.containsKey(e.getId())) {
-								oldControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
+								oldControlPointLocations.put(e.getId(), edgeView.getControlCoordinatesNormalized());
 							}
 							edgeView.endMoved(deltaX, deltaY);
-							newControlPointLocations.put(e.getId(), edgeView.getControlCoordinates());
+							newControlPointLocations.put(e.getId(), edgeView.getControlCoordinatesNormalized());
 						}
 					}
 					uShape.setTranslateX(uShape.getTranslateX() + deltaX);
@@ -207,7 +203,6 @@ public class NodeShapeInteraction {
 		});
 
 		shapeBelow.setOnMouseReleased(a -> {
-			System.err.println("Released");
 			selectOnlyService.cancel();
 
 			if (Main.isDesktop() && !moved.get() && !a.isShiftDown()) {
@@ -241,7 +236,7 @@ public class NodeShapeInteraction {
 						}
 					}
 					if (isDag) {
-						undoManager.doAndAdd(new NewEdgeAndNodeCommand(pane, networkView, nodeSelection, v, w, circle.getTranslateX(), circle.getTranslateY()));
+						undoManager.doAndAdd(new NewEdgeAndNodeCommand(networkView, nodeSelection, v, w, circle.getTranslateX(), circle.getTranslateY()));
 					}
 				}
 			}

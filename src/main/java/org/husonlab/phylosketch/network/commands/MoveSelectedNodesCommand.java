@@ -57,12 +57,12 @@ public class MoveSelectedNodesCommand extends UndoableRedoableCommand {
 
 		undo = () -> {
 			nodeData.forEach(id -> networkView.moveNode(tree.findNodeById(id), -dx, -dy));
-			edgeData.forEach(id -> networkView.getView(tree.findEdgeById(id)).setControlCoordinates(oldEdgeControlCoordinates.get(id)));
+			edgeData.forEach(id -> networkView.getView(tree.findEdgeById(id)).setControlCoordinatesFromNormalized(oldEdgeControlCoordinates.get(id)));
 		};
 
 		redo = () -> {
 			nodeData.forEach(id -> networkView.moveNode(tree.findNodeById(id), dx, dy));
-			edgeData.forEach(id -> networkView.getView(tree.findEdgeById(id)).setControlCoordinates(newEdgeControlCoordinates.get(id)));
+			edgeData.forEach(id -> networkView.getView(tree.findEdgeById(id)).setControlCoordinatesFromNormalized(newEdgeControlCoordinates.get(id)));
 		};
 	}
 
