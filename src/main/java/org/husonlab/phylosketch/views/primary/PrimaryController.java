@@ -23,6 +23,7 @@ package org.husonlab.phylosketch.views.primary;
 import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
@@ -33,39 +34,28 @@ import java.util.Objects;
 public class PrimaryController {
 
 	@FXML
-	private View primary;
-
-	@FXML
 	private AnchorPane anchorPane;
 
 	@FXML
-	private Label modeLabel;
+	private RadioMenuItem arrowBothRadioMenuItem;
 
 	@FXML
-	private ToggleButton showNewickToggleButton;
+	private RadioMenuItem arrowLeftRadioMenuItem;
 
 	@FXML
-	private TextField textField;
+	private Menu arrowMenu;
 
 	@FXML
-	private Button redoButton;
+	private RadioMenuItem arrowNoneRadioMenuItem;
 
 	@FXML
-	private Button undoButton;
+	private RadioMenuItem arrowRightRadioMenuItem;
 
 	@FXML
-	private ScrollPane scrollPane;
+	private ColorPicker borderColorPicker;
 
 	@FXML
-	private StackPane stackPane;
-
-	@FXML
-	private Button resetButton;
-
-	@FXML
-	private MenuButton menuButton;
-
-	private final ToggleGroup toggles = new ToggleGroup();
+	private Menu edgeShapeMenu;
 
 	@FXML
 	private RadioMenuItem editLabelMenuItem;
@@ -77,10 +67,70 @@ public class PrimaryController {
 	private RadioMenuItem eraseMenuItem;
 
 	@FXML
+	private ColorPicker fontColorPicker;
+
+	@FXML
+	private MenuItem fontMenuItem;
+
+	@FXML
+	private Label modeLabel;
+
+	@FXML
+	private MenuButton modeMenuButton;
+
+	@FXML
 	private RadioMenuItem moveMenuItem;
 
 	@FXML
 	private RadioMenuItem panMenuItem;
+
+	@FXML
+	private View primary;
+
+	@FXML
+	private RadioMenuItem rectangularEdgesRadioMenuItem;
+
+	@FXML
+	private Button redoButton;
+
+	@FXML
+	private Button resetButton;
+
+	@FXML
+	private RadioMenuItem roundEdgesRadioMenuItem;
+
+	@FXML
+	private ScrollPane scrollPane;
+
+	@FXML
+	private ToggleButton showNewickToggleButton;
+
+	@FXML
+	private Slider sizeSlider;
+
+	@FXML
+	private StackPane stackPane;
+
+	@FXML
+	private RadioMenuItem straightEdgesRadioMenuItem;
+
+	@FXML
+	private MenuButton styleMenuButton;
+
+	@FXML
+	private TextField textField;
+
+	@FXML
+	private Button undoButton;
+
+	@FXML
+	private Slider widthSlider;
+
+
+	private final ToggleGroup modeToggleGroup = new ToggleGroup();
+	private final ToggleGroup edgeShapeToggleGroup = new ToggleGroup();
+	private final ToggleGroup arrowTypeToggleGroup = new ToggleGroup();
+
 
 	@FXML
 	private void initialize() {
@@ -101,15 +151,30 @@ public class PrimaryController {
 			stackPane.setMinSize(n.getWidth(), n.getHeight());
 		});
 
-		for (var item : menuButton.getItems()) {
+		for (var item : modeMenuButton.getItems()) {
 			if (item instanceof RadioMenuItem radioMenuItem) {
-				toggles.getToggles().add(radioMenuItem);
+				modeToggleGroup.getToggles().add(radioMenuItem);
 			}
 		}
-		toggles.selectedToggleProperty().addListener((v, o, n) -> {
 
+		edgeShapeToggleGroup.getToggles().addAll(straightEdgesRadioMenuItem, rectangularEdgesRadioMenuItem, roundEdgesRadioMenuItem);
+
+		arrowTypeToggleGroup.getToggles().addAll(arrowNoneRadioMenuItem, arrowRightRadioMenuItem, arrowLeftRadioMenuItem, arrowBothRadioMenuItem);
+
+		// don't allow size 0
+		widthSlider.valueChangingProperty().addListener((v, o, n) -> {
+			if (!n && widthSlider.getValue() == 0)
+				Platform.runLater(() -> widthSlider.setValue(1));
 		});
+
+		// don't allow size 0
+		sizeSlider.valueChangingProperty().addListener((v, o, n) -> {
+			if (!n && sizeSlider.getValue() == 0)
+				Platform.runLater(() -> sizeSlider.setValue(1));
+		});
+
 	}
+
 
 	public View getPrimary() {
 		return primary;
@@ -140,12 +205,12 @@ public class PrimaryController {
 		return modeLabel;
 	}
 
-	public MenuButton getMenuButton() {
-		return menuButton;
+	public MenuButton getModeMenuButton() {
+		return modeMenuButton;
 	}
 
-	public ToggleGroup getToggles() {
-		return toggles;
+	public ToggleGroup getModeToggleGroup() {
+		return modeToggleGroup;
 	}
 
 	public RadioMenuItem getEditLabelMenuItem() {
@@ -174,5 +239,77 @@ public class PrimaryController {
 
 	public TextField getTextField() {
 		return textField;
+	}
+
+	public AnchorPane getAnchorPane() {
+		return anchorPane;
+	}
+
+	public ToggleGroup getEdgeShapeToggleGroup() {
+		return edgeShapeToggleGroup;
+	}
+
+	public MenuButton getStyleMenuButton() {
+		return styleMenuButton;
+	}
+
+	public RadioMenuItem getRectangularEdgesRadioMenuItem() {
+		return rectangularEdgesRadioMenuItem;
+	}
+
+	public RadioMenuItem getRoundEdgesRadioMenuItem() {
+		return roundEdgesRadioMenuItem;
+	}
+
+	public RadioMenuItem getStraightEdgesRadioMenuItem() {
+		return straightEdgesRadioMenuItem;
+	}
+
+	public RadioMenuItem getArrowNoneRadioMenuItem() {
+		return arrowNoneRadioMenuItem;
+	}
+
+	public RadioMenuItem getArrowRightRadioMenuItem() {
+		return arrowRightRadioMenuItem;
+	}
+
+	public RadioMenuItem getArrowLeftRadioMenuItem() {
+		return arrowLeftRadioMenuItem;
+	}
+
+	public RadioMenuItem getArrowBothRadioMenuItem() {
+		return arrowBothRadioMenuItem;
+	}
+
+	public ToggleGroup getArrowTypeToggleGroup() {
+		return arrowTypeToggleGroup;
+	}
+
+	public Menu getArrowMenu() {
+		return arrowMenu;
+	}
+
+	public ColorPicker getBorderColorPicker() {
+		return borderColorPicker;
+	}
+
+	public Menu getEdgeShapeMenu() {
+		return edgeShapeMenu;
+	}
+
+	public ColorPicker getFontColorPicker() {
+		return fontColorPicker;
+	}
+
+	public MenuItem getFontMenuItem() {
+		return fontMenuItem;
+	}
+
+	public Slider getSizeSlider() {
+		return sizeSlider;
+	}
+
+	public Slider getWidthSlider() {
+		return widthSlider;
 	}
 }

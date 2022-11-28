@@ -45,7 +45,6 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 		super("Add Edge");
 		final var tree = networkView.getTree();
 
-
 		final int aId = a.getId();
 		final int bId = (b != null ? b.getId() : 0);
 

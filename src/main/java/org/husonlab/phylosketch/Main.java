@@ -36,6 +36,7 @@ import static com.gluonhq.charm.glisten.application.AppManager.HOME_VIEW;
 public class Main extends Application {
 	public static final String PRIMARY_VIEW = HOME_VIEW;
 	public static final String SECONDARY_VIEW = "Configuration View";
+	public static final Swatch SWATCH = Swatch.TEAL;
 
 	private final AppManager appManager = AppManager.initialize(this::postInit);
 
@@ -60,7 +61,7 @@ public class Main extends Application {
 	}
 
 	private void postInit(Scene scene) {
-		Swatch.TEAL.assignTo(scene);
+		SWATCH.assignTo(scene);
 
 		var stylesURL = Main.class.getResource("styles.css");
 		assert stylesURL != null;

@@ -31,7 +31,6 @@ import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
 import jloda.fx.shapes.SquareShape;
-import jloda.fx.util.SelectionEffect;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.graph.NodeArray;
@@ -39,6 +38,7 @@ import org.husonlab.phylosketch.network.interaction.EdgeShapeInteraction;
 import org.husonlab.phylosketch.network.interaction.LabelEditingManager;
 import org.husonlab.phylosketch.network.interaction.NodeLabelInteraction;
 import org.husonlab.phylosketch.network.interaction.NodeShapeInteraction;
+import org.husonlab.phylosketch.utils.SelectionEffect;
 import org.husonlab.phylosketch.views.primary.InteractionMode;
 
 

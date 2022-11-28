@@ -20,6 +20,7 @@
 
 package org.husonlab.phylosketch.network;
 
+import javafx.collections.ListChangeListener;
 import jloda.fx.graph.GraphFX;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.selection.SetSelectionModel;
@@ -46,6 +47,20 @@ public class Document {
 		networkView = new NetworkView(this);
 		graphFX = new GraphFX<>(model.getTree());
 
+		graphFX.getNodeList().addListener((ListChangeListener<Node>) a -> {
+			while (a.next()) {
+				if (a.wasRemoved()) {
+					nodeSelection.clearSelection(a.getRemoved());
+				}
+			}
+		});
+		graphFX.getEdgeList().addListener((ListChangeListener<Edge>) a -> {
+			while (a.next()) {
+				if (a.wasRemoved()) {
+					edgeSelection.clearSelection(a.getRemoved());
+				}
+			}
+		});
 	}
 
 	public SelectionModel<Node> getNodeSelection() {

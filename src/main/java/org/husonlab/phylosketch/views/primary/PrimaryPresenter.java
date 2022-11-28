@@ -24,7 +24,6 @@ import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Cursor;
@@ -32,13 +31,24 @@ import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.InputEvent;
 import javafx.util.Duration;
+import jloda.fx.selection.rubberband.RubberBandSelection;
+import jloda.fx.selection.rubberband.RubberBandSelectionHandler;
 import jloda.phylo.algorithms.RootedNetworkProperties;
 import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
 
 public class PrimaryPresenter {
+	public enum EdgeShape {Straight, Rectangular, Round}
 
-	private final ObjectProperty<InteractionMode> interactionMode = new SimpleObjectProperty<>(this, "tool", InteractionMode.Pan);
+	public enum ArrowType {ArrowNone, ArrowRight, ArrowLeft, ArrowBoth}
+
+	private final ObjectProperty<InteractionMode> interactionMode = new SimpleObjectProperty<>(this, "interactionMode", InteractionMode.Pan);
+
+	private final ObjectProperty<EdgeShape> edgeShape = new SimpleObjectProperty<>(this, "edgeShape");
+
+	private final ObjectProperty<ArrowType> arrowType = new SimpleObjectProperty<>(this, "ArrowType");
+
+	private final RubberBandSelection rubberBandSelection;
 
 	public PrimaryPresenter(Document document, PrimaryView view, PrimaryController controller) {
 
@@ -52,6 +62,10 @@ public class PrimaryPresenter {
 				}
 			});
 		}
+
+		var selectionHandler = RubberBandSelectionHandler.create(document.getModel().getTree(), document.getNodeSelection(),
+				document.getEdgeSelection(), a -> document.getNetworkView().getView(a).shape());
+		rubberBandSelection = new RubberBandSelection(controller.getStackPane(), controller.getScrollPane(), document.getNetworkView().getWorld(), selectionHandler);
 
 		interactionMode.addListener((v, o, n) -> {
 			controller.getScrollPane().setPannable(n == InteractionMode.Pan);
@@ -73,6 +87,14 @@ public class PrimaryPresenter {
 		});
 
 		controller.getModeLabel().setText("");
+
+		edgeShape.addListener((v, o, n) -> {
+			System.err.println("Using edge shape: " + n);
+		});
+
+		arrowType.addListener((v, o, n) -> {
+			System.err.println("Using arrow type: " + n);
+		});
 
 		controller.getUndoButton().setOnAction(e -> document.getUndoManager().undo());
 		controller.getUndoButton().disableProperty().bind(document.getUndoManager().undoableProperty().not());
@@ -126,11 +148,10 @@ public class PrimaryPresenter {
 				controller.getTextField().setText(heading + RootedNetworkProperties.computeInfoString(tree).replace(", network", ""));
 			}
 		});
-		document.getGraphFX().getNodeList().addListener((InvalidationListener) a -> controller.getShowNewickToggleButton().setSelected(false));
-		document.getGraphFX().getEdgeList().addListener((InvalidationListener) a -> controller.getShowNewickToggleButton().setSelected(false));
+		document.getGraphFX().lastUpdateProperty().addListener(a -> controller.getShowNewickToggleButton().setSelected(false));
 		controller.getShowNewickToggleButton().setSelected(true);
 
-		controller.getToggles().selectedToggleProperty().addListener((v, o, n) -> {
+		controller.getModeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
 			Node graphic = null;
 			if (n instanceof MenuItem menuItem) {
 				if (menuItem == controller.getPanMenuItem()) {
@@ -157,10 +178,37 @@ public class PrimaryPresenter {
 				graphic = MaterialDesignIcon.HELP_OUTLINE.graphic();
 			;
 			graphic.setStyle("-fx-text-fill: white;");
-			controller.getMenuButton().setGraphic(graphic);
+			controller.getModeMenuButton().setGraphic(graphic);
 		});
 		controller.getPanMenuItem().setSelected(true);
+
+		controller.getEdgeShapeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
+			if (n == controller.getRectangularEdgesRadioMenuItem())
+				edgeShape.set(EdgeShape.Rectangular);
+			else if (n == controller.getRoundEdgesRadioMenuItem())
+				edgeShape.set(EdgeShape.Round);
+			else
+				edgeShape.set(EdgeShape.Straight);
+		});
+		controller.getEdgeShapeToggleGroup().selectToggle(controller.getStraightEdgesRadioMenuItem());
+
+		controller.getArrowTypeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
+			if (n == controller.getArrowRightRadioMenuItem())
+				arrowType.set(ArrowType.ArrowRight);
+			else if (n == controller.getArrowLeftRadioMenuItem())
+				arrowType.set(ArrowType.ArrowLeft);
+			else if (n == controller.getArrowBothRadioMenuItem())
+				arrowType.set(ArrowType.ArrowBoth);
+			else
+				arrowType.set(ArrowType.ArrowNone);
+
+		});
+		controller.getArrowTypeToggleGroup().selectToggle(controller.getArrowNoneRadioMenuItem());
+
+		controller.getWidthSlider().setValue(1);
+		controller.getSizeSlider().setValue(2);
 	}
+
 
 	public ObjectProperty<InteractionMode> interactionModeProperty() {
 		return interactionMode;

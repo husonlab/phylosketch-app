@@ -34,12 +34,12 @@ import jloda.fx.undo.UndoManager;
 import jloda.fx.util.GeometryUtilsFX;
 import jloda.graph.Edge;
 import jloda.graph.Node;
+import jloda.graph.algorithms.IsDAG;
 import jloda.util.Single;
 import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.NetworkView;
 import org.husonlab.phylosketch.network.commands.MoveSelectedNodesCommand;
 import org.husonlab.phylosketch.network.commands.NewEdgeAndNodeCommand;
-import org.husonlab.phylosketch.utils.GraphUtils;
 import org.husonlab.phylosketch.views.primary.InteractionMode;
 
 import java.util.HashMap;
@@ -230,7 +230,7 @@ public class NodeShapeInteraction {
 						var tree = networkView.getTree();
 						var e = tree.newEdge(v, w);
 						try {
-							isDag = GraphUtils.isDAG(tree);
+							isDag = IsDAG.apply(tree);
 						} finally {
 							tree.deleteEdge(e);
 						}
