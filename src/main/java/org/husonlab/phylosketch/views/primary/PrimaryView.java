@@ -21,7 +21,6 @@
 package org.husonlab.phylosketch.views.primary;
 
 import com.gluonhq.charm.glisten.mvc.View;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkPresenter;
@@ -41,7 +40,6 @@ public class PrimaryView {
 		try (var ins = Objects.requireNonNull(PrimaryController.class.getResource("primary.fxml")).openStream()) {
 			fxmlLoader.load(ins);
 		} catch (IOException ex) {
-			System.err.println(ex);
 			throw new RuntimeException(ex);
 		}
 		controller = fxmlLoader.getController();
@@ -50,18 +48,7 @@ public class PrimaryView {
 
 		NetworkPresenter.setupView(controller.getStackPane(), document, getPresenter().interactionModeProperty());
 
-		if (true) {
-			Platform.runLater(() -> {
-				try {
-					var model = document.getModel();
-					model.getTree().parseBracketNotation("((a,b),(c,(d,e)));", true);
-					model.computeEmbedding(true, 200, 200);
-					NetworkPresenter.model2view(model, document.getNetworkView());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
-		}
+			document.setNewickString("((a,b),(c,d));");
 	}
 
 	public PrimaryController getController() {

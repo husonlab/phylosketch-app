@@ -77,6 +77,13 @@ public class LabelEditingManager {
 		editor = new LabelEditor(this);
 
 		DraggableUtils.setupDragMouseLayout(editor.getRoot());
+
+		networkView.fontScaleProperty().addListener((v, o, n) -> {
+			var fontSize = 12 * n.doubleValue();
+			if (fontSize >= 12 && fontSize <= 40)
+				editor.getTextField().setStyle("-fx-font-size: %.1f;".formatted(fontSize));
+		});
+
 	}
 
 	public void startEditing(Node v) {
@@ -155,7 +162,7 @@ public class LabelEditingManager {
 	}
 
 	private void saveCurrent() {
-		if (currentNode != null) {
+		if (currentNode != null && currentNode.getOwner() != null) {
 			var newText = editor.getController().getTextField().getText();
 			if (!newText.equals(originalText)) {
 				undoManager.doAndAdd(new NodeLabelCommand(currentNode, networkView, originalText, newText));

@@ -147,6 +147,7 @@
                         <list>javafx.scene.control.TextArea</list>
                         <list>javafx.scene.control.ScrollPane</list>
                         <list>javafx.scene.control.Separator</list>
+                        <list>javafx.scene.control.Menu</list>
                         <list>javafx.scene.control.MenuItem</list>
                         <list>javafx.scene.control.MenuButton</list>
                         <list>javafx.scene.control.RadioMenuItem</list>

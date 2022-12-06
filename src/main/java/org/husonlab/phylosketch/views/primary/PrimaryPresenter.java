@@ -24,19 +24,22 @@ import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.*;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.InputEvent;
 import javafx.util.Duration;
-import jloda.fx.selection.rubberband.RubberBandSelection;
-import jloda.fx.selection.rubberband.RubberBandSelectionHandler;
-import jloda.phylo.algorithms.RootedNetworkProperties;
+import jloda.phylo.PhyloTree;
 import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
+import org.husonlab.phylosketch.network.commands.ReplaceNetworkCommand;
 
+/**
+ * the primary view presenter
+ * Daniel Huson, 10.2022
+ */
 public class PrimaryPresenter {
 	public enum EdgeShape {Straight, Rectangular, Round}
 
@@ -48,7 +51,9 @@ public class PrimaryPresenter {
 
 	private final ObjectProperty<ArrowType> arrowType = new SimpleObjectProperty<>(this, "ArrowType");
 
-	private final RubberBandSelection rubberBandSelection;
+	private final BooleanProperty enableImportButton = new SimpleBooleanProperty(this, "newickIsValid", false);
+
+	private final DoubleProperty textFieldFontSize = new SimpleDoubleProperty(this, "textFieldFontSize", 14);
 
 	public PrimaryPresenter(Document document, PrimaryView view, PrimaryController controller) {
 
@@ -62,10 +67,6 @@ public class PrimaryPresenter {
 				}
 			});
 		}
-
-		var selectionHandler = RubberBandSelectionHandler.create(document.getModel().getTree(), document.getNodeSelection(),
-				document.getEdgeSelection(), a -> document.getNetworkView().getView(a).shape());
-		rubberBandSelection = new RubberBandSelection(controller.getStackPane(), controller.getScrollPane(), document.getNetworkView().getWorld(), selectionHandler);
 
 		interactionMode.addListener((v, o, n) -> {
 			controller.getScrollPane().setPannable(n == InteractionMode.Pan);
@@ -111,16 +112,14 @@ public class PrimaryPresenter {
 				e.consume();
 			});
 		}
-		if (true) {
-			controller.getStackPane().setOnZoom(e -> {
-				var factor = e.getZoomFactor();
-				var box = view.getDocument().getNetworkView().getBoundingBox();
-				if (!(factor < 1 && Math.min(box.getWidth(), box.getHeight()) < 200 || factor > 1 && Math.max(box.getWidth(), box.getHeight()) > 2000)) {
-					view.getDocument().getNetworkView().scale(factor, factor);
-				}
-				e.consume();
-			});
-		}
+		controller.getStackPane().setOnZoom(e -> {
+			var factor = e.getZoomFactor();
+			var box = view.getDocument().getNetworkView().getBoundingBox();
+			if (!(factor < 1 && Math.min(box.getWidth(), box.getHeight()) < 200 || factor > 1 && Math.max(box.getWidth(), box.getHeight()) > 2000)) {
+				view.getDocument().getNetworkView().scale(factor, factor);
+			}
+			e.consume();
+		});
 
 		controller.getResetButton().setOnAction(e -> view.getDocument().getNetworkView().resetScale());
 
@@ -130,26 +129,6 @@ public class PrimaryPresenter {
 				view.getDocument().getEdgeSelection().clearSelection();
 			}
 		});
-
-
-		controller.getShowNewickToggleButton().selectedProperty().addListener((v, o, n) -> {
-			if (n) {
-				controller.getTextField().setText(document.getModel().getTree().toBracketString(false) + ";");
-			} else {
-				var tree = document.getModel().getTree();
-				String heading;
-				if (tree.getNumberOfNodes() > 0 && tree.isConnected()) {
-					if (tree.hasReticulateEdges())
-						heading = "Network: ";
-					else
-						heading = "Tree: ";
-				} else
-					heading = "";
-				controller.getTextField().setText(heading + RootedNetworkProperties.computeInfoString(tree).replace(", network", ""));
-			}
-		});
-		document.getGraphFX().lastUpdateProperty().addListener(a -> controller.getShowNewickToggleButton().setSelected(false));
-		controller.getShowNewickToggleButton().setSelected(true);
 
 		controller.getModeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
 			Node graphic = null;
@@ -207,8 +186,70 @@ public class PrimaryPresenter {
 
 		controller.getWidthSlider().setValue(1);
 		controller.getSizeSlider().setValue(2);
+
+		controller.getInfoTextField().textProperty().bind(document.infoProperty());
+
+		var newickText = controller.getNewickTextField().textProperty();
+		var inputChanged = new SimpleBooleanProperty(this, "inputChanged", false);
+
+		document.getGraphFX().lastUpdateProperty().addListener(a -> {
+			newickText.set(document.getNewickString(false));
+			inputChanged.set(false);
+		});
+		newickText.set(document.getNewickString(false));
+		newickText.addListener(a -> inputChanged.set(true));
+
+		controller.getImportButton().setOnAction(a -> {
+			if (!newickText.get().endsWith(";"))
+				newickText.set(newickText.get() + ";");
+			document.getUndoManager().doAndAdd(new ReplaceNetworkCommand(document, newickText.get()));
+			inputChanged.set(false);
+		});
+		controller.getImportButton().disableProperty().bind((controller.getShowNewickToggleButton().selectedProperty().and(enableImportButton)).not());
+
+		enableImportButton.bind(Bindings.createBooleanBinding(() -> canParse(newickText.get()) && inputChanged.get(), newickText, document.getGraphFX().lastUpdateProperty()));
+
+		controller.getIncreaseFontSizeButton().setOnAction(a -> document.getUndoManager().doAndAdd("font size",
+				() -> {
+					document.getNetworkView().setFontScale(1.0 / 1.2 * document.getNetworkView().getFontScale());
+					textFieldFontSize.set(1.0 / 1.2 * textFieldFontSize.get());
+
+				}, () -> {
+					document.getNetworkView().setFontScale(1.2 * document.getNetworkView().getFontScale());
+					textFieldFontSize.set(1.2 * textFieldFontSize.get());
+
+				}));
+
+		controller.getDecreaseFontSizeButton().setOnAction(a -> document.getUndoManager().doAndAdd("font size",
+				() -> {
+					document.getNetworkView().setFontScale(1.2 * document.getNetworkView().getFontScale());
+					textFieldFontSize.set(1.2 * textFieldFontSize.get());
+
+				}, () -> {
+					document.getNetworkView().setFontScale(1.0 / 1.2 * document.getNetworkView().getFontScale());
+					textFieldFontSize.set(1.0 / 1.2 * textFieldFontSize.get());
+
+				}));
+
+
+		textFieldFontSize.addListener((c, o, n) -> {
+			if (n.doubleValue() >= 10 && n.doubleValue() <= 36)
+				controller.getNewickTextField().setStyle("-fx-font-size: %.1f;".formatted(n.doubleValue()));
+		});
 	}
 
+	private static boolean canParse(String newick) {
+		newick = newick.trim();
+		if (!newick.startsWith("(") && !(newick.endsWith(")") || newick.endsWith(";")))
+			return false;
+		try {
+			var tree = new PhyloTree();
+			tree.parseBracketNotation(newick, true);
+			return tree.getNumberOfNodes() > 0;
+		} catch (Exception ignored) {
+			return false;
+		}
+	}
 
 	public ObjectProperty<InteractionMode> interactionModeProperty() {
 		return interactionMode;

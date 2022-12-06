@@ -118,14 +118,24 @@ public class PrimaryController {
 	private MenuButton styleMenuButton;
 
 	@FXML
-	private TextField textField;
+	private Button importButton;
 
+	@FXML
+	private TextField infoTextField;
+
+	@FXML
+	private TextField newickTextField;
 	@FXML
 	private Button undoButton;
 
 	@FXML
 	private Slider widthSlider;
 
+	@FXML
+	private Button increaseFontSizeButton;
+
+	@FXML
+	private Button decreaseFontSizeButton;
 
 	private final ToggleGroup modeToggleGroup = new ToggleGroup();
 	private final ToggleGroup edgeShapeToggleGroup = new ToggleGroup();
@@ -173,6 +183,19 @@ public class PrimaryController {
 				Platform.runLater(() -> sizeSlider.setValue(1));
 		});
 
+		//infoTextField.setStyle("-fx-text-fill: white; -fx-background-color: -primary-swatch-500;");
+
+
+		showNewickToggleButton.setSelected(false);
+		newickTextField.setPrefHeight(0);
+		newickTextField.setVisible(false);
+
+		showNewickToggleButton.selectedProperty().addListener((v, o, n) -> {
+			newickTextField.setPrefHeight(n ? 40 : 0);
+			newickTextField.setVisible(n);
+			importButton.setVisible(n);
+		});
+		importButton.setVisible(false);
 	}
 
 
@@ -237,8 +260,8 @@ public class PrimaryController {
 		return showNewickToggleButton;
 	}
 
-	public TextField getTextField() {
-		return textField;
+	public TextField getNewickTextField() {
+		return newickTextField;
 	}
 
 	public AnchorPane getAnchorPane() {
@@ -311,5 +334,21 @@ public class PrimaryController {
 
 	public Slider getWidthSlider() {
 		return widthSlider;
+	}
+
+	public Button getImportButton() {
+		return importButton;
+	}
+
+	public TextField getInfoTextField() {
+		return infoTextField;
+	}
+
+	public Button getIncreaseFontSizeButton() {
+		return increaseFontSizeButton;
+	}
+
+	public Button getDecreaseFontSizeButton() {
+		return decreaseFontSizeButton;
 	}
 }

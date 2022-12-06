@@ -20,11 +20,17 @@
 
 package org.husonlab.phylosketch.network;
 
+import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import jloda.graph.*;
 import jloda.phylo.PhyloTree;
+import jloda.util.CanceledException;
 import jloda.util.Counter;
+import jloda.util.progress.ProgressSilent;
+import org.husonlab.phylosketch.algorithms.embedding.EmbeddingOptimizer;
+import org.husonlab.phylosketch.algorithms.embedding.HeightAndAngles;
+import org.husonlab.phylosketch.algorithms.embedding.LayoutTreeRectangular;
 
 /**
  * model of a network with some node and edge attributes
@@ -53,6 +59,36 @@ public class NetworkModel {
 	 */
 	public void computeEmbedding(boolean toScale, double fitWidth, double fitHeight) {
 		clear();
+
+		if (tree.hasReticulateEdges()) {
+			try (NodeArray<Node> nodeCopyNodeMap = tree.newNodeArray()) {
+				var copyTree = new PhyloTree();
+				copyTree.copy(tree, nodeCopyNodeMap, null);
+				try {
+					EmbeddingOptimizer.apply(tree, new ProgressSilent());
+				} catch (CanceledException ignored) {
+				}
+				try (NodeArray<Point2D> copyNodePointMap = LayoutTreeRectangular.apply(copyTree, false, HeightAndAngles.Averaging.LeafAverage);
+					 NodeArray<Point2D> nodePointMap = tree.newNodeArray()) {
+					for (var v : tree.nodes()) {
+						nodePointMap.put(v, copyNodePointMap.get(nodeCopyNodeMap.get(v)));
+					}
+
+					fit(fitWidth, fitHeight, nodePointMap);
+
+					for (var v : tree.nodes()) {
+						var vx = nodePointMap.get(v).getX();
+						var vy = nodePointMap.get(v).getY();
+						var text = tree.getLabel(v);
+						var label = new Label(10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get(), 0, text != null ? text : "");
+						setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, 8, 8, Color.BLACK, Color.WHITE, label));
+					}
+					for (var e : tree.edges()) {
+						edgeAttributesMap.put(e, new EdgeAttributes(EdgeGlyph.StraightLine, 1.0, Color.BLACK, null));
+					}
+				}
+			}
+		}
 		if (!tree.hasReticulateEdges()) {
 			try (var x = tree.newNodeDoubleArray(); var y = tree.newNodeDoubleArray()) {
 				if (toScale) {
@@ -121,6 +157,22 @@ public class NetworkModel {
 				}
 			}
 		});
+	}
+
+	private static void fit(double fitWidth, double fitHeight, NodeArray<Point2D> map) {
+		if (fitWidth > 0) {
+			var min = map.values().stream().mapToDouble(Point2D::getX).min().orElse(0);
+			var max = map.values().stream().mapToDouble(Point2D::getX).max().orElse(0);
+			var diff = max - min > 0 ? max - min : 1.0;
+			map.replaceAll(((key, value) -> new Point2D((value.getX() - min) / diff * fitWidth, value.getY())));
+		}
+		if (fitHeight > 0) {
+			var min = map.values().stream().mapToDouble(Point2D::getY).min().orElse(0);
+			var max = map.values().stream().mapToDouble(Point2D::getY).max().orElse(0);
+			var diff = max - min > 0 ? max - min : 1.0;
+			map.replaceAll(((v, value) -> new Point2D(value.getX(), (value.getY() - min) / diff * fitHeight)));
+		}
+
 	}
 
 	private static void fit(double fitWidth, double fitHeight, NodeDoubleArray x, NodeDoubleArray y) {

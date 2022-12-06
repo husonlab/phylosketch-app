@@ -20,6 +20,8 @@
 
 package org.husonlab.phylosketch.network;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Group;
@@ -41,23 +43,25 @@ import java.util.function.Consumer;
  * Daniel Huson, 10.2022
  */
 public class NetworkView {
-	private final Group edgeBelowWaterGroup = new Group();
-	private final Group nodeBelowWaterGroup = new Group();
-	private final Group labelBelowWaterGroup = new Group();
 	private final Group edgePathGroup = new Group();
 	private final Group nodeShapeGroup = new Group();
 	private final Group edgeLabelGroup = new Group();
 	private final Group nodeLabelGroup = new Group();
 
+	private final Group edgeBelowWaterGroup = new Group();
+	private final Group nodeBelowWaterGroup = new Group();
+	private final Group labelBelowWaterGroup = new Group();
+
 	private final Group world = new Group(edgeBelowWaterGroup, labelBelowWaterGroup, nodeBelowWaterGroup, edgePathGroup, nodeShapeGroup, edgeLabelGroup, nodeLabelGroup);
 
-	private final Document document;
 	private final PhyloTree tree;
 	private final Map<Node, NodeView> nodeViewMap;
 	private final Map<Edge, EdgeView> edgeViewMap;
 
 	private double xScale = 1.0;
 	private double yScale = 1.0;
+
+	private final DoubleProperty fontScale = new SimpleDoubleProperty(1.0);
 
 	private Consumer<Node> nodeViewAddedCallback = a -> {
 	};
@@ -66,11 +70,11 @@ public class NetworkView {
 
 	private Consumer<Edge> edgeViewAddedCallback = a -> {
 	};
+
 	private Consumer<Edge> edgeViewRemoveCallback = a -> {
 	};
 
 	public NetworkView(Document document) {
-		this.document = document;
 		this.tree = document.getModel().getTree();
 
 		nodeViewMap = new HashMap<>();
@@ -122,13 +126,26 @@ public class NetworkView {
 				}
 			}
 		});
+
+		fontScale.addListener((c, o, n) -> {
+			for (var v : document.getModel().getTree().nodes()) {
+				var label = document.getNetworkView().getView(v).label();
+				label.setScale(n.doubleValue());
+			}
+			for (var e : document.getModel().getTree().edges()) {
+				var label = document.getNetworkView().getView(e).label();
+				if (label != null)
+					label.setScale(n.doubleValue());
+			}
+		});
 	}
 
 	public void clear() {
-		for (var v : tree.nodes())
-			removeView(v);
-		for (var e : tree.edges()) {
-			removeView(e);
+		nodeViewMap.clear();
+		edgeViewMap.clear();
+		for (var group : BasicFX.getAllRecursively(world, Group.class)) {
+			for (var node : BasicFX.getAllRecursively(group, n -> !(n instanceof Group)))
+				group.getChildren().remove(node);
 		}
 	}
 
@@ -156,6 +173,14 @@ public class NetworkView {
 			if (nodeView.label() != null)
 				nodeLabelGroup.getChildren().add(nodeView.label());
 			nodeViewMap.put(v, nodeView);
+			if (nodeView.label() != null) {
+				var label = nodeView.label();
+				label.scaleProperty().addListener((a, o, n) -> {
+					var diff = 0.5 * (n.doubleValue() / o.doubleValue() * label.getHeight() - label.getHeight());
+					label.setLayoutY(label.getLayoutY() - diff);
+				});
+				label.setScale(getFontScale());
+			}
 			nodeViewAddedCallback.accept(v);
 		}
 	}
@@ -197,6 +222,8 @@ public class NetworkView {
 			if (edgeView.label() != null)
 				edgeLabelGroup.getChildren().add(edgeView.label());
 			edgeViewMap.put(e, edgeView);
+			if (edgeView.label() != null)
+				edgeView.label().setScale(getFontScale());
 			edgeViewAddedCallback.accept(e);
 		}
 	}
@@ -311,9 +338,20 @@ public class NetworkView {
 		yScale = 1.0;
 	}
 
-
 	public Group getWorld() {
 		return world;
+	}
+
+	public double getFontScale() {
+		return fontScale.get();
+	}
+
+	public DoubleProperty fontScaleProperty() {
+		return fontScale;
+	}
+
+	public void setFontScale(double fontScale) {
+		this.fontScale.set(fontScale);
 	}
 
 	public BoundingBox getBoundingBox() {

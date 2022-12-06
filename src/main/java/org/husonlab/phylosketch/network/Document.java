@@ -20,6 +20,8 @@
 
 package org.husonlab.phylosketch.network;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import jloda.fx.graph.GraphFX;
 import jloda.fx.selection.SelectionModel;
@@ -28,6 +30,9 @@ import jloda.fx.undo.UndoManager;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
+import jloda.phylo.algorithms.RootedNetworkProperties;
+
+import java.io.IOException;
 
 
 public class Document {
@@ -40,6 +45,8 @@ public class Document {
 	private final NetworkView networkView;
 
 	private final GraphFX<PhyloTree> graphFX;
+
+	private final StringProperty info = new SimpleStringProperty(this, "info", "");
 
 
 	public Document() {
@@ -60,6 +67,19 @@ public class Document {
 					edgeSelection.clearSelection(a.getRemoved());
 				}
 			}
+		});
+
+		graphFX.lastUpdateProperty().addListener(e -> {
+			var tree = getModel().getTree();
+			String heading;
+			if (tree.getNumberOfNodes() > 0 && tree.isConnected()) {
+				if (tree.hasReticulateEdges())
+					heading = "Network: ";
+				else
+					heading = "Tree: ";
+			} else
+				heading = "";
+			info.set(heading + RootedNetworkProperties.computeInfoString(tree).replace(", network", ""));
 		});
 	}
 
@@ -85,5 +105,32 @@ public class Document {
 
 	public UndoManager getUndoManager() {
 		return undoManager;
+	}
+
+	public String getInfo() {
+		return info.get();
+	}
+
+	public StringProperty infoProperty() {
+		return info;
+	}
+
+	public boolean setNewickString(String newick) {
+		try {
+			model.getTree().parseBracketNotation(newick, true);
+			updateModelAndView();
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	public void updateModelAndView() {
+		model.computeEmbedding(true, 200, 200);
+		NetworkPresenter.model2view(model, getNetworkView());
+	}
+
+	public String getNewickString(boolean showWeights) {
+		return model.getTree().toBracketString(showWeights) + ";";
 	}
 }

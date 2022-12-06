@@ -50,50 +50,86 @@
         </AnchorPane>
     </center>
     <top>
-        <VBox BorderPane.alignment="CENTER">
+        <AnchorPane BorderPane.alignment="CENTER">
             <children>
-                <ToolBar prefHeight="40.0" prefWidth="200.0">
-                    <items>
-                        <MenuButton fx:id="modeMenuButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false">
+                <VBox layoutX="4.099999904632568" layoutY="1.0" AnchorPane.bottomAnchor="0.0"
+                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <ToolBar prefHeight="40.0" prefWidth="200.0">
                             <items>
-                                <RadioMenuItem fx:id="panMenuItem" mnemonicParsing="false">
-                                    <graphic>
-                                        <Icon content="PAN_TOOL"/>
-                                    </graphic>
-                                </RadioMenuItem>
-                                <RadioMenuItem fx:id="moveMenuItem" mnemonicParsing="false">
-                                    <graphic>
-                                        <Icon content="SWAP_VERT"/>
-                                    </graphic>
-                                </RadioMenuItem>
-                                <RadioMenuItem fx:id="editLabelMenuItem" mnemonicParsing="false">
-                                    <graphic>
-                                        <Icon content="LABEL_OUTLINE"/>
-                                    </graphic>
-                                </RadioMenuItem>
-                                <RadioMenuItem fx:id="editMenuItem" mnemonicParsing="false">
-                                    <graphic>
-                                        <Icon content="EDIT"/>
-                                    </graphic>
-                                </RadioMenuItem>
-                                <RadioMenuItem fx:id="eraseMenuItem" mnemonicParsing="false">
-                                    <graphic>
-                                        <Icon content="BACKSPACE"/>
-                                    </graphic>
-                                </RadioMenuItem>
-                            </items>
-                            <graphic>
-                                <Icon content="HELP_OUTLINE"/>
-                            </graphic>
-                        </MenuButton>
-                        <MenuButton fx:id="styleMenuButton" mnemonicParsing="false">
-                            <graphic>
-                                <Icon content="STYLE"/>
-                            </graphic>
-                            <items>
-                                <Menu fx:id="edgeShapeMenu" mnemonicParsing="false">
+                                <MenuButton fx:id="modeMenuButton" contentDisplay="GRAPHIC_ONLY"
+                                            mnemonicParsing="false">
                                     <items>
-                                        <RadioMenuItem fx:id="straightEdgesRadioMenuItem" mnemonicParsing="false">
+                                        <RadioMenuItem fx:id="panMenuItem" mnemonicParsing="false">
+                                            <graphic>
+                                                <Icon content="PAN_TOOL"/>
+                                            </graphic>
+                                        </RadioMenuItem>
+                                        <RadioMenuItem fx:id="moveMenuItem" mnemonicParsing="false">
+                                            <graphic>
+                                                <Icon content="SWAP_VERT"/>
+                                            </graphic>
+                                        </RadioMenuItem>
+                                        <RadioMenuItem fx:id="editLabelMenuItem" mnemonicParsing="false">
+                                            <graphic>
+                                                <Icon content="LABEL_OUTLINE"/>
+                                            </graphic>
+                                        </RadioMenuItem>
+                                        <RadioMenuItem fx:id="editMenuItem" mnemonicParsing="false">
+                                            <graphic>
+                                                <Icon content="EDIT"/>
+                                            </graphic>
+                                        </RadioMenuItem>
+                                        <RadioMenuItem fx:id="eraseMenuItem" mnemonicParsing="false">
+                                            <graphic>
+                                                <Icon content="BACKSPACE"/>
+                                            </graphic>
+                                        </RadioMenuItem>
+                                    </items>
+                                    <graphic>
+                                        <Icon content="HELP_OUTLINE"/>
+                                    </graphic>
+                                </MenuButton>
+                                <MenuButton fx:id="styleMenuButton" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="STYLE"/>
+                                    </graphic>
+                                    <items>
+                                        <Menu fx:id="edgeShapeMenu" mnemonicParsing="false">
+                                            <items>
+                                                <RadioMenuItem fx:id="straightEdgesRadioMenuItem"
+                                                               mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
+                                                                   preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@/org/husonlab/phylosketch/views/primary/Straight.png"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </RadioMenuItem>
+                                                <RadioMenuItem fx:id="rectangularEdgesRadioMenuItem"
+                                                               mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
+                                                                   preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@/org/husonlab/phylosketch/views/primary/Rectangular.png"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </RadioMenuItem>
+                                                <RadioMenuItem fx:id="roundEdgesRadioMenuItem" mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
+                                                                   preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@/org/husonlab/phylosketch/views/primary/Round.png"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </RadioMenuItem>
+                                            </items>
                                             <graphic>
                                                 <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
                                                            preserveRatio="true">
@@ -102,41 +138,51 @@
                                                     </image>
                                                 </ImageView>
                                             </graphic>
-                                        </RadioMenuItem>
-                                        <RadioMenuItem fx:id="rectangularEdgesRadioMenuItem" mnemonicParsing="false">
-                                            <graphic>
-                                                <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                           preserveRatio="true">
-                                                    <image>
-                                                        <Image url="@/org/husonlab/phylosketch/views/primary/Rectangular.png"/>
-                                                    </image>
-                                                </ImageView>
-                                            </graphic>
-                                        </RadioMenuItem>
-                                        <RadioMenuItem fx:id="roundEdgesRadioMenuItem" mnemonicParsing="false">
-                                            <graphic>
-                                                <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                           preserveRatio="true">
-                                                    <image>
-                                                        <Image url="@/org/husonlab/phylosketch/views/primary/Round.png"/>
-                                                    </image>
-                                                </ImageView>
-                                            </graphic>
-                                        </RadioMenuItem>
-                                    </items>
-                                    <graphic>
-                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                   preserveRatio="true">
-                                            <image>
-                                                <Image url="@/org/husonlab/phylosketch/views/primary/Straight.png"/>
-                                            </image>
-                                        </ImageView>
-                                    </graphic>
 
-                                </Menu>
-                                <Menu fx:id="arrowMenu" mnemonicParsing="false">
-                                    <items>
-                                        <RadioMenuItem fx:id="arrowNoneRadioMenuItem" mnemonicParsing="false">
+                                        </Menu>
+                                        <Menu fx:id="arrowMenu" mnemonicParsing="false">
+                                            <items>
+                                                <RadioMenuItem fx:id="arrowNoneRadioMenuItem" mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
+                                                                   preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@/org/husonlab/phylosketch/views/primary/ArrowNone.png"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </RadioMenuItem>
+                                                <RadioMenuItem fx:id="arrowRightRadioMenuItem" mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
+                                                                   preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@/org/husonlab/phylosketch/views/primary/ArrowRight.png"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </RadioMenuItem>
+                                                <RadioMenuItem fx:id="arrowLeftRadioMenuItem" mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
+                                                                   preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@/org/husonlab/phylosketch/views/primary/ArrowLeft.png"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </RadioMenuItem>
+                                                <RadioMenuItem fx:id="arrowBothRadioMenuItem" mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
+                                                                   preserveRatio="true">
+                                                            <image>
+                                                                <Image url="@/org/husonlab/phylosketch/views/primary/ArrowBoth.png"/>
+                                                            </image>
+                                                        </ImageView>
+                                                    </graphic>
+                                                </RadioMenuItem>
+                                            </items>
                                             <graphic>
                                                 <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
                                                            preserveRatio="true">
@@ -145,148 +191,129 @@
                                                     </image>
                                                 </ImageView>
                                             </graphic>
-                                        </RadioMenuItem>
-                                        <RadioMenuItem fx:id="arrowRightRadioMenuItem" mnemonicParsing="false">
+                                        </Menu>
+                                        <Menu mnemonicParsing="false">
+                                            <items>
+                                                <MenuItem mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ColorPicker fx:id="fontColorPicker"/>
+                                                    </graphic>
+                                                </MenuItem>
+                                            </items>
                                             <graphic>
-                                                <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                           preserveRatio="true">
-                                                    <image>
-                                                        <Image url="@/org/husonlab/phylosketch/views/primary/ArrowRight.png"/>
-                                                    </image>
-                                                </ImageView>
+                                                <Icon content="FORMAT_COLOR_TEXT"/>
                                             </graphic>
-                                        </RadioMenuItem>
-                                        <RadioMenuItem fx:id="arrowLeftRadioMenuItem" mnemonicParsing="false">
+                                        </Menu>
+                                        <Menu mnemonicParsing="false">
+                                            <items>
+                                                <MenuItem mnemonicParsing="false">
+                                                    <graphic>
+                                                        <ColorPicker fx:id="borderColorPicker"/>
+                                                    </graphic>
+                                                </MenuItem>
+                                            </items>
                                             <graphic>
-                                                <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                           preserveRatio="true">
-                                                    <image>
-                                                        <Image url="@/org/husonlab/phylosketch/views/primary/ArrowLeft.png"/>
-                                                    </image>
-                                                </ImageView>
+                                                <Icon content="BORDER_COLOR"/>
                                             </graphic>
-                                        </RadioMenuItem>
-                                        <RadioMenuItem fx:id="arrowBothRadioMenuItem" mnemonicParsing="false">
+                                        </Menu>
+                                        <Menu mnemonicParsing="false">
+                                            <items>
+                                                <MenuItem mnemonicParsing="false">
+                                                    <graphic>
+                                                        <Slider fx:id="widthSlider" majorTickUnit="5.0" max="25.0"
+                                                                minorTickCount="4" showTickLabels="true"
+                                                                showTickMarks="true"/>
+                                                    </graphic>
+                                                </MenuItem>
+                                            </items>
                                             <graphic>
-                                                <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                           preserveRatio="true">
-                                                    <image>
-                                                        <Image url="@/org/husonlab/phylosketch/views/primary/ArrowBoth.png"/>
-                                                    </image>
-                                                </ImageView>
+                                                <Icon content="SHORT_TEXT"/>
                                             </graphic>
-                                        </RadioMenuItem>
+                                        </Menu>
+                                        <Menu mnemonicParsing="false">
+                                            <items>
+                                                <MenuItem mnemonicParsing="false">
+                                                    <graphic>
+                                                        <Slider fx:id="sizeSlider" majorTickUnit="5.0" max="25.0"
+                                                                minorTickCount="4" showTickLabels="true"
+                                                                showTickMarks="true" snapToTicks="true" value="1.0"/>
+                                                    </graphic>
+                                                </MenuItem>
+                                            </items>
+                                            <graphic>
+                                                <Icon content="FILTER_NONE"/>
+                                            </graphic>
+                                        </Menu>
+                                        <Menu mnemonicParsing="false">
+                                            <items>
+                                                <MenuItem fx:id="fontMenuItem" mnemonicParsing="false"/>
+                                            </items>
+                                            <graphic>
+                                                <Icon content="FONT_DOWNLOAD"/>
+                                            </graphic>
+                                        </Menu>
                                     </items>
+                                </MenuButton>
+                                <Button fx:id="undoButton" contentDisplay="GRAPHIC_ONLY" layoutX="150.0" layoutY="10.0"
+                                        mnemonicParsing="false" text="Undo">
                                     <graphic>
-                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                   preserveRatio="true">
-                                            <image>
-                                                <Image url="@/org/husonlab/phylosketch/views/primary/ArrowNone.png"/>
-                                            </image>
-                                        </ImageView>
+                                        <Icon content="UNDO"/>
                                     </graphic>
-                                </Menu>
-                                <Menu mnemonicParsing="false">
-                                    <items>
-                                        <MenuItem mnemonicParsing="false">
-                                            <graphic>
-                                                <ColorPicker fx:id="fontColorPicker"/>
-                                            </graphic>
-                                        </MenuItem>
-                                    </items>
+                                </Button>
+                                <Button fx:id="redoButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0"
+                                        mnemonicParsing="false" text="Redo">
                                     <graphic>
-                                        <Icon content="FORMAT_COLOR_TEXT"/>
+                                        <Icon content="REDO"/>
                                     </graphic>
-                                </Menu>
-                                <Menu mnemonicParsing="false">
-                                    <items>
-                                        <MenuItem mnemonicParsing="false">
-                                            <graphic>
-                                                <ColorPicker fx:id="borderColorPicker"/>
-                                            </graphic>
-                                        </MenuItem>
-                                    </items>
+                                </Button>
+                                <Separator orientation="VERTICAL"/>
+                                <Button fx:id="resetButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0"
+                                        mnemonicParsing="false" text="Reset Zoom">
                                     <graphic>
-                                        <Icon content="BORDER_COLOR"/>
+                                        <Icon content="HOME"/>
                                     </graphic>
-                                </Menu>
-                                <Menu mnemonicParsing="false">
-                                    <items>
-                                        <MenuItem mnemonicParsing="false">
-                                            <graphic>
-                                                <Slider fx:id="widthSlider" majorTickUnit="5.0" max="25.0"
-                                                        minorTickCount="4" showTickLabels="true" showTickMarks="true"/>
-                                            </graphic>
-                                        </MenuItem>
-                                    </items>
-                                    <graphic>
-                                        <Icon content="SHORT_TEXT"/>
-                                    </graphic>
-                                </Menu>
-                                <Menu mnemonicParsing="false">
-                                    <items>
-                                        <MenuItem mnemonicParsing="false">
-                                            <graphic>
-                                                <Slider fx:id="sizeSlider" majorTickUnit="5.0" max="25.0"
-                                                        minorTickCount="4" showTickLabels="true" showTickMarks="true"
-                                                        snapToTicks="true" value="1.0"/>
-                                            </graphic>
-                                        </MenuItem>
-                                    </items>
-                                    <graphic>
-                                        <Icon content="FILTER_NONE"/>
-                                    </graphic>
-                                </Menu>
-                                <Menu mnemonicParsing="false">
-                                    <items>
-                                        <MenuItem fx:id="fontMenuItem" mnemonicParsing="false"/>
-                                    </items>
-                                    <graphic>
-                                        <Icon content="FONT_DOWNLOAD"/>
-                                    </graphic>
-                                </Menu>
-                            </items>
-                        </MenuButton>
-                        <Button fx:id="undoButton" contentDisplay="GRAPHIC_ONLY" layoutX="150.0" layoutY="10.0"
-                                mnemonicParsing="false" text="Undo">
-                            <graphic>
-                                <Icon content="UNDO"/>
-                            </graphic>
-                        </Button>
-                        <Button fx:id="redoButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0"
-                                mnemonicParsing="false" text="Redo">
-                            <graphic>
-                                <Icon content="REDO"/>
-                            </graphic>
-                        </Button>
-                        <Separator orientation="VERTICAL"/>
-                        <Button fx:id="resetButton" contentDisplay="GRAPHIC_ONLY" layoutX="196.0" layoutY="10.0"
-                                mnemonicParsing="false" text="Reset Zoom">
-                            <graphic>
-                                <Icon content="HOME"/>
-                            </graphic>
-                        </Button>
+                                </Button>
+                                <Separator layoutX="247.0" layoutY="10.0" orientation="VERTICAL"/>
+                                <Button fx:id="increaseFontSizeButton" mnemonicParsing="false" text="A+"/>
+                                <Button fx:id="decreaseFontSizeButton" layoutX="329.0" layoutY="10.0"
+                                        mnemonicParsing="false" text="A-"/>
 
-                    </items>
-                </ToolBar>
-                <HBox alignment="CENTER">
-                    <children>
-                        <javafx.scene.control.TextField fx:id="textField" alignment="CENTER" editable="false"
-                                                        HBox.hgrow="ALWAYS">
+                            </items>
+                        </ToolBar>
+                        <TextField fx:id="infoTextField" alignment="CENTER" prefHeight="40.0" promptText="Info">
                             <font>
-                                <Font size="18.0"/>
+                                <Font size="12.0"/>
                             </font>
-                            <HBox.margin>
-                                <Insets/>
-                            </HBox.margin>
                             <padding>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                <Insets left="5.0" right="50.0"/>
+                            </padding>
+                        </TextField>
+                        <javafx.scene.control.TextField fx:id="newickTextField" minHeight="0.0" prefHeight="40.0"
+                                                        promptText="Newick string" VBox.vgrow="ALWAYS">
+                            <font>
+                                <Font name="Courier New" size="12.0"/>
+                            </font>
+                            <padding>
+                                <Insets left="5.0" right="5.0"/>
                             </padding>
                         </javafx.scene.control.TextField>
-                        <ToggleButton fx:id="showNewickToggleButton" mnemonicParsing="false" text="Newick"/>
+                    </children>
+                </VBox>
+                <HBox layoutX="529.4000244140625" layoutY="4.900000095367432" AnchorPane.rightAnchor="8.0"
+                      AnchorPane.topAnchor="2.0">
+                    <children>
+                        <ToggleButton fx:id="showNewickToggleButton" contentDisplay="CENTER" mnemonicParsing="false"
+                                      prefHeight="41.0" style="-fx-font-weight: bold; -fx-font-size: 16;"
+                                      text="(a,b);"/>
                     </children>
                 </HBox>
+                <Button fx:id="importButton" contentDisplay="GRAPHIC_ONLY" minHeight="0.0" mnemonicParsing="false"
+                        text="Import" textFill="WHITE" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="46.0">
+                    <graphic>
+                        <Icon content="INPUT" minHeight="0.0"/>
+                    </graphic>
+                </Button>
             </children>
-        </VBox>
+        </AnchorPane>
     </top>
 </View>
