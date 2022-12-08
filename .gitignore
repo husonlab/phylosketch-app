@@ -1,6 +1,9 @@
 # mvn:
 .mvn
 
+# mac files:
+.DS_Store
+
 target/
 pom.xml.tag
 pom.xml.releaseBackup

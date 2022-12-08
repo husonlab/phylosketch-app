@@ -120,8 +120,7 @@ public class EmbeddingOptimizer {
 		if (!useFastAlignmentHeuristic && trees.length == 2) {
 			final var bestOrdering = getLinearOrderingId(circularOrdering, idRho);
 
-			if (progressListener != null)
-				progressListener.setCancelable(true);
+			progressListener.setCancelable(true);
 
 			var circularOrderingPair = new int[2][];
 			circularOrderingPair[0] = circularOrdering;

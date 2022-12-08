@@ -26,6 +26,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import jloda.phylo.PhyloTree;
 import org.husonlab.phylosketch.views.primary.PrimaryView;
 import org.husonlab.phylosketch.views.secondary.SecondaryView;
 
@@ -42,6 +43,7 @@ public class Main extends Application {
 
 	@Override
 	public void init() {
+		PhyloTree.SUPPORT_RICH_NEWICK = true;
 		System.setProperty(com.gluonhq.attach.util.Constants.ATTACH_DEBUG, "true");
 		appManager.addViewFactory(PRIMARY_VIEW, () -> (new PrimaryView()).getView());
 		appManager.addViewFactory(SECONDARY_VIEW, () -> (new SecondaryView()).getView());

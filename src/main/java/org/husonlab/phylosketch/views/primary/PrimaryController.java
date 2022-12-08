@@ -28,6 +28,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.util.converter.DoubleStringConverter;
+import jloda.fx.control.RichTextLabel;
+import jloda.util.Single;
 
 import java.util.Objects;
 
@@ -35,12 +39,6 @@ public class PrimaryController {
 
 	@FXML
 	private AnchorPane anchorPane;
-
-	@FXML
-	private RadioMenuItem arrowBothRadioMenuItem;
-
-	@FXML
-	private RadioMenuItem arrowLeftRadioMenuItem;
 
 	@FXML
 	private Menu arrowMenu;
@@ -52,7 +50,7 @@ public class PrimaryController {
 	private RadioMenuItem arrowRightRadioMenuItem;
 
 	@FXML
-	private ColorPicker borderColorPicker;
+	private ColorPicker lineColorPicker;
 
 	@FXML
 	private Menu edgeShapeMenu;
@@ -70,7 +68,20 @@ public class PrimaryController {
 	private ColorPicker fontColorPicker;
 
 	@FXML
-	private MenuItem fontMenuItem;
+	private ToggleButton boldToggleButton;
+
+	@FXML
+	private ToggleButton italicToggleButton;
+
+	@FXML
+	private ToggleButton underlineToggleButton;
+
+	@FXML
+	private ComboBox<String> fontComboBox;
+
+	@FXML
+	private TextField fontSizeTextField;
+
 
 	@FXML
 	private Label modeLabel;
@@ -124,8 +135,6 @@ public class PrimaryController {
 	private TextField infoTextField;
 
 	@FXML
-	private TextField newickTextField;
-	@FXML
 	private Button undoButton;
 
 	@FXML
@@ -136,6 +145,24 @@ public class PrimaryController {
 
 	@FXML
 	private Button decreaseFontSizeButton;
+
+	@FXML
+	private SplitPane splitPane;
+
+	@FXML
+	private TextArea newickTextArea;
+
+	@FXML
+	private VBox vBox;
+
+	@FXML
+	private ToolBar fontToolBar;
+
+	@FXML
+	private Button closeFontButton;
+
+	@FXML
+	private CheckMenuItem showFontsCheckMenuItem;
 
 	private final ToggleGroup modeToggleGroup = new ToggleGroup();
 	private final ToggleGroup edgeShapeToggleGroup = new ToggleGroup();
@@ -169,7 +196,7 @@ public class PrimaryController {
 
 		edgeShapeToggleGroup.getToggles().addAll(straightEdgesRadioMenuItem, rectangularEdgesRadioMenuItem, roundEdgesRadioMenuItem);
 
-		arrowTypeToggleGroup.getToggles().addAll(arrowNoneRadioMenuItem, arrowRightRadioMenuItem, arrowLeftRadioMenuItem, arrowBothRadioMenuItem);
+		arrowTypeToggleGroup.getToggles().addAll(arrowNoneRadioMenuItem, arrowRightRadioMenuItem);
 
 		// don't allow size 0
 		widthSlider.valueChangingProperty().addListener((v, o, n) -> {
@@ -186,16 +213,42 @@ public class PrimaryController {
 		//infoTextField.setStyle("-fx-text-fill: white; -fx-background-color: -primary-swatch-500;");
 
 
+		var dividerPos = new Single<>(0.1);
+		primary.heightProperty().addListener((v, o, n) -> {
+			if (o.doubleValue() > 0) {
+				dividerPos.set(dividerPos.get() / o.doubleValue() * n.doubleValue());
+				splitPane.setDividerPositions(newickTextArea.isVisible() ? dividerPos.get() : 0);
+			}
+		});
+
 		showNewickToggleButton.setSelected(false);
-		newickTextField.setPrefHeight(0);
-		newickTextField.setVisible(false);
+
+		newickTextArea.setVisible(false);
+		splitPane.setDividerPositions(0.0);
 
 		showNewickToggleButton.selectedProperty().addListener((v, o, n) -> {
-			newickTextField.setPrefHeight(n ? 40 : 0);
-			newickTextField.setVisible(n);
+			splitPane.setDividerPositions(n ? dividerPos.get() : 0);
+			newickTextArea.setMinHeight(n ? 60 : 0);
+			newickTextArea.setVisible(n);
 			importButton.setVisible(n);
 		});
 		importButton.setVisible(false);
+
+		fontSizeTextField.setTextFormatter(new TextFormatter<>(new DoubleStringConverter()));
+		fontSizeTextField.setText(String.valueOf(RichTextLabel.DEFAULT_FONT.getSize()));
+
+		vBox.getChildren().remove(fontToolBar);
+
+		showFontsCheckMenuItem.selectedProperty().addListener((v, o, n) -> {
+			if (n) {
+				if (!vBox.getChildren().contains(fontToolBar))
+					vBox.getChildren().add(1, fontToolBar);
+			} else
+				vBox.getChildren().remove(fontToolBar);
+		});
+
+		closeFontButton.setOnAction(a -> showFontsCheckMenuItem.setSelected(false));
+
 	}
 
 
@@ -260,20 +313,12 @@ public class PrimaryController {
 		return showNewickToggleButton;
 	}
 
-	public TextField getNewickTextField() {
-		return newickTextField;
-	}
-
-	public AnchorPane getAnchorPane() {
-		return anchorPane;
+	public TextArea getNewickTextArea() {
+		return newickTextArea;
 	}
 
 	public ToggleGroup getEdgeShapeToggleGroup() {
 		return edgeShapeToggleGroup;
-	}
-
-	public MenuButton getStyleMenuButton() {
-		return styleMenuButton;
 	}
 
 	public RadioMenuItem getRectangularEdgesRadioMenuItem() {
@@ -296,14 +341,6 @@ public class PrimaryController {
 		return arrowRightRadioMenuItem;
 	}
 
-	public RadioMenuItem getArrowLeftRadioMenuItem() {
-		return arrowLeftRadioMenuItem;
-	}
-
-	public RadioMenuItem getArrowBothRadioMenuItem() {
-		return arrowBothRadioMenuItem;
-	}
-
 	public ToggleGroup getArrowTypeToggleGroup() {
 		return arrowTypeToggleGroup;
 	}
@@ -312,8 +349,8 @@ public class PrimaryController {
 		return arrowMenu;
 	}
 
-	public ColorPicker getBorderColorPicker() {
-		return borderColorPicker;
+	public ColorPicker getLineColorPicker() {
+		return lineColorPicker;
 	}
 
 	public Menu getEdgeShapeMenu() {
@@ -322,10 +359,6 @@ public class PrimaryController {
 
 	public ColorPicker getFontColorPicker() {
 		return fontColorPicker;
-	}
-
-	public MenuItem getFontMenuItem() {
-		return fontMenuItem;
 	}
 
 	public Slider getSizeSlider() {
@@ -350,5 +383,25 @@ public class PrimaryController {
 
 	public Button getDecreaseFontSizeButton() {
 		return decreaseFontSizeButton;
+	}
+
+	public ToggleButton getBoldToggleButton() {
+		return boldToggleButton;
+	}
+
+	public ToggleButton getItalicToggleButton() {
+		return italicToggleButton;
+	}
+
+	public ToggleButton getUnderlineToggleButton() {
+		return underlineToggleButton;
+	}
+
+	public ComboBox<String> getFontComboBox() {
+		return fontComboBox;
+	}
+
+	public TextField getFontSizeTextField() {
+		return fontSizeTextField;
 	}
 }

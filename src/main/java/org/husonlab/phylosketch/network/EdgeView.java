@@ -29,6 +29,7 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.GeometryUtilsFX;
@@ -48,7 +49,9 @@ public class EdgeView {
 
 	final private Circle circle1;
 	final private Circle circle2;
+
 	final private Shape arrowHead;
+
 	private final ObservableList<Node> children;
 
 	/**
@@ -89,6 +92,7 @@ public class EdgeView {
 		arrowHead.setStrokeWidth(curve.getStrokeWidth());
 		arrowHead.setFill(curve.getFill());
 		arrowHead.setStroke(curve.getStroke());
+		arrowHead.setVisible(false); // initially not shown
 
 		arrowHead.strokeWidthProperty().bind(curve.strokeWidthProperty());
 		arrowHead.fillProperty().bind(curve.strokeProperty());
@@ -294,5 +298,31 @@ public class EdgeView {
 		curveBelow.translateYProperty().bind(curve.translateYProperty());
 
 		return curveBelow;
+	}
+
+	public void setShowArrowHead(boolean show) {
+		arrowHead.setVisible(show);
+	}
+
+	public boolean isShowArrowHead() {
+		return arrowHead.isVisible();
+	}
+
+	public void setStrokeWidth(double value) {
+		if (value >= 0) {
+			curve.setStrokeWidth(value);
+		}
+	}
+
+	public double getStrokeWidth() {
+		return curve.getStrokeWidth();
+	}
+
+	public Paint getStroke() {
+		return curve.getStroke();
+	}
+
+	public void setStroke(Paint stroke) {
+		curve.setStroke(stroke);
 	}
 }

@@ -153,7 +153,10 @@
                         <list>javafx.scene.control.RadioMenuItem</list>
                         <list>javafx.scene.control.TextField</list>
                         <list>javafx.scene.control.Slider</list>
+                        <list>javafx.scene.control.SplitPane</list>
                         <list>javafx.scene.control.ColorPicker</list>
+                        <list>javafx.scene.control.CheckBox</list>
+                        <list>javafx.scene.control.ComboBox</list>
                         <list>javafx.scene.image.ImageView</list>
                         <list>javafx.scene.layout.HBox</list>
                         <list>com.gluonhq.charm.glisten.control.ToggleButtonGroup</list>

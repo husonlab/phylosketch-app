@@ -38,13 +38,37 @@
     -fx-background-color: -primary-swatch-500;
 }
 
+.combo-box .list-view .list-cell {
+    -fx-background-color: -primary-swatch-500;
+    -fx-text-fill: white;
+}
+
+.combo-box .text-input {
+    -fx-background-color: -primary-swatch-600;
+    -fx-text-fill: white;
+}
+
 .menu-item {
+    -fx-background-color: -primary-swatch-500;
+    -fx-text-fill: white;
+}
+
+.h-box {
+    -fx-background-color: -primary-swatch-500;
+}
+
+.label {
     -fx-background-color: -primary-swatch-500;
     -fx-text-fill: white;
 }
 
 #infoTextField {
     -fx-background-color: -primary-swatch-500;
+    -fx-text-fill: white;
+}
+
+#fontSizeTextField {
+    -fx-background-color: -primary-swatch-600;
     -fx-text-fill: white;
 }
 

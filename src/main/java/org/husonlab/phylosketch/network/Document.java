@@ -133,4 +133,18 @@ public class Document {
 	public String getNewickString(boolean showWeights) {
 		return model.getTree().toBracketString(showWeights) + ";";
 	}
+
+	public Iterable<Node> getSelectedOrAllNodes() {
+		if (nodeSelection.size() > 0)
+			return nodeSelection.getSelectedItems();
+		else
+			return getModel().getTree().nodes();
+	}
+
+	public Iterable<Edge> getSelectedOrAllEdges() {
+		if (edgeSelection.size() > 0)
+			return edgeSelection.getSelectedItems();
+		else
+			return getModel().getTree().edges();
+	}
 }

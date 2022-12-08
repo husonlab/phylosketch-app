@@ -47,10 +47,15 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 		this.document = document;
 		oldTree.copy(document.getModel().getTree());
 		for (var v : document.getModel().getTree().nodes()) {
-			var shape = document.getNetworkView().getView(v).shape();
-			nodeTranslate.put(v.getId(), new Point2D(shape.getTranslateX(), shape.getTranslateY()));
-			var label = document.getNetworkView().getView(v).label();
-			nodeLabelLayout.put(v.getId(), new Point2D(label.getLayoutX(), label.getLayoutY()));
+			var view = document.getNetworkView().getView(v);
+			if (view != null) {
+				var shape = document.getNetworkView().getView(v).shape();
+				if (shape != null)
+					nodeTranslate.put(v.getId(), new Point2D(shape.getTranslateX(), shape.getTranslateY()));
+				var label = document.getNetworkView().getView(v).label();
+				if (label != null)
+					nodeLabelLayout.put(v.getId(), new Point2D(label.getLayoutX(), label.getLayoutY()));
+			}
 		}
 		try {
 			newTree.parseBracketNotation(newNewick, true);
@@ -89,7 +94,9 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 
 	@Override
 	public void redo() {
+		document.getModel().getTree().clear();
 		document.getModel().getTree().copy(newTree);
+
 		document.updateModelAndView();
 		if (document.getNetworkView().getFontScale() != 1.0) {
 			for (var v : document.getModel().getTree().nodes()) {

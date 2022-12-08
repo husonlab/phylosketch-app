@@ -24,17 +24,27 @@ import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.InputEvent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
+import jloda.fx.control.RichTextLabel;
+import jloda.fx.util.AutoCompleteComboBox;
+import jloda.fx.util.RunAfterAWhile;
 import jloda.phylo.PhyloTree;
+import jloda.util.NumberUtils;
 import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
-import org.husonlab.phylosketch.network.commands.ReplaceNetworkCommand;
+import org.husonlab.phylosketch.network.commands.*;
 
 /**
  * the primary view presenter
@@ -48,8 +58,6 @@ public class PrimaryPresenter {
 	private final ObjectProperty<InteractionMode> interactionMode = new SimpleObjectProperty<>(this, "interactionMode", InteractionMode.Pan);
 
 	private final ObjectProperty<EdgeShape> edgeShape = new SimpleObjectProperty<>(this, "edgeShape");
-
-	private final ObjectProperty<ArrowType> arrowType = new SimpleObjectProperty<>(this, "ArrowType");
 
 	private final BooleanProperty enableImportButton = new SimpleBooleanProperty(this, "newickIsValid", false);
 
@@ -91,10 +99,6 @@ public class PrimaryPresenter {
 
 		edgeShape.addListener((v, o, n) -> {
 			System.err.println("Using edge shape: " + n);
-		});
-
-		arrowType.addListener((v, o, n) -> {
-			System.err.println("Using arrow type: " + n);
 		});
 
 		controller.getUndoButton().setOnAction(e -> document.getUndoManager().undo());
@@ -172,24 +176,116 @@ public class PrimaryPresenter {
 		controller.getEdgeShapeToggleGroup().selectToggle(controller.getStraightEdgesRadioMenuItem());
 
 		controller.getArrowTypeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
-			if (n == controller.getArrowRightRadioMenuItem())
-				arrowType.set(ArrowType.ArrowRight);
-			else if (n == controller.getArrowLeftRadioMenuItem())
-				arrowType.set(ArrowType.ArrowLeft);
-			else if (n == controller.getArrowBothRadioMenuItem())
-				arrowType.set(ArrowType.ArrowBoth);
-			else
-				arrowType.set(ArrowType.ArrowNone);
-
+			if (n != null) {
+				var showArrow = (n == controller.getArrowRightRadioMenuItem());
+				document.getUndoManager().doAndAdd(new ShowArrowHeadCommand(document, showArrow));
+			}
 		});
 		controller.getArrowTypeToggleGroup().selectToggle(controller.getArrowNoneRadioMenuItem());
+
+		controller.getWidthSlider().valueProperty().addListener((v, o, n) -> RunAfterAWhile.applyInFXThread(controller.getWidthSlider(), () -> {
+			document.getUndoManager().doAndAdd(new ChangeLineWidthCommand(document, n.doubleValue()));
+		}));
+
+		controller.getLineColorPicker().setOnAction(a -> {
+			document.getUndoManager().doAndAdd(new ChangeLineColorCommand(document, controller.getLineColorPicker().getValue()));
+		});
+
+		controller.getFontColorPicker().setOnAction(a -> {
+			document.getUndoManager().doAndAdd(new ChangeLabelColorCommand(document, controller.getFontColorPicker().getValue()));
+		});
+
+		InvalidationListener edgeSelectionInvalidationListener = a -> {
+			var hasArrow = false;
+			var hasNoArrow = false;
+			var maxLineWidth = 0.0;
+			Paint lineColor = null;
+			int numLineColors = 0;
+			for (var e : document.getSelectedOrAllEdges()) {
+				var ev = document.getNetworkView().getView(e);
+				if (ev != null) {
+					if (ev.isShowArrowHead()) {
+						hasArrow = true;
+					} else {
+						hasNoArrow = true;
+					}
+					maxLineWidth = Math.max(maxLineWidth, ev.getStrokeWidth());
+					if (numLineColors < 2) {
+						if (lineColor == null) {
+							lineColor = ev.getStroke();
+							numLineColors = 1;
+						} else if (!lineColor.equals(ev.getStroke())) {
+							numLineColors = 2;
+						}
+					}
+				}
+			}
+			if (hasArrow == hasNoArrow)
+				controller.getArrowTypeToggleGroup().selectToggle(null);
+			else if (hasArrow)
+				controller.getArrowTypeToggleGroup().selectToggle(controller.getArrowRightRadioMenuItem());
+			else
+				controller.getArrowTypeToggleGroup().selectToggle(controller.getArrowNoneRadioMenuItem());
+			controller.getSizeSlider().setValue(maxLineWidth);
+			controller.getLineColorPicker().setValue(numLineColors == 1 ? (Color) lineColor : null);
+		};
+		document.getEdgeSelection().getSelectedItems().addListener(edgeSelectionInvalidationListener);
+		document.getGraphFX().lastUpdateProperty().addListener(edgeSelectionInvalidationListener);
+		edgeSelectionInvalidationListener.invalidated(null);
+
+		InvalidationListener nodeSelectionInvalidationListener = a -> {
+			Paint color = null;
+			var numColors = 0;
+			var hasBold = false;
+			var hasNotBold = false;
+			var hasItalic = false;
+			var hasNotItalic = false;
+			var hasUnderline = false;
+			var hasNotUnderline = false;
+
+			for (var v : document.getSelectedOrAllNodes()) {
+				var nv = document.getNetworkView().getView(v);
+				if (nv != null) {
+					var label = nv.label();
+					if (label != null && label.getText().length() > 0) {
+						if (numColors < 2) {
+							if (color == null) {
+								color = label.getTextFill();
+								numColors = 1;
+							} else if (!color.equals(label.getTextFill())) {
+								numColors = 2;
+							}
+						}
+						if (label.isBold())
+							hasBold = true;
+						else
+							hasNotBold = true;
+						if (label.isItalic())
+							hasItalic = true;
+						else
+							hasNotItalic = true;
+						if (label.isUnderline())
+							hasUnderline = true;
+						else
+							hasNotUnderline = true;
+					}
+				}
+			}
+			controller.getFontColorPicker().setValue(numColors == 1 ? (Color) color : null);
+			controller.getBoldToggleButton().setSelected(hasBold && !hasNotBold);
+			controller.getItalicToggleButton().setSelected(hasItalic && !hasNotItalic);
+			controller.getUnderlineToggleButton().setSelected(hasUnderline && !hasNotUnderline);
+		};
+		document.getNodeSelection().getSelectedItems().addListener(nodeSelectionInvalidationListener);
+		document.getGraphFX().lastUpdateProperty().addListener(nodeSelectionInvalidationListener);
+		nodeSelectionInvalidationListener.invalidated(null);
 
 		controller.getWidthSlider().setValue(1);
 		controller.getSizeSlider().setValue(2);
 
 		controller.getInfoTextField().textProperty().bind(document.infoProperty());
 
-		var newickText = controller.getNewickTextField().textProperty();
+		var newickText = controller.getNewickTextArea().textProperty();
 		var inputChanged = new SimpleBooleanProperty(this, "inputChanged", false);
 
 		document.getGraphFX().lastUpdateProperty().addListener(a -> {
@@ -228,13 +324,43 @@ public class PrimaryPresenter {
 				}, () -> {
 					document.getNetworkView().setFontScale(1.0 / 1.2 * document.getNetworkView().getFontScale());
 					textFieldFontSize.set(1.0 / 1.2 * textFieldFontSize.get());
-
 				}));
 
 
 		textFieldFontSize.addListener((c, o, n) -> {
-			if (n.doubleValue() >= 10 && n.doubleValue() <= 36)
-				controller.getNewickTextField().setStyle("-fx-font-size: %.1f;".formatted(n.doubleValue()));
+			if (n.doubleValue() >= 10 && n.doubleValue() <= 36) {
+				controller.getNewickTextArea().setStyle("-fx-font-size: %.1f;".formatted(n.doubleValue()));
+			}
+		});
+
+		controller.getFontSizeTextField().setOnAction(a -> {
+			if (NumberUtils.isDouble(controller.getFontSizeTextField().getText())) {
+				var size = NumberUtils.parseDouble(controller.getFontSizeTextField().getText());
+				if (size >= 4)
+					document.getUndoManager().doAndAdd(new SetFontSizeCommand(document, size));
+			}
+		});
+
+		controller.getItalicToggleButton().setOnAction(a -> document.getUndoManager().doAndAdd(new SetItalicFontCommand(document, controller.getItalicToggleButton().isSelected())));
+		controller.getBoldToggleButton().setOnAction(a -> document.getUndoManager().doAndAdd(new SetBoldFontCommand(document, controller.getBoldToggleButton().isSelected())));
+		controller.getUnderlineToggleButton().setOnAction(a -> document.getUndoManager().doAndAdd(new SetUnderlineFontCommand(document, controller.getUnderlineToggleButton().isSelected())));
+
+		controller.getFontComboBox().getItems().addAll(Font.getFamilies());
+		controller.getFontComboBox().setValue(RichTextLabel.DEFAULT_FONT.getFamily());
+		controller.getFontComboBox().valueProperty().addListener((v, o, n) -> {
+			if (controller.getFontComboBox().getItems().contains(n))
+				document.getUndoManager().doAndAdd(new SetFontFamilyCommand(document, controller.getFontComboBox().getValue()));
+		});
+		AutoCompleteComboBox.install(controller.getFontComboBox());
+
+		// pressing enter in the newick text area will load the newick string, if it is valid
+		controller.getNewickTextArea().addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+			if (e.getCode().equals(KeyCode.ENTER)) {
+				e.consume();
+				if (!controller.getImportButton().isDisabled()) {
+					controller.getImportButton().fire();
+				}
+			}
 		});
 	}
 

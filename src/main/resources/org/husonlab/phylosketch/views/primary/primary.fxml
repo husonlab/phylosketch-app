@@ -31,28 +31,33 @@
       stylesheets="@/org/husonlab/phylosketch/views/primary/primary.css" xmlns="http://javafx.com/javafx/18"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.primary.PrimaryController">
     <center>
-        <AnchorPane fx:id="anchorPane" BorderPane.alignment="CENTER">
-            <children>
-                <ScrollPane fx:id="scrollPane" hbarPolicy="ALWAYS" pannable="true" vbarPolicy="ALWAYS"
-                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                            AnchorPane.topAnchor="0.0">
-                    <content>
-                        <StackPane fx:id="stackPane" style="-fx-background-color: white;">
-                            <padding>
-                                <Insets bottom="50.0" left="50.0" right="50.0" top="50.0"/>
-                            </padding>
-                        </StackPane>
-                    </content>
-                </ScrollPane>
-                <Label fx:id="modeLabel" text="Label" textFill="DARKGRAY" AnchorPane.leftAnchor="10.0"
-                       AnchorPane.topAnchor="10.0"/>
-            </children>
-        </AnchorPane>
+        <SplitPane fx:id="splitPane" dividerPositions="0.1" orientation="VERTICAL">
+            <items>
+                <TextArea fx:id="newickTextArea" minHeight="0.0" prefHeight="60.0" prefRowCount="0" wrapText="true"/>
+                <AnchorPane fx:id="anchorPane">
+                    <children>
+                        <ScrollPane fx:id="scrollPane" hbarPolicy="ALWAYS" pannable="true" vbarPolicy="ALWAYS"
+                                    AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <content>
+                                <StackPane fx:id="stackPane" style="-fx-background-color: white;">
+                                    <padding>
+                                        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0"/>
+                                    </padding>
+                                </StackPane>
+                            </content>
+                        </ScrollPane>
+                        <Label fx:id="modeLabel" text="Label" textFill="DARKGRAY" AnchorPane.leftAnchor="10.0"
+                               AnchorPane.topAnchor="10.0"/>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
     </center>
     <top>
         <AnchorPane BorderPane.alignment="CENTER">
             <children>
-                <VBox layoutX="4.099999904632568" layoutY="1.0" AnchorPane.bottomAnchor="0.0"
+                <VBox fx:id="vBox" layoutX="4.099999904632568" layoutY="1.0" AnchorPane.bottomAnchor="0.0"
                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
                         <ToolBar prefHeight="40.0" prefWidth="200.0">
@@ -162,26 +167,6 @@
                                                         </ImageView>
                                                     </graphic>
                                                 </RadioMenuItem>
-                                                <RadioMenuItem fx:id="arrowLeftRadioMenuItem" mnemonicParsing="false">
-                                                    <graphic>
-                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                                   preserveRatio="true">
-                                                            <image>
-                                                                <Image url="@/org/husonlab/phylosketch/views/primary/ArrowLeft.png"/>
-                                                            </image>
-                                                        </ImageView>
-                                                    </graphic>
-                                                </RadioMenuItem>
-                                                <RadioMenuItem fx:id="arrowBothRadioMenuItem" mnemonicParsing="false">
-                                                    <graphic>
-                                                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
-                                                                   preserveRatio="true">
-                                                            <image>
-                                                                <Image url="@/org/husonlab/phylosketch/views/primary/ArrowBoth.png"/>
-                                                            </image>
-                                                        </ImageView>
-                                                    </graphic>
-                                                </RadioMenuItem>
                                             </items>
                                             <graphic>
                                                 <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true"
@@ -208,7 +193,7 @@
                                             <items>
                                                 <MenuItem mnemonicParsing="false">
                                                     <graphic>
-                                                        <ColorPicker fx:id="borderColorPicker"/>
+                                                        <ColorPicker fx:id="lineColorPicker"/>
                                                     </graphic>
                                                 </MenuItem>
                                             </items>
@@ -244,14 +229,8 @@
                                                 <Icon content="FILTER_NONE"/>
                                             </graphic>
                                         </Menu>
-                                        <Menu mnemonicParsing="false">
-                                            <items>
-                                                <MenuItem fx:id="fontMenuItem" mnemonicParsing="false"/>
-                                            </items>
-                                            <graphic>
-                                                <Icon content="FONT_DOWNLOAD"/>
-                                            </graphic>
-                                        </Menu>
+                                        <CheckMenuItem fx:id="showFontsCheckMenuItem" mnemonicParsing="false"
+                                                       text="Show Fonts"/>
                                     </items>
                                 </MenuButton>
                                 <Button fx:id="undoButton" contentDisplay="GRAPHIC_ONLY" layoutX="150.0" layoutY="10.0"
@@ -280,6 +259,20 @@
 
                             </items>
                         </ToolBar>
+                        <ToolBar fx:id="fontToolBar">
+                            <items>
+                                <ComboBox fx:id="fontComboBox" prefWidth="150.0" promptText="Font"/>
+                                <TextField fx:id="fontSizeTextField" prefColumnCount="4" promptText="Size"/>
+                                <ToggleButton fx:id="boldToggleButton" mnemonicParsing="false" text="B"/>
+                                <ToggleButton fx:id="italicToggleButton" layoutX="10.0" layoutY="10.0"
+                                              mnemonicParsing="false" text="I"/>
+                                <ToggleButton fx:id="underlineToggleButton" layoutX="404.0" layoutY="10.0"
+                                              mnemonicParsing="false" text="U"/>
+                                <Button fx:id="closeFontButton" contentDisplay="CENTER" minHeight="-Infinity"
+                                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0"
+                                        text="✖"/>
+                            </items>
+                        </ToolBar>
                         <TextField fx:id="infoTextField" alignment="CENTER" prefHeight="40.0" promptText="Info">
                             <font>
                                 <Font size="12.0"/>
@@ -288,15 +281,6 @@
                                 <Insets left="5.0" right="50.0"/>
                             </padding>
                         </TextField>
-                        <javafx.scene.control.TextField fx:id="newickTextField" minHeight="0.0" prefHeight="40.0"
-                                                        promptText="Newick string" VBox.vgrow="ALWAYS">
-                            <font>
-                                <Font name="Courier New" size="12.0"/>
-                            </font>
-                            <padding>
-                                <Insets left="5.0" right="5.0"/>
-                            </padding>
-                        </javafx.scene.control.TextField>
                     </children>
                 </VBox>
                 <HBox layoutX="529.4000244140625" layoutY="4.900000095367432" AnchorPane.rightAnchor="8.0"

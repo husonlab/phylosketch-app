@@ -30,6 +30,7 @@ import jloda.util.Counter;
 import jloda.util.progress.ProgressSilent;
 import org.husonlab.phylosketch.algorithms.embedding.EmbeddingOptimizer;
 import org.husonlab.phylosketch.algorithms.embedding.HeightAndAngles;
+import org.husonlab.phylosketch.algorithms.embedding.LSATree;
 import org.husonlab.phylosketch.algorithms.embedding.LayoutTreeRectangular;
 
 /**
@@ -60,25 +61,22 @@ public class NetworkModel {
 	public void computeEmbedding(boolean toScale, double fitWidth, double fitHeight) {
 		clear();
 
-		if (tree.hasReticulateEdges()) {
-			try (NodeArray<Node> nodeCopyNodeMap = tree.newNodeArray()) {
-				var copyTree = new PhyloTree();
-				copyTree.copy(tree, nodeCopyNodeMap, null);
+		if (true || tree.hasReticulateEdges()) {
+			if (true) {
+
 				try {
+					LSATree.computeNodeLSAChildrenMap(tree);
 					EmbeddingOptimizer.apply(tree, new ProgressSilent());
 				} catch (CanceledException ignored) {
 				}
-				try (NodeArray<Point2D> copyNodePointMap = LayoutTreeRectangular.apply(copyTree, false, HeightAndAngles.Averaging.LeafAverage);
-					 NodeArray<Point2D> nodePointMap = tree.newNodeArray()) {
-					for (var v : tree.nodes()) {
-						nodePointMap.put(v, copyNodePointMap.get(nodeCopyNodeMap.get(v)));
-					}
+				try (NodeArray<Point2D> nodePointMap = LayoutTreeRectangular.apply(tree, false, HeightAndAngles.Averaging.LeafAverage)) {
 
 					fit(fitWidth, fitHeight, nodePointMap);
 
 					for (var v : tree.nodes()) {
-						var vx = nodePointMap.get(v).getX();
-						var vy = nodePointMap.get(v).getY();
+						var point = nodePointMap.get(v);
+						var vx = (point != null ? point.getX() : 0);
+						var vy = (point != null ? point.getY() : 0);
 						var text = tree.getLabel(v);
 						var label = new Label(10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get(), 0, text != null ? text : "");
 						setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, 8, 8, Color.BLACK, Color.WHITE, label));
@@ -87,9 +85,38 @@ public class NetworkModel {
 						edgeAttributesMap.put(e, new EdgeAttributes(EdgeGlyph.StraightLine, 1.0, Color.BLACK, null));
 					}
 				}
+			} else {
+				try (NodeArray<Node> nodeCopyNodeMap = tree.newNodeArray()) {
+					var copyTree = new PhyloTree();
+					copyTree.copy(tree, nodeCopyNodeMap, null);
+
+					try {
+						EmbeddingOptimizer.apply(tree, new ProgressSilent());
+					} catch (CanceledException ignored) {
+					}
+					try (NodeArray<Point2D> copyNodePointMap = LayoutTreeRectangular.apply(copyTree, false, HeightAndAngles.Averaging.LeafAverage);
+						 NodeArray<Point2D> nodePointMap = tree.newNodeArray()) {
+						for (var v : tree.nodes()) {
+							nodePointMap.put(v, copyNodePointMap.get(nodeCopyNodeMap.get(v)));
+						}
+
+						fit(fitWidth, fitHeight, nodePointMap);
+
+						for (var v : tree.nodes()) {
+							var point = nodePointMap.get(v);
+							var vx = (point != null ? point.getX() : 0);
+							var vy = (point != null ? point.getY() : 0);
+							var text = tree.getLabel(v);
+							var label = new Label(10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get(), 0, text != null ? text : "");
+							setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, 8, 8, Color.BLACK, Color.WHITE, label));
+						}
+						for (var e : tree.edges()) {
+							edgeAttributesMap.put(e, new EdgeAttributes(EdgeGlyph.StraightLine, 1.0, Color.BLACK, null));
+						}
+					}
+				}
 			}
-		}
-		if (!tree.hasReticulateEdges()) {
+		} else {
 			try (var x = tree.newNodeDoubleArray(); var y = tree.newNodeDoubleArray()) {
 				if (toScale) {
 					var root = tree.getRoot();
