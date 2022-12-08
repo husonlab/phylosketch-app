@@ -143,26 +143,27 @@
                         <list>org.husonlab.phylosketch.views.secondary.SecondaryView</list>
                         <list>org.husonlab.phylosketch.views.labeleditor.LabelEditor</list>
                         <list>org.husonlab.phylosketch.views.labeleditor.LabelEditorController</list>
-                        <list>javafx.scene.control.ToggleButton</list>
-                        <list>javafx.scene.control.TextArea</list>
-                        <list>javafx.scene.control.ScrollPane</list>
-                        <list>javafx.scene.control.Separator</list>
-                        <list>javafx.scene.control.Menu</list>
-                        <list>javafx.scene.control.MenuItem</list>
-                        <list>javafx.scene.control.MenuButton</list>
-                        <list>javafx.scene.control.RadioMenuItem</list>
-                        <list>javafx.scene.control.TextField</list>
-                        <list>javafx.scene.control.Slider</list>
-                        <list>javafx.scene.control.SplitPane</list>
-                        <list>javafx.scene.control.ColorPicker</list>
-                        <list>javafx.scene.control.CheckBox</list>
-                        <list>javafx.scene.control.ComboBox</list>
-                        <list>javafx.scene.image.ImageView</list>
-                        <list>javafx.scene.layout.HBox</list>
-                        <list>com.gluonhq.charm.glisten.control.ToggleButtonGroup</list>
                         <list>com.gluonhq.charm.glisten.control.DropdownButton</list>
                         <list>com.gluonhq.charm.glisten.control.Icon</list>
-
+                        <list>com.gluonhq.charm.glisten.control.ToggleButtonGroup</list>
+                        <list>javafx.scene.control.Button</list>
+                        <list>javafx.scene.control.CheckBox</list>
+                        <list>javafx.scene.control.CheckMenuItem</list>
+                        <list>javafx.scene.control.ColorPicker</list>
+                        <list>javafx.scene.control.ComboBox</list>
+                        <list>javafx.scene.control.Menu</list>
+                        <list>javafx.scene.control.MenuButton</list>
+                        <list>javafx.scene.control.MenuItem</list>
+                        <list>javafx.scene.control.RadioMenuItem</list>
+                        <list>javafx.scene.control.ScrollPane</list>
+                        <list>javafx.scene.control.Separator</list>
+                        <list>javafx.scene.control.Slider</list>
+                        <list>javafx.scene.control.SplitPane</list>
+                        <list>javafx.scene.control.TextArea</list>
+                        <list>javafx.scene.control.TextField</list>
+                        <list>javafx.scene.control.ToggleButton</list>
+                        <list>javafx.scene.image.ImageView</list>
+                        <list>javafx.scene.layout.HBox</list>
                     </reflectionList>
                 </configuration>
             </plugin>

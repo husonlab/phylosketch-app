@@ -23,11 +23,13 @@ package org.husonlab.phylosketch.network.commands;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import jloda.fx.undo.UndoableRedoableCommand;
+import jloda.fx.window.MainWindowManager;
 import org.husonlab.phylosketch.network.Document;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * change label color
@@ -40,8 +42,14 @@ public class ChangeLabelColorCommand extends UndoableRedoableCommand {
 	/**
 	 * constructor
 	 */
-	public ChangeLabelColorCommand(Document document, Color color) {
+	public ChangeLabelColorCommand(Document document, Color color0) {
 		super("label color");
+
+		Color color;
+		if (MainWindowManager.isUseDarkTheme() && color0.equals(Color.WHITE) || !MainWindowManager.isUseDarkTheme() && color0.equals(Color.BLACK))
+			color = null;
+		else
+			color = color0;
 
 		var networkView = document.getNetworkView();
 
@@ -51,7 +59,7 @@ public class ChangeLabelColorCommand extends UndoableRedoableCommand {
 		final Map<Integer, Paint> oldNodeColor = new HashMap<>();
 		for (var v : document.getSelectedOrAllNodes()) {
 			var label = networkView.getView(v).label();
-			if (label != null && label.getText().length() > 0) {
+			if (label != null && label.getText().length() > 0 && !Objects.equals(label.getTextFill(), color)) {
 				oldNodeColor.put(v.getId(), label.getTextFill());
 				nodeData.add(v.getId());
 			}

@@ -253,9 +253,18 @@
                                     </graphic>
                                 </Button>
                                 <Separator layoutX="247.0" layoutY="10.0" orientation="VERTICAL"/>
-                                <Button fx:id="increaseFontSizeButton" mnemonicParsing="false" text="A+"/>
+                                <Button fx:id="increaseFontSizeButton" mnemonicParsing="false"
+                                        contentDisplay="GRAPHIC_ONLY">
+                                    <graphic>
+                                        <Icon content="ZOOM_IN"/>
+                                    </graphic>
+                                </Button>
                                 <Button fx:id="decreaseFontSizeButton" layoutX="329.0" layoutY="10.0"
-                                        mnemonicParsing="false" text="A-"/>
+                                        mnemonicParsing="false" contentDisplay="GRAPHIC_ONLY">
+                                    <graphic>
+                                        <Icon content="ZOOM_OUT"/>
+                                    </graphic>
+                                </Button>
 
                             </items>
                         </ToolBar>
@@ -263,14 +272,30 @@
                             <items>
                                 <ComboBox fx:id="fontComboBox" prefWidth="150.0" promptText="Font"/>
                                 <TextField fx:id="fontSizeTextField" prefColumnCount="4" promptText="Size"/>
-                                <ToggleButton fx:id="boldToggleButton" mnemonicParsing="false" text="B"/>
-                                <ToggleButton fx:id="italicToggleButton" layoutX="10.0" layoutY="10.0"
-                                              mnemonicParsing="false" text="I"/>
-                                <ToggleButton fx:id="underlineToggleButton" layoutX="404.0" layoutY="10.0"
-                                              mnemonicParsing="false" text="U"/>
-                                <Button fx:id="closeFontButton" contentDisplay="CENTER" minHeight="-Infinity"
-                                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0"
-                                        text="✖"/>
+                                <ToggleButton fx:id="boldToggleButton" contentDisplay="GRAPHIC_ONLY"
+                                              mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="FORMAT_BOLD"/>
+                                    </graphic>
+                                </ToggleButton>
+                                <ToggleButton fx:id="italicToggleButton" contentDisplay="GRAPHIC_ONLY" layoutX="10.0"
+                                              layoutY="10.0" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="FORMAT_ITALIC"/>
+                                    </graphic>
+                                </ToggleButton>
+                                <ToggleButton fx:id="underlineToggleButton" contentDisplay="GRAPHIC_ONLY"
+                                              layoutX="404.0" layoutY="10.0" mnemonicParsing="false">
+                                    <graphic>
+                                        <Icon content="FORMAT_UNDERLINED"/>
+                                    </graphic>
+                                </ToggleButton>
+                                <Button fx:id="closeFontButton" minHeight="-Infinity" minWidth="-Infinity"
+                                        mnemonicParsing="false" style="-fx-font-size: 10;">
+                                    <graphic>
+                                        <Icon content="DONE"/>
+                                    </graphic>
+                                </Button>
                             </items>
                         </ToolBar>
                         <TextField fx:id="infoTextField" alignment="CENTER" prefHeight="40.0" promptText="Info">

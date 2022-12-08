@@ -79,7 +79,7 @@ public class NetworkModel {
 						var vy = (point != null ? point.getY() : 0);
 						var text = tree.getLabel(v);
 						var label = new Label(10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get(), 0, text != null ? text : "");
-						setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, 8, 8, Color.BLACK, Color.WHITE, label));
+						setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, 2, 2, Color.BLACK, Color.WHITE, label));
 					}
 					for (var e : tree.edges()) {
 						edgeAttributesMap.put(e, new EdgeAttributes(EdgeGlyph.StraightLine, 1.0, Color.BLACK, null));

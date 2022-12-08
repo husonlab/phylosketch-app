@@ -249,6 +249,8 @@ public class PrimaryController {
 
 		closeFontButton.setOnAction(a -> showFontsCheckMenuItem.setSelected(false));
 
+		newickTextArea.setStyle("-fx-font-family: 'Courier New';");
+
 	}
 
 

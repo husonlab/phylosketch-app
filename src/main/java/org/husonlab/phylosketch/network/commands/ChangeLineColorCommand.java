@@ -39,6 +39,7 @@ public class ChangeLineColorCommand extends UndoableRedoableCommand {
 
 	public ChangeLineColorCommand(Document document, Color color) {
 		super("line color");
+
 		var networkView = document.getNetworkView();
 		var edgeOldColor = new ArrayList<Pair<Integer, Paint>>();
 		for (var e : document.getSelectedOrAllEdges()) {

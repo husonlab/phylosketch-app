@@ -59,7 +59,7 @@ public class PrimaryPresenter {
 
 	private final ObjectProperty<EdgeShape> edgeShape = new SimpleObjectProperty<>(this, "edgeShape");
 
-	private final BooleanProperty enableImportButton = new SimpleBooleanProperty(this, "newickIsValid", false);
+	private final BooleanProperty enableImportButton = new SimpleBooleanProperty(this, "enableImportButton", false);
 
 	private final DoubleProperty textFieldFontSize = new SimpleDoubleProperty(this, "textFieldFontSize", 14);
 
@@ -303,7 +303,7 @@ public class PrimaryPresenter {
 		});
 		controller.getImportButton().disableProperty().bind((controller.getShowNewickToggleButton().selectedProperty().and(enableImportButton)).not());
 
-		enableImportButton.bind(Bindings.createBooleanBinding(() -> canParse(newickText.get()) && inputChanged.get(), newickText, document.getGraphFX().lastUpdateProperty()));
+		enableImportButton.bind(Bindings.createBooleanBinding(() -> canParse(newickText.get(), true) && inputChanged.get(), newickText, document.getGraphFX().lastUpdateProperty()));
 
 		controller.getIncreaseFontSizeButton().setOnAction(a -> document.getUndoManager().doAndAdd("font size",
 				() -> {
@@ -328,8 +328,8 @@ public class PrimaryPresenter {
 
 
 		textFieldFontSize.addListener((c, o, n) -> {
-			if (n.doubleValue() >= 10 && n.doubleValue() <= 36) {
-				controller.getNewickTextArea().setStyle("-fx-font-size: %.1f;".formatted(n.doubleValue()));
+			if (n.doubleValue() >= 10 && n.doubleValue() <= 32) {
+				controller.getNewickTextArea().setStyle("-fx-font-family: 'Courier New';-fx-font-size: %.1f;".formatted(n.doubleValue()));
 			}
 		});
 
@@ -362,16 +362,23 @@ public class PrimaryPresenter {
 				}
 			}
 		});
+
+		controller.getShowNewickToggleButton().selectedProperty().addListener((v, o, n) -> {
+			if (n)
+				controller.getNewickTextArea().setText(document.getNewickString(false));
+		});
 	}
 
-	private static boolean canParse(String newick) {
+	private static boolean canParse(String newick, boolean first) {
 		newick = newick.trim();
 		if (!newick.startsWith("(") && !(newick.endsWith(")") || newick.endsWith(";")))
 			return false;
+		if (newick.endsWith(";"))
+			newick = newick.substring(0, newick.length() - 1).trim();
 		try {
 			var tree = new PhyloTree();
 			tree.parseBracketNotation(newick, true);
-			return tree.getNumberOfNodes() > 0;
+			return tree.getNumberOfNodes() > 0 && (!first || !canParse(newick.substring(0, newick.length() - 1), false));
 		} catch (Exception ignored) {
 			return false;
 		}

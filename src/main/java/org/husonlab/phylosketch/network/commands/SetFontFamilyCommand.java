@@ -20,12 +20,14 @@
 
 package org.husonlab.phylosketch.network.commands;
 
+import jloda.fx.control.RichTextLabel;
 import jloda.fx.undo.UndoableRedoableCommand;
 import org.husonlab.phylosketch.network.Document;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * change label color
@@ -38,8 +40,15 @@ public class SetFontFamilyCommand extends UndoableRedoableCommand {
 	/**
 	 * constructor
 	 */
-	public SetFontFamilyCommand(Document document, String family) {
+	public SetFontFamilyCommand(Document document, String family0) {
 		super("font");
+
+		String family;
+		if (Objects.equals(family0, RichTextLabel.DEFAULT_FONT.getFamily()))
+			family = null;
+		else
+			family = family0;
+
 
 		var networkView = document.getNetworkView();
 
@@ -49,7 +58,7 @@ public class SetFontFamilyCommand extends UndoableRedoableCommand {
 		final Map<Integer, String> oldNodeFamily = new HashMap<>();
 		for (var v : document.getSelectedOrAllNodes()) {
 			var label = networkView.getView(v).label();
-			if (label != null && label.getText().length() > 0) {
+			if (label != null && label.getText().length() > 0 && !Objects.equals(label.getFontFamily(), family)) {
 				oldNodeFamily.put(v.getId(), label.getFontFamily());
 				nodeData.add(v.getId());
 			}
@@ -59,7 +68,7 @@ public class SetFontFamilyCommand extends UndoableRedoableCommand {
 		final Map<Integer, String> oldEdgeFamily = new HashMap<>();
 		for (var e : document.getSelectedOrAllEdges()) {
 			var label = networkView.getView(e).label();
-			if (label != null && label.getText().length() > 0) {
+			if (label != null && label.getText().length() > 0 && !Objects.equals(label.getFontFamily(), family)) {
 				oldEdgeFamily.put(e.getId(), label.getFontFamily());
 				edgeData.add(e.getId());
 			}
