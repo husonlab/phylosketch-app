@@ -20,9 +20,12 @@
 
 package org.husonlab.phylosketch.network;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
+import jloda.fx.control.RichTextLabel;
 import jloda.fx.graph.GraphFX;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.selection.SetSelectionModel;
@@ -47,6 +50,9 @@ public class Document {
 	private final GraphFX<PhyloTree> graphFX;
 
 	private final StringProperty info = new SimpleStringProperty(this, "info", "");
+
+	private final BooleanProperty toScale = new SimpleBooleanProperty(this, "toScale", false);
+	private final BooleanProperty showHTML = new SimpleBooleanProperty(this, "showHTML", false);
 
 
 	public Document() {
@@ -74,9 +80,9 @@ public class Document {
 			String heading;
 			if (tree.getNumberOfNodes() > 0 && tree.isConnected()) {
 				if (tree.hasReticulateEdges())
-					heading = "Network: ";
+					heading = "Network ";
 				else
-					heading = "Tree: ";
+					heading = "Tree ";
 			} else
 				heading = "";
 			info.set(heading + RootedNetworkProperties.computeInfoString(tree).replace(", network", ""));
@@ -126,12 +132,31 @@ public class Document {
 	}
 
 	public void updateModelAndView() {
-		model.computeEmbedding(true, 200, 200);
+		model.computeEmbedding(isToScale(), 200, 200);
 		NetworkPresenter.model2view(model, getNetworkView());
 	}
 
-	public String getNewickString(boolean showWeights) {
-		return model.getTree().toBracketString(showWeights) + ";";
+	public String getNewickString() {
+		if (isToScale() && !model.getTree().hasEdgeWeights()) {
+			for (var e : model.getTree().edges()) {
+				if (!model.getTree().isReticulateEdge(e)) {
+					var weight = Math.abs(networkView.getView(e.getSource()).shape().getTranslateX() - (networkView.getView(e.getTarget()).shape().getTranslateX()));
+					model.getTree().setWeight(e, weight);
+				}
+			}
+		}
+
+		if (!isShowHTML()) {
+			var tmpTree = new PhyloTree(model.getTree());
+			for (var v : tmpTree.nodes()) {
+				var label = tmpTree.getLabel(v);
+				if (label != null && !label.isBlank()) {
+					tmpTree.setLabel(v, RichTextLabel.getRawText(label));
+				}
+			}
+			return tmpTree.toBracketString(isToScale()) + ";";
+		} else
+			return model.getTree().toBracketString(isToScale()) + ";";
 	}
 
 	public Iterable<Node> getSelectedOrAllNodes() {
@@ -146,5 +171,29 @@ public class Document {
 			return edgeSelection.getSelectedItems();
 		else
 			return getModel().getTree().edges();
+	}
+
+	public boolean isToScale() {
+		return toScale.get();
+	}
+
+	public BooleanProperty toScaleProperty() {
+		return toScale;
+	}
+
+	public void setToScale(boolean toScale) {
+		this.toScale.set(toScale);
+	}
+
+	public boolean isShowHTML() {
+		return showHTML.get();
+	}
+
+	public BooleanProperty showHTMLProperty() {
+		return showHTML;
+	}
+
+	public void setShowHTML(boolean showHTML) {
+		this.showHTML.set(showHTML);
 	}
 }

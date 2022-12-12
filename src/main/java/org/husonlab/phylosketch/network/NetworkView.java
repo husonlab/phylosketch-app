@@ -25,7 +25,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.BoundingBox;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.CubicCurve;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
@@ -186,10 +185,8 @@ public class NetworkView {
 	}
 
 	public void createShapeAndLabel(Node v, double x, double y, String text, double labelDx, double labelDy) {
-		var shape = new CircleShape(8);
+		var shape = new CircleShape(2);
 		shape.setId("graph-node");
-		shape.setStroke(Color.BLACK);
-		shape.setFill(Color.WHITE);
 		shape.setTranslateX(x);
 		shape.setTranslateY(y);
 		var label = new RichTextLabel(text);
@@ -228,11 +225,12 @@ public class NetworkView {
 		}
 	}
 
-	public void createEdgeView(Edge e) {
+	public EdgeView createEdgeView(Edge e) {
 		var source = getView(e.getSource()).shape();
 		var target = getView(e.getTarget()).shape();
 		var edgeView = new EdgeView(e, source.translateXProperty(), source.translateYProperty(), target.translateXProperty(), target.translateYProperty());
 		setView(e, edgeView);
+		return edgeView;
 	}
 
 	public void addLabel(Edge e, String text, double dx, double dy) {
@@ -369,5 +367,46 @@ public class NetworkView {
 			}
 		}
 		return new BoundingBox(minX, minY, maxX - minX, maxY - minY);
+	}
+
+	/**
+	 * computes the control points for a given edge glyph
+	 *
+	 * @param e         edge
+	 * @param edgeGlyph glyph
+	 * @return control point coordinates x1 y1 x2 y2
+	 */
+	public double[] computeControlPoints(Edge e, NetworkModel.EdgeGlyph edgeGlyph) {
+		var v = e.getSource();
+		var w = e.getTarget();
+		var vShape = getView(v).shape();
+		var wShape = getView(w).shape();
+
+		switch (edgeGlyph) {
+			default -> {
+				return new double[]{
+						0.66 * vShape.getTranslateX() + 0.34 * wShape.getTranslateX(),
+						0.66 * vShape.getTranslateY() + 0.34 * wShape.getTranslateY(),
+						0.34 * vShape.getTranslateX() + 0.66 * wShape.getTranslateX(),
+						0.34 * vShape.getTranslateY() + 0.66 * wShape.getTranslateY()
+				};
+			}
+			case RectangleLine -> {
+				return new double[]{
+						vShape.getTranslateX(),
+						0.01 * vShape.getTranslateY() + 0.99 * wShape.getTranslateY(),
+						0.99 * vShape.getTranslateX() + 0.01 * wShape.getTranslateX(),
+						wShape.getTranslateY()
+				};
+			}
+			case CubicCurve -> {
+				return new double[]{
+						vShape.getTranslateX(),
+						wShape.getTranslateY(),
+						wShape.getTranslateX(),
+						wShape.getTranslateY()
+				};
+			}
+		}
 	}
 }

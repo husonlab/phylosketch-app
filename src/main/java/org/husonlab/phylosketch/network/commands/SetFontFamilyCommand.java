@@ -44,7 +44,7 @@ public class SetFontFamilyCommand extends UndoableRedoableCommand {
 		super("font");
 
 		String family;
-		if (Objects.equals(family0, RichTextLabel.DEFAULT_FONT.getFamily()))
+		if (Objects.equals(family0, RichTextLabel.getDefaultFont().getFamily()))
 			family = null;
 		else
 			family = family0;

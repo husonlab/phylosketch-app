@@ -53,7 +53,11 @@
     -fx-text-fill: white;
 }
 
-.h-box {
+.background {
+    -fx-background-color: -primary-swatch-500;
+}
+
+.flow-pane {
     -fx-background-color: -primary-swatch-500;
 }
 
@@ -62,19 +66,19 @@
     -fx-text-fill: white;
 }
 
-#infoTextField {
+.view {
     -fx-background-color: -primary-swatch-500;
-    -fx-text-fill: white;
 }
 
-#fontSizeTextField {
-    -fx-background-color: -primary-swatch-600;
-    -fx-text-fill: white;
-}
-
-#newickTextField {
+#newickTextArea {
     -fx-font-family: 'Courier New';
-    -fx-font-size: 18;
+    -fx-border-color: -primary-swatch-500;
+    -fx-border-width: 5;
+}
+
+.split-pane .split-pane-divider {
+    -fx-background-color: -primary-swatch-500;
+    -fx-min-height: 10;
 }
 
 .menu-item:focused {
@@ -83,10 +87,37 @@
 
 .icon {
     -fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+#showNewickToggleButton {
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+}
+
+#showNewickToggleButton:selected {
+    -fx-background-color: -primary-swatch-600;
+}
+
+#showHTMLToggleButton:selected {
+    -fx-background-color: -primary-swatch-600;
+}
+
+#showWeightsToggleButton:selected {
+    -fx-background-color: -primary-swatch-600;
 }
 
 .menu,
 .menu:focused,
 .menu-item {
     -fx-padding: 10;
+}
+
+
+.text-area {
+    -fx-background-color: white;
+}
+
+.text-area .content {
+    -fx-background-color: white;
 }

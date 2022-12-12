@@ -47,11 +47,11 @@ import org.husonlab.phylosketch.views.primary.InteractionMode;
  * Daniel Huson, 10.2022
  */
 public class NetworkPresenter {
-	public static DoubleProperty DEFAULT_FONT_SIZE = new SimpleDoubleProperty(RichTextLabel.DEFAULT_FONT.getSize());
+	public static DoubleProperty DEFAULT_FONT_SIZE = new SimpleDoubleProperty(RichTextLabel.getDefaultFont().getSize());
 
 	static {
 		DEFAULT_FONT_SIZE.addListener((v, o, n) -> {
-			RichTextLabel.DEFAULT_FONT = new Font(RichTextLabel.DEFAULT_FONT.getName(), n.doubleValue());
+			RichTextLabel.setDefaultFont(new Font(RichTextLabel.getDefaultFont().getName(), n.doubleValue()));
 		});
 	}
 
@@ -105,8 +105,8 @@ public class NetworkPresenter {
 		});
 	}
 
-	public static void model2view(NetworkModel model, NetworkView view) {
-		view.clear();
+	public static void model2view(NetworkModel model, NetworkView networkView) {
+		networkView.clear();
 
 		try (NodeArray<DoubleProperty> x = model.getTree().newNodeArray();
 			 NodeArray<DoubleProperty> y = model.getTree().newNodeArray()) {
@@ -133,29 +133,20 @@ public class NetworkPresenter {
 				textLabel.setLayoutY(label.dy());
 				textLabel.setRotate(label.angle()); // todo: not sure about this
 				var nv = new NodeView(shape, textLabel);
-				view.setView(v, nv);
+				networkView.setView(v, nv);
 			}
 
 			for (var e : model.getTree().edges()) {
 				var attributes = model.getAttributes(e);
-				var v = e.getSource();
-				var w = e.getTarget();
-
+				var controlPoints = networkView.computeControlPoints(e, attributes.glyph());
+				var ev = networkView.createEdgeView(e);
+				ev.getCircle1().setTranslateX(controlPoints[0]);
+				ev.getCircle1().setTranslateY(controlPoints[1]);
+				ev.getCircle2().setTranslateX(controlPoints[2]);
+				ev.getCircle2().setTranslateY(controlPoints[3]);
 				var label = attributes.label();
-
-				switch (attributes.glyph()) {
-					case StraightLine -> {
-						view.createEdgeView(e);
-						if (label != null)
-							view.addLabel(e, label.text(), label.dx(), label.dy());
-					}
-					case RectangleLine -> {
-						throw new RuntimeException("Not implemented");
-					}
-					case CubicCurve -> {
-						throw new RuntimeException("Not implemented");
-					}
-				}
+				if (label != null)
+					networkView.addLabel(e, label.text(), label.dx(), label.dy());
 			}
 		}
 	}

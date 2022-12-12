@@ -24,6 +24,7 @@ import javafx.geometry.Point2D;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.phylo.PhyloTree;
 import org.husonlab.phylosketch.network.Document;
+import org.husonlab.phylosketch.network.NetworkModel;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import java.util.Map;
  */
 public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 	private final Document document;
+	private final NetworkModel.EdgeGlyph glyph;
 	private final PhyloTree oldTree = new PhyloTree();
 	private final Map<Integer, Point2D> nodeTranslate = new HashMap<>();
 	private final Map<Integer, Point2D> nodeLabelLayout = new HashMap<>();
@@ -42,9 +44,10 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 	private final PhyloTree newTree = new PhyloTree();
 	private boolean canUndoRedo = true;
 
-	public ReplaceNetworkCommand(Document document, String newNewick) {
+	public ReplaceNetworkCommand(Document document, String newNewick, NetworkModel.EdgeGlyph glyph) {
 		super("Replace Network");
 		this.document = document;
+		this.glyph = glyph;
 		oldTree.copy(document.getModel().getTree());
 		for (var v : document.getModel().getTree().nodes()) {
 			var view = document.getNetworkView().getView(v);
@@ -90,6 +93,7 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 				label.setLayoutY(offset.getY());
 			}
 		}
+		ChangeEdgeShapeCommand.changeEdgeShape(document, glyph);
 	}
 
 	@Override
@@ -107,5 +111,6 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 				}
 			}
 		}
+		ChangeEdgeShapeCommand.changeEdgeShape(document, glyph);
 	}
 }

@@ -24,13 +24,11 @@ import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.util.converter.DoubleStringConverter;
-import jloda.fx.control.RichTextLabel;
+import javafx.scene.layout.*;
 import jloda.util.Single;
 
 import java.util.Objects;
@@ -41,7 +39,14 @@ public class PrimaryController {
 	private AnchorPane anchorPane;
 
 	@FXML
-	private Menu arrowMenu;
+	private CheckMenuItem boldCheckMenuItem;
+
+	@FXML
+	private CheckMenuItem italicCheckMenuItem;
+
+	@FXML
+	private CheckMenuItem underlineCheckMenuItem;
+
 
 	@FXML
 	private RadioMenuItem arrowNoneRadioMenuItem;
@@ -51,9 +56,6 @@ public class PrimaryController {
 
 	@FXML
 	private ColorPicker lineColorPicker;
-
-	@FXML
-	private Menu edgeShapeMenu;
 
 	@FXML
 	private RadioMenuItem editLabelMenuItem;
@@ -68,20 +70,7 @@ public class PrimaryController {
 	private ColorPicker fontColorPicker;
 
 	@FXML
-	private ToggleButton boldToggleButton;
-
-	@FXML
-	private ToggleButton italicToggleButton;
-
-	@FXML
-	private ToggleButton underlineToggleButton;
-
-	@FXML
 	private ComboBox<String> fontComboBox;
-
-	@FXML
-	private TextField fontSizeTextField;
-
 
 	@FXML
 	private Label modeLabel;
@@ -102,22 +91,10 @@ public class PrimaryController {
 	private RadioMenuItem rectangularEdgesRadioMenuItem;
 
 	@FXML
-	private Button redoButton;
-
-	@FXML
-	private Button resetButton;
-
-	@FXML
 	private RadioMenuItem roundEdgesRadioMenuItem;
 
 	@FXML
 	private ScrollPane scrollPane;
-
-	@FXML
-	private ToggleButton showNewickToggleButton;
-
-	@FXML
-	private Slider sizeSlider;
 
 	@FXML
 	private StackPane stackPane;
@@ -126,16 +103,8 @@ public class PrimaryController {
 	private RadioMenuItem straightEdgesRadioMenuItem;
 
 	@FXML
-	private MenuButton styleMenuButton;
-
-	@FXML
 	private Button importButton;
 
-	@FXML
-	private TextField infoTextField;
-
-	@FXML
-	private Button undoButton;
 
 	@FXML
 	private Slider widthSlider;
@@ -147,31 +116,51 @@ public class PrimaryController {
 	private Button decreaseFontSizeButton;
 
 	@FXML
-	private SplitPane splitPane;
+	private HBox newickHBox;
 
 	@FXML
 	private TextArea newickTextArea;
 
 	@FXML
+	private ToggleButton showNewickToggleButton;
+
+	@FXML
+	private ToggleButton showWeightsToggleButton;
+
+	@FXML
+	private ToggleButton showHTMLToggleButton;
+
+	@FXML
 	private VBox vBox;
 
 	@FXML
-	private ToolBar fontToolBar;
-
-	@FXML
-	private Button closeFontButton;
-
-	@FXML
-	private CheckMenuItem showFontsCheckMenuItem;
+	private Pane dragPane;
 
 	private final ToggleGroup modeToggleGroup = new ToggleGroup();
 	private final ToggleGroup edgeShapeToggleGroup = new ToggleGroup();
 	private final ToggleGroup arrowTypeToggleGroup = new ToggleGroup();
 
+	private final StringProperty infoString = new SimpleStringProperty("");
+
+	private final Button undoButton = MaterialDesignIcon.UNDO.button(a -> getUndoButton().fire());
+	private final Button redoButton = MaterialDesignIcon.REDO.button(a -> getRedoButton().fire());
 
 	@FXML
 	private void initialize() {
 		primary.getStylesheets().add(Objects.requireNonNull(PrimaryController.class.getResource("primary.css")).toExternalForm());
+
+		{
+			var newButton = MaterialDesignIcon.ZOOM_IN.button();
+			var pane = (Pane) increaseFontSizeButton.getParent();
+			pane.getChildren().set(pane.getChildren().indexOf(increaseFontSizeButton), newButton);
+			increaseFontSizeButton = newButton;
+		}
+		{
+			var newButton = MaterialDesignIcon.ZOOM_OUT.button();
+			var pane = (Pane) decreaseFontSizeButton.getParent();
+			pane.getChildren().set(pane.getChildren().indexOf(decreaseFontSizeButton), newButton);
+			decreaseFontSizeButton = newButton;
+		}
 
 		primary.showingProperty().addListener((obs, oldValue, newValue) -> {
 			if (newValue) {
@@ -179,8 +168,7 @@ public class PrimaryController {
 				appBar.setNavIcon(MaterialDesignIcon.MENU.button(e ->
 						AppManager.getInstance().getDrawer().open()));
 				appBar.setTitleText("PhyloSketch");
-				appBar.getActionItems().add(MaterialDesignIcon.SEARCH.button(e ->
-						System.err.println("Search")));
+				appBar.getActionItems().addAll(undoButton, redoButton);
 			}
 		});
 
@@ -204,55 +192,29 @@ public class PrimaryController {
 				Platform.runLater(() -> widthSlider.setValue(1));
 		});
 
-		// don't allow size 0
-		sizeSlider.valueChangingProperty().addListener((v, o, n) -> {
-			if (!n && sizeSlider.getValue() == 0)
-				Platform.runLater(() -> sizeSlider.setValue(1));
-		});
-
-		//infoTextField.setStyle("-fx-text-fill: white; -fx-background-color: -primary-swatch-500;");
-
-
-		var dividerPos = new Single<>(0.1);
-		primary.heightProperty().addListener((v, o, n) -> {
-			if (o.doubleValue() > 0) {
-				dividerPos.set(dividerPos.get() / o.doubleValue() * n.doubleValue());
-				splitPane.setDividerPositions(newickTextArea.isVisible() ? dividerPos.get() : 0);
-			}
-		});
-
 		showNewickToggleButton.setSelected(false);
 
-		newickTextArea.setVisible(false);
-		splitPane.setDividerPositions(0.0);
+		newickHBox.visibleProperty().bind(showNewickToggleButton.selectedProperty());
 
-		showNewickToggleButton.selectedProperty().addListener((v, o, n) -> {
-			splitPane.setDividerPositions(n ? dividerPos.get() : 0);
-			newickTextArea.setMinHeight(n ? 60 : 0);
-			newickTextArea.setVisible(n);
-			importButton.setVisible(n);
-		});
-		importButton.setVisible(false);
-
-		fontSizeTextField.setTextFormatter(new TextFormatter<>(new DoubleStringConverter()));
-		fontSizeTextField.setText(String.valueOf(RichTextLabel.DEFAULT_FONT.getSize()));
-
-		vBox.getChildren().remove(fontToolBar);
-
-		showFontsCheckMenuItem.selectedProperty().addListener((v, o, n) -> {
-			if (n) {
-				if (!vBox.getChildren().contains(fontToolBar))
-					vBox.getChildren().add(1, fontToolBar);
-			} else
-				vBox.getChildren().remove(fontToolBar);
+		infoString.addListener((v, o, n) -> {
+			var string = infoString.get();
+			if (string.isBlank() || string.equals("null"))
+				AppManager.getInstance().getAppBar().setTitleText("PhyloSketch");
+			AppManager.getInstance().getAppBar().setTitleText(infoString.get());
 		});
 
-		closeFontButton.setOnAction(a -> showFontsCheckMenuItem.setSelected(false));
-
-		newickTextArea.setStyle("-fx-font-family: 'Courier New';");
-
+		var mouseY = new Single<>(0.0);
+		dragPane.setOnMousePressed(e -> {
+			mouseY.set(e.getScreenY());
+		});
+		dragPane.setOnMouseDragged(e -> {
+			var deltaY = e.getScreenY() - mouseY.get();
+			var newHeight = vBox.getHeight() + deltaY;
+			if (newHeight > 60 && newHeight < 500)
+				vBox.setPrefHeight(newHeight);
+			mouseY.set(e.getScreenY());
+		});
 	}
-
 
 	public View getPrimary() {
 		return primary;
@@ -273,10 +235,6 @@ public class PrimaryController {
 
 	public StackPane getStackPane() {
 		return stackPane;
-	}
-
-	public Button getResetButton() {
-		return resetButton;
 	}
 
 	public Label getModeLabel() {
@@ -347,24 +305,12 @@ public class PrimaryController {
 		return arrowTypeToggleGroup;
 	}
 
-	public Menu getArrowMenu() {
-		return arrowMenu;
-	}
-
 	public ColorPicker getLineColorPicker() {
 		return lineColorPicker;
 	}
 
-	public Menu getEdgeShapeMenu() {
-		return edgeShapeMenu;
-	}
-
 	public ColorPicker getFontColorPicker() {
 		return fontColorPicker;
-	}
-
-	public Slider getSizeSlider() {
-		return sizeSlider;
 	}
 
 	public Slider getWidthSlider() {
@@ -375,10 +321,6 @@ public class PrimaryController {
 		return importButton;
 	}
 
-	public TextField getInfoTextField() {
-		return infoTextField;
-	}
-
 	public Button getIncreaseFontSizeButton() {
 		return increaseFontSizeButton;
 	}
@@ -387,23 +329,31 @@ public class PrimaryController {
 		return decreaseFontSizeButton;
 	}
 
-	public ToggleButton getBoldToggleButton() {
-		return boldToggleButton;
-	}
-
-	public ToggleButton getItalicToggleButton() {
-		return italicToggleButton;
-	}
-
-	public ToggleButton getUnderlineToggleButton() {
-		return underlineToggleButton;
-	}
-
 	public ComboBox<String> getFontComboBox() {
 		return fontComboBox;
 	}
 
-	public TextField getFontSizeTextField() {
-		return fontSizeTextField;
+	public CheckMenuItem getBoldCheckMenuItem() {
+		return boldCheckMenuItem;
+	}
+
+	public CheckMenuItem getItalicCheckMenuItem() {
+		return italicCheckMenuItem;
+	}
+
+	public CheckMenuItem getUnderlineCheckMenuItem() {
+		return underlineCheckMenuItem;
+	}
+
+	public StringProperty infoStringProperty() {
+		return infoString;
+	}
+
+	public ToggleButton getShowWeightsToggleButton() {
+		return showWeightsToggleButton;
+	}
+
+	public ToggleButton getShowHTMLToggleButton() {
+		return showHTMLToggleButton;
 	}
 }

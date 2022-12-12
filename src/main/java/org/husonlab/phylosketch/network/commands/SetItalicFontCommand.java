@@ -37,7 +37,7 @@ public class SetItalicFontCommand extends UndoableRedoableCommand {
 	 * constructor
 	 */
 	public SetItalicFontCommand(Document document, boolean italic) {
-		super("font size");
+		super("italic");
 
 		var networkView = document.getNetworkView();
 

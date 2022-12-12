@@ -37,7 +37,7 @@ public class SetBoldFontCommand extends UndoableRedoableCommand {
 	 * constructor
 	 */
 	public SetBoldFontCommand(Document document, boolean bold) {
-		super("font size");
+		super("bold");
 
 		var networkView = document.getNetworkView();
 
