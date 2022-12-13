@@ -20,7 +20,6 @@
   ~
   -->
 
-<?import com.gluonhq.charm.glisten.control.*?>
 <?import com.gluonhq.charm.glisten.mvc.View?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
@@ -28,6 +27,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import java.lang.String?>
+<?import com.gluonhq.charm.glisten.control.Icon?>
 <View fx:id="primary" prefHeight="600.0" prefWidth="600.0"
       stylesheets="@/org/husonlab/phylosketch/views/primary/primary.css" xmlns="http://javafx.com/javafx/18"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.primary.PrimaryController">
