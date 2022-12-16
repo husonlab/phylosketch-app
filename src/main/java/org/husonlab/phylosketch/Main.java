@@ -23,11 +23,15 @@ package org.husonlab.phylosketch;
 import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.visual.Swatch;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import jloda.phylo.PhyloTree;
+import org.husonlab.phylosketch.network.DefaultOptions;
 import org.husonlab.phylosketch.views.primary.PrimaryView;
+import org.husonlab.phylosketch.views.other.OtherView;
 import org.husonlab.phylosketch.views.secondary.SecondaryView;
 
 import java.io.IOException;
@@ -36,17 +40,23 @@ import static com.gluonhq.charm.glisten.application.AppManager.HOME_VIEW;
 
 public class Main extends Application {
 	public static final String PRIMARY_VIEW = HOME_VIEW;
-	public static final String SECONDARY_VIEW = "Configuration View";
+	public static final String SECONDARY = "Settings View";
+	public static final String OTHER_VIEW = "Other View";
 	public static final Swatch SWATCH = Swatch.TEAL;
 
 	private final AppManager appManager = AppManager.initialize(this::postInit);
 
+	private final ObjectProperty<PrimaryView> primaryView = new SimpleObjectProperty<>(this, "primaryView", null);
+
 	@Override
 	public void init() {
+		DefaultOptions.load();
+
 		PhyloTree.SUPPORT_RICH_NEWICK = true;
 		System.setProperty(com.gluonhq.attach.util.Constants.ATTACH_DEBUG, "true");
-		appManager.addViewFactory(PRIMARY_VIEW, () -> (new PrimaryView()).getView());
-		appManager.addViewFactory(SECONDARY_VIEW, () -> (new SecondaryView()).getView());
+		appManager.addViewFactory(PRIMARY_VIEW, () -> (new PrimaryView(primaryView)).getView());
+		appManager.addViewFactory(SECONDARY, () -> (new SecondaryView(primaryView.get())).getView());
+		appManager.addViewFactory(OTHER_VIEW, () -> (new OtherView()).getView());
 		DrawerManager.buildDrawer(appManager);
 	}
 
@@ -75,6 +85,12 @@ public class Main extends Application {
 		} catch (IOException exception) {
 			exception.printStackTrace();
 		}
+	}
+
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+		DefaultOptions.store();
 	}
 
 	public static void main(String[] args) {

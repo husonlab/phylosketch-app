@@ -141,11 +141,14 @@
                         <list>org.husonlab.phylosketch.views.primary.PrimaryView</list>
                         <list>org.husonlab.phylosketch.views.secondary.SecondaryController</list>
                         <list>org.husonlab.phylosketch.views.secondary.SecondaryView</list>
+                        <list>org.husonlab.phylosketch.views.other.OtherController</list>
+                        <list>org.husonlab.phylosketch.views.other.OtherView</list>
                         <list>org.husonlab.phylosketch.views.labeleditor.LabelEditor</list>
                         <list>org.husonlab.phylosketch.views.labeleditor.LabelEditorController</list>
                         <list>com.gluonhq.charm.glisten.control.DropdownButton</list>
                         <list>com.gluonhq.charm.glisten.control.Icon</list>
                         <list>com.gluonhq.charm.glisten.control.ToggleButtonGroup</list>
+                        <list>com.gluonhq.charm.glisten.control.SettingsPane</list>
                         <list>javafx.scene.control.Button</list>
                         <list>javafx.scene.control.CheckBox</list>
                         <list>javafx.scene.control.CheckMenuItem</list>
@@ -165,6 +168,7 @@
                         <list>javafx.scene.control.ToggleButton</list>
                         <list>javafx.scene.image.ImageView</list>
                         <list>javafx.scene.layout.FlowPane</list>
+                        <list>javafx.scene.layout.GridPane</list>
                         <list>javafx.scene.layout.HBox</list>
                     </reflectionList>
                 </configuration>

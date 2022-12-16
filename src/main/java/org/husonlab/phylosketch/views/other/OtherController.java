@@ -1,5 +1,5 @@
 /*
- * SecondaryController.java Copyright (C) 2022 Daniel H. Huson
+ * OtherController.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,56 +18,51 @@
  *
  */
 
-package org.husonlab.phylosketch.views.secondary;
+package org.husonlab.phylosketch.views.other;
 
 import com.gluonhq.charm.glisten.animation.BounceInRightTransition;
 import com.gluonhq.charm.glisten.application.AppManager;
-import com.gluonhq.charm.glisten.control.SettingsPane;
+import com.gluonhq.charm.glisten.control.AppBar;
+import com.gluonhq.charm.glisten.control.FloatingActionButton;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 
-import java.util.Objects;
-
-public class SecondaryController {
-
-	@FXML
-	private SettingsPane settingsPane;
+public class OtherController {
 
 	@FXML
 	private View view;
 
 	@FXML
-	private TextField propertiesField;
+	private FlowPane flowPane;
+
 
 	@FXML
 	private void initialize() {
-		view.getStylesheets().add(Objects.requireNonNull(SecondaryController.class.getResource("secondary.css")).toExternalForm());
-
 		view.setShowTransitionFactory(BounceInRightTransition::new);
+
+		FloatingActionButton fab = new FloatingActionButton(MaterialDesignIcon.INFO.text, e -> System.out.println("Info"));
+
+		fab.showOn(view);
 
 		view.showingProperty().addListener((obs, oldValue, newValue) -> {
 			if (newValue) {
-				var appBar = AppManager.getInstance().getAppBar();
-				appBar.setNavIcon(MaterialDesignIcon.MENU.button(e -> AppManager.getInstance().getDrawer().open()));
-				appBar.setTitleText("Properties and Settings");
+				AppBar appBar = AppManager.getInstance().getAppBar();
+				appBar.setNavIcon(MaterialDesignIcon.MENU.button(e ->
+						AppManager.getInstance().getDrawer().open()));
+				appBar.setTitleText("Other");
+				appBar.getActionItems().add(MaterialDesignIcon.FAVORITE.button(e ->
+						System.out.println("Favorite")));
 			}
 		});
-
-		settingsPane.setSearchBoxVisible(false);
 	}
 
 	public View getView() {
 		return view;
 	}
 
-	public SettingsPane getSettingsPane() {
-		return settingsPane;
-	}
-
-	public TextField getPropertiesField() {
-		return propertiesField;
+	public FlowPane getFlowPane() {
+		return flowPane;
 	}
 }

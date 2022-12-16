@@ -20,14 +20,37 @@
   ~
   -->
 
-<?import com.gluonhq.charm.glisten.mvc.View?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
-<?import java.lang.String?>
 <?import com.gluonhq.charm.glisten.control.Icon?>
+<?import com.gluonhq.charm.glisten.mvc.View?>
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
 <View fx:id="primary" prefHeight="600.0" prefWidth="600.0"
       stylesheets="@/org/husonlab/phylosketch/views/primary/primary.css" xmlns="http://javafx.com/javafx/18"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.primary.PrimaryController">
@@ -52,23 +75,26 @@
                     <children>
                         <VBox fx:id="vBox" HBox.hgrow="ALWAYS">
                             <children>
-                                <TextArea fx:id="newickTextArea" prefRowCount="0" wrapText="true" VBox.vgrow="ALWAYS"/>
+                                <TextArea fx:id="newickTextArea" prefRowCount="0"
+                                          style="-fx-font-size: 20; -fx-font-family: 'Courier New';" wrapText="true"
+                                          VBox.vgrow="ALWAYS"/>
                                 <Pane fx:id="dragPane" prefHeight="10.0" styleClass="background"/>
                             </children>
                         </VBox>
-                        <VBox alignment="BOTTOM_CENTER" spacing="5.0" styleClass="background">
+                        <VBox spacing="2.0" styleClass="background">
                             <children>
+                                <MenuButton fx:id="treesMenu" mnemonicParsing="false" text="();"/>
                                 <ToggleButton fx:id="showWeightsToggleButton" mnemonicParsing="false"
-                                              text="Show weights">
+                                              text="Show weights" VBox.vgrow="NEVER">
                                     <graphic>
-                                        <Icon content="SHORT_TEXT" styleClass="selected-toggle-button"/>
+                                        <Icon content="SHORT_TEXT"/>
                                     </graphic>
                                     <styleClass>
                                         <String fx:value="icon-toggle"/>
                                     </styleClass>
                                 </ToggleButton>
-                                <ToggleButton fx:id="showHTMLToggleButton" layoutX="10.0" layoutY="10.0"
-                                              mnemonicParsing="false" text="Show HTML">
+                                <ToggleButton fx:id="showHTMLToggleButton" mnemonicParsing="false" text="Show HTML"
+                                              VBox.vgrow="NEVER">
                                     <graphic>
                                         <Icon content="DEVELOPER_MODE"/>
                                     </graphic>
@@ -76,11 +102,15 @@
                                         <String fx:value="icon-toggle"/>
                                     </styleClass>
                                 </ToggleButton>
-                                <Button fx:id="importButton" contentDisplay="GRAPHIC_ONLY" minHeight="0.0"
-                                        mnemonicParsing="false" styleClass="icon-toggle" text="Import" textFill="WHITE">
+                                <Pane styleClass="background" VBox.vgrow="ALWAYS"/>
+                                <Button fx:id="importButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
+                                        styleClass="icon-toggle" text="Import" textFill="WHITE" VBox.vgrow="NEVER">
                                     <graphic>
                                         <Icon content="INPUT" minHeight="0.0"/>
                                     </graphic>
+                                    <VBox.margin>
+                                        <Insets bottom="5.0"/>
+                                    </VBox.margin>
                                 </Button>
                             </children>
                         </VBox>
@@ -89,6 +119,50 @@
                         <Insets right="5.0"/>
                     </padding>
                 </HBox>
+                <GridPane fx:id="zoomButtonPane" hgap="20.0" style="-fx-background-color: transparent;" vgap="10.0"
+                          AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER"/>
+                        <ColumnConstraints hgrow="NEVER"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints vgrow="NEVER"/>
+                        <RowConstraints vgrow="NEVER"/>
+                    </rowConstraints>
+                    <children>
+                        <Button fx:id="verticalZoomOutButton" contentDisplay="RIGHT" mnemonicParsing="false"
+                                style="-fx-font-size: 10; -fx-background-color: darkgray;" styleClass="icon-toggle"
+                                text="-" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <graphic>
+                                <Icon content="ARROW_DOWNWARD"/>
+                            </graphic>
+                        </Button>
+                        <Button fx:id="horizontalZoomInButton" layoutX="110.0" layoutY="10.0" mnemonicParsing="false"
+                                style="-fx-font-size: 10; -fx-background-color: darkgray;" styleClass="icon-toggle"
+                                text="+">
+                            <graphic>
+                                <Icon content="ARROW_FORWARD"/>
+                            </graphic>
+                            <font>
+                                <Font size="10.0"/>
+                            </font>
+                        </Button>
+                        <Button fx:id="verticalZoomInButton" alignment="TOP_CENTER" layoutX="10.0" layoutY="10.0"
+                                mnemonicParsing="false" style="-fx-font-size: 10; -fx-background-color: darkgray;"
+                                styleClass="icon-toggle" text="+" GridPane.columnIndex="1">
+                            <graphic>
+                                <Icon content="ARROW_UPWARD"/>
+                            </graphic>
+                        </Button>
+                        <Button fx:id="horizontalZoomOutButton" contentDisplay="RIGHT" layoutX="110.0" layoutY="10.0"
+                                mnemonicParsing="false" style="-fx-font-size: 10; -fx-background-color: darkgray;"
+                                styleClass="icon-toggle" text="-" GridPane.rowIndex="1">
+                            <graphic>
+                                <Icon content="ARROW_BACK"/>
+                            </graphic>
+                        </Button>
+                    </children>
+                </GridPane>
             </children>
         </AnchorPane>
     </center>
@@ -100,8 +174,8 @@
                     <children>
                         <FlowPane hgap="5.0" prefWrapLength="500.0" vgap="5.0" VBox.vgrow="ALWAYS">
                             <children>
-                                <MenuButton fx:id="modeMenuButton" contentDisplay="GRAPHIC_ONLY"
-                                            mnemonicParsing="false">
+                                <MenuButton fx:id="modeMenuButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
+                                            styleClass="icon-toggle">
                                     <items>
                                         <RadioMenuItem fx:id="panMenuItem" mnemonicParsing="false">
                                             <graphic>
@@ -133,7 +207,7 @@
                                         <Icon content="HELP_OUTLINE"/>
                                     </graphic>
                                 </MenuButton>
-                                <MenuButton mnemonicParsing="false">
+                                <MenuButton mnemonicParsing="false" styleClass="icon-toggle">
                                     <graphic>
                                         <Icon content="REPEAT"/>
                                     </graphic>
@@ -205,7 +279,7 @@
                                     </items>
                                 </MenuButton>
                                 <ComboBox fx:id="fontComboBox" maxWidth="150.0" minWidth="150.0" prefWidth="150.0"
-                                          promptText="Font"/>
+                                          promptText="Font" styleClass="icon-toggle"/>
                                 <MenuButton mnemonicParsing="false">
                                     <graphic>
                                         <Icon content="TEXT_FORMAT"/>
@@ -246,22 +320,14 @@
                                         <Icon content="ZOOM_OUT"/>
                                     </graphic>
                                 </Button>
-                                <HBox>
-                                    <children>
-                                        <ToggleButton fx:id="showNewickToggleButton" contentDisplay="TOP"
-                                                      mnemonicParsing="false">
-                                            <font>
-                                                <Font name="System Bold" size="13.0"/>
-                                            </font>
-                                            <styleClass>
-                                                <String fx:value="icon-toggle"/>
-                                            </styleClass>
-                                            <graphic>
-                                                <Icon content="KEYBOARD"/>
-                                            </graphic>
-                                        </ToggleButton>
-                                    </children>
-                                </HBox>
+                                <ToggleButton fx:id="showNewickToggleButton" mnemonicParsing="false" text="Show Newick">
+                                    <graphic>
+                                        <Icon content="KEYBOARD"/>
+                                    </graphic>
+                                    <styleClass>
+                                        <String fx:value="icon-toggle"/>
+                                    </styleClass>
+                                </ToggleButton>
                             </children>
                             <VBox.margin>
                                 <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>

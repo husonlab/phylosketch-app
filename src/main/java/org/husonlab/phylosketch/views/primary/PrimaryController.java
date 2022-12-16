@@ -23,14 +23,20 @@ package org.husonlab.phylosketch.views.primary;
 import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 import jloda.util.Single;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class PrimaryController {
@@ -136,11 +142,27 @@ public class PrimaryController {
 	@FXML
 	private Pane dragPane;
 
+	@FXML
+	private Button horizontalZoomInButton;
+
+	@FXML
+	private Button horizontalZoomOutButton;
+
+	@FXML
+	private Button verticalZoomInButton;
+
+	@FXML
+	private Button verticalZoomOutButton;
+
+	@FXML
+	private GridPane zoomButtonPane;
+
+	@FXML
+	private MenuButton treesMenu;
+
 	private final ToggleGroup modeToggleGroup = new ToggleGroup();
 	private final ToggleGroup edgeShapeToggleGroup = new ToggleGroup();
 	private final ToggleGroup arrowTypeToggleGroup = new ToggleGroup();
-
-	private final StringProperty infoString = new SimpleStringProperty("");
 
 	private final Button undoButton = MaterialDesignIcon.UNDO.button(a -> getUndoButton().fire());
 	private final Button redoButton = MaterialDesignIcon.REDO.button(a -> getRedoButton().fire());
@@ -196,13 +218,6 @@ public class PrimaryController {
 
 		newickHBox.visibleProperty().bind(showNewickToggleButton.selectedProperty());
 
-		infoString.addListener((v, o, n) -> {
-			var string = infoString.get();
-			if (string.isBlank() || string.equals("null"))
-				AppManager.getInstance().getAppBar().setTitleText("PhyloSketch");
-			AppManager.getInstance().getAppBar().setTitleText(infoString.get());
-		});
-
 		var mouseY = new Single<>(0.0);
 		dragPane.setOnMousePressed(e -> {
 			mouseY.set(e.getScreenY());
@@ -214,6 +229,27 @@ public class PrimaryController {
 				vBox.setPrefHeight(newHeight);
 			mouseY.set(e.getScreenY());
 		});
+
+		zoomButtonPane.cursorProperty().bind(scrollPane.cursorProperty());
+
+		for (var button : List.of(verticalZoomInButton, verticalZoomOutButton, horizontalZoomInButton, horizontalZoomOutButton)) {
+			button.setVisible(false);
+		}
+	}
+
+	public void showZoomButtons(boolean show) {
+		var transitions = new ArrayList<Transition>();
+		var to = (show ? 1.0 : 0.0);
+		for (var button : List.of(verticalZoomInButton, verticalZoomOutButton, horizontalZoomInButton, horizontalZoomOutButton)) {
+			button.setVisible(true);
+			var fade = new FadeTransition(Duration.seconds(0.75), button);
+			fade.setToValue(to);
+			transitions.add(fade);
+			fade.setOnFinished(a -> {
+				button.setVisible(show);
+			});
+		}
+		(new ParallelTransition(transitions.toArray(new Transition[0]))).play();
 	}
 
 	public View getPrimary() {
@@ -345,15 +381,35 @@ public class PrimaryController {
 		return underlineCheckMenuItem;
 	}
 
-	public StringProperty infoStringProperty() {
-		return infoString;
-	}
-
 	public ToggleButton getShowWeightsToggleButton() {
 		return showWeightsToggleButton;
 	}
 
 	public ToggleButton getShowHTMLToggleButton() {
 		return showHTMLToggleButton;
+	}
+
+	public Button getHorizontalZoomInButton() {
+		return horizontalZoomInButton;
+	}
+
+	public Button getHorizontalZoomOutButton() {
+		return horizontalZoomOutButton;
+	}
+
+	public Button getVerticalZoomInButton() {
+		return verticalZoomInButton;
+	}
+
+	public Button getVerticalZoomOutButton() {
+		return verticalZoomOutButton;
+	}
+
+	public GridPane getZoomButtonPane() {
+		return zoomButtonPane;
+	}
+
+	public MenuButton getTreesMenu() {
+		return treesMenu;
 	}
 }

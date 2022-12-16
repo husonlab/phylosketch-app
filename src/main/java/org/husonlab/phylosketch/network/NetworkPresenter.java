@@ -25,7 +25,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.SetChangeListener;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
@@ -112,13 +111,16 @@ public class NetworkPresenter {
 			 NodeArray<DoubleProperty> y = model.getTree().newNodeArray()) {
 			for (var v : model.getTree().nodes()) {
 				var attributes = model.getAttributes(v);
+				var size = attributes.height() != null ? attributes.height() : DefaultOptions.getNodeSize();
+				var fill = attributes.fill() != null ? attributes.fill() : DefaultOptions.getNodeColor();
+				var stroke = attributes.stroke() != null ? attributes.stroke() : DefaultOptions.getNodeColor();
 				var shape = switch (attributes.glyph()) {
-					case Square -> new SquareShape(attributes.height(), (Color) attributes.stroke(), (Color) attributes.fill());
-					case Circle -> new CircleShape(attributes.height());
+					case Square -> new SquareShape(size);
+					case Circle -> new CircleShape(size);
 				};
 				shape.setId("graph-node");
-				shape.setStroke(attributes.stroke());
-				shape.setFill(attributes.fill());
+				shape.setStroke(stroke);
+				shape.setFill(fill);
 				shape.setTranslateX(attributes.x());
 				shape.setTranslateY(attributes.y());
 				x.put(v, shape.translateXProperty());
@@ -140,6 +142,8 @@ public class NetworkPresenter {
 				var attributes = model.getAttributes(e);
 				var controlPoints = networkView.computeControlPoints(e, attributes.glyph());
 				var ev = networkView.createEdgeView(e);
+				ev.setStrokeWidth(attributes.strokeWidth() != null ? attributes.strokeWidth() : DefaultOptions.getEdgeWidth());
+				ev.setStroke(attributes.stroke() != null ? attributes.stroke() : DefaultOptions.getEdgeColor());
 				ev.getCircle1().setTranslateX(controlPoints[0]);
 				ev.getCircle1().setTranslateY(controlPoints[1]);
 				ev.getCircle2().setTranslateX(controlPoints[2]);

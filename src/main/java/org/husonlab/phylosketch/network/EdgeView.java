@@ -62,8 +62,8 @@ public class EdgeView {
 		curve.setId("graph-edge");
 		curve.setUserData(this);
 		curve.setFill(Color.TRANSPARENT);
-		curve.setStroke(Color.BLACK);
-		curve.setStrokeWidth(1);
+		curve.setStroke(DefaultOptions.getEdgeColor());
+		curve.setStrokeWidth(DefaultOptions.getEdgeWidth());
 		curve.setPickOnBounds(false);
 		curve.setStrokeLineCap(StrokeLineCap.ROUND);
 

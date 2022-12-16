@@ -39,11 +39,11 @@ import javafx.scene.text.Font;
 import javafx.util.Duration;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.AutoCompleteComboBox;
+import jloda.fx.util.BasicFX;
 import jloda.fx.util.RunAfterAWhile;
 import jloda.phylo.PhyloTree;
 import org.husonlab.phylosketch.Main;
-import org.husonlab.phylosketch.network.Document;
-import org.husonlab.phylosketch.network.NetworkModel;
+import org.husonlab.phylosketch.network.*;
 import org.husonlab.phylosketch.network.commands.*;
 
 import java.util.Objects;
@@ -62,7 +62,6 @@ public class PrimaryPresenter {
 	private final DoubleProperty textFieldFontSize = new SimpleDoubleProperty(this, "textFieldFontSize", 14);
 
 	public PrimaryPresenter(Document document, PrimaryView view, PrimaryController controller) {
-
 		if (!Main.isDesktop()) {
 			controller.getScrollPane().addEventFilter(InputEvent.ANY, a -> {
 				if (interactionModeProperty().get() != InteractionMode.Pan) {
@@ -282,9 +281,7 @@ public class PrimaryPresenter {
 		document.getGraphFX().lastUpdateProperty().addListener(nodeSelectionInvalidationListener);
 		nodeSelectionInvalidationListener.invalidated(null);
 
-		controller.getWidthSlider().setValue(1);
-
-		controller.infoStringProperty().bind(document.infoProperty());
+		controller.getWidthSlider().setValue(DefaultOptions.getEdgeWidth());
 
 		var newickText = controller.getNewickTextArea().textProperty();
 		var inputChanged = new SimpleBooleanProperty(this, "inputChanged", false);
@@ -292,7 +289,10 @@ public class PrimaryPresenter {
 		InvalidationListener updateNewickString = a -> {
 			newickText.set(document.getNewickString());
 			inputChanged.set(false);
+			var hasHTML = document.getNewickString(false, true).matches(".*<.*>.*");
+			controller.getShowHTMLToggleButton().setDisable(!hasHTML);
 		};
+		controller.getShowHTMLToggleButton().setDisable(true);
 
 		document.getGraphFX().lastUpdateProperty().addListener(updateNewickString);
 
@@ -346,20 +346,12 @@ public class PrimaryPresenter {
 					textFieldFontSize.set(1.0 / 1.2 * textFieldFontSize.get());
 				}));
 
-
-		textFieldFontSize.addListener((c, o, n) -> {
-			if (n.doubleValue() >= 10 && n.doubleValue() <= 32) {
-				controller.getNewickTextArea().setStyle("-fx-font-family: 'Courier New';-fx-font-size: %.1f;".formatted(n.doubleValue()));
-			}
-		});
-
-
 		controller.getItalicCheckMenuItem().setOnAction(a -> document.getUndoManager().doAndAdd(new SetItalicFontCommand(document, controller.getItalicCheckMenuItem().isSelected())));
 		controller.getBoldCheckMenuItem().setOnAction(a -> document.getUndoManager().doAndAdd(new SetBoldFontCommand(document, controller.getBoldCheckMenuItem().isSelected())));
 		controller.getUnderlineCheckMenuItem().setOnAction(a -> document.getUndoManager().doAndAdd(new SetUnderlineFontCommand(document, controller.getUnderlineCheckMenuItem().isSelected())));
 
 		controller.getFontComboBox().getItems().addAll(Font.getFamilies());
-		controller.getFontComboBox().setValue(RichTextLabel.getDefaultFont().getFamily());
+		controller.getFontComboBox().setValue(DefaultOptions.getLabelFontFamily());
 		controller.getFontComboBox().valueProperty().addListener((v, o, n) -> {
 			if (controller.getFontComboBox().getItems().contains(n))
 				document.getUndoManager().doAndAdd(new SetFontFamilyCommand(document, controller.getFontComboBox().getValue()));
@@ -375,6 +367,40 @@ public class PrimaryPresenter {
 				}
 			}
 		});
+
+		controller.getZoomButtonPane().mouseTransparentProperty().bind(interactionMode.isNotEqualTo(InteractionMode.Pan));
+
+		controller.getZoomButtonPane().setOnMouseEntered(e -> controller.showZoomButtons(interactionMode.get() == InteractionMode.Pan));
+		controller.getZoomButtonPane().setOnMouseExited(e -> controller.showZoomButtons(false));
+		controller.getHorizontalZoomInButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1.2, 1));
+		controller.getHorizontalZoomOutButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1.0 / 1.2, 1));
+		controller.getVerticalZoomInButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1, 1.2));
+		controller.getVerticalZoomOutButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1, 1.0 / 1.2));
+
+		DefaultOptions.textAreaFontSizeProperty().addListener((v, o, n) ->
+				controller.getNewickTextArea().setStyle("-fx-font-family: 'Courier New';-fx-font-size: %d;".formatted(n.intValue())));
+
+		DefaultOptions.labelFontFamilyProperty().addListener((v, o, n) -> {
+			var font = RichTextLabel.getDefaultFont();
+			RichTextLabel.setDefaultFont(Font.font(n, BasicFX.getWeight(font), BasicFX.getPosture(font), font.getSize()));
+		});
+
+		DefaultOptions.labelFontSizeProperty().addListener((v, o, n) -> {
+			NetworkPresenter.DEFAULT_FONT_SIZE.set(n.doubleValue());
+		});
+
+		InvalidationListener treesListener = e -> {
+			controller.getTreesMenu().getItems().clear();
+			for (var newick : DefaultOptions.getTrees()) {
+				var menuItem = new MenuItem(newick);
+				menuItem.setOnAction(a -> controller.getNewickTextArea().setText(newick));
+				controller.getTreesMenu().getItems().add(menuItem);
+				if (controller.getTreesMenu().getItems().size() > 10)
+					break; // ony keep last ten
+			}
+		};
+		DefaultOptions.getTrees().addListener(treesListener);
+		treesListener.invalidated(null);
 	}
 
 	private static boolean canParse(String newick, boolean first) {
@@ -394,5 +420,13 @@ public class PrimaryPresenter {
 
 	public ObjectProperty<InteractionMode> interactionModeProperty() {
 		return interactionMode;
+	}
+
+	public NetworkModel.EdgeGlyph getEdgeGlyph() {
+		return edgeGlyph.get();
+	}
+
+	public ObjectProperty<NetworkModel.EdgeGlyph> edgeGlyphProperty() {
+		return edgeGlyph;
 	}
 }

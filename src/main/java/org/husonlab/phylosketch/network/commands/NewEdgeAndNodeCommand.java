@@ -27,6 +27,7 @@ import jloda.fx.selection.SelectionModel;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
 import jloda.graph.Node;
+import org.husonlab.phylosketch.network.DefaultOptions;
 import org.husonlab.phylosketch.network.NetworkPresenter;
 import org.husonlab.phylosketch.network.NetworkView;
 
@@ -67,8 +68,12 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 				translateTransition.play();
 			} else if (edgeId > 0) {
 				var e = tree.findEdgeById(edgeId);
+				var w = e.getTarget();
 				networkView.removeView(e);
 				tree.deleteEdge(e);
+				if (w.getInDegree() == 1 && networkView.getView(w.getFirstInEdge()).getStroke().equals(DefaultOptions.getReticulateColor())) {
+					networkView.getView(w.getFirstInEdge()).setStroke(DefaultOptions.getEdgeColor());
+				}
 			}
 		};
 
@@ -95,6 +100,12 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 				w = tree.findNodeById(bId);
 
 			if (v.getCommonEdge(w) == null && v != w) {
+				if (w.getInDegree() == 1) {
+					for (var f : w.inEdges()) {
+						if (networkView.getView(f).getStroke().equals(DefaultOptions.getEdgeColor()))
+							networkView.getView(f).setStroke(DefaultOptions.getReticulateColor());
+					}
+				}
 				Edge e;
 				if (edgeId == 0) {
 					e = tree.newEdge(v, w);
@@ -103,6 +114,7 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 					e = tree.newEdge(v, w, null, edgeId);
 				}
 				networkView.createEdgeView(e);
+
 			}
 			if (wId > 0) Platform.runLater(() -> {
 				nodeSelection.clearSelection();

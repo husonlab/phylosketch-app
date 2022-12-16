@@ -34,8 +34,7 @@ import javafx.scene.image.ImageView;
 
 import java.util.Objects;
 
-import static org.husonlab.phylosketch.Main.PRIMARY_VIEW;
-import static org.husonlab.phylosketch.Main.SECONDARY_VIEW;
+import static org.husonlab.phylosketch.Main.*;
 
 public class DrawerManager {
 
@@ -49,9 +48,10 @@ public class DrawerManager {
 		var header = new NavigationDrawer.Header("PhyloSketch App", "Sketch phylogenetic trees and networks", iconView);
 		drawer.setHeader(header);
 
-		final var primaryItem = new ViewItem("Main", MaterialDesignIcon.HOME.graphic(), PRIMARY_VIEW, ViewStackPolicy.SKIP);
-		final var secondaryItem = new ViewItem("Configure", MaterialDesignIcon.DASHBOARD.graphic(), SECONDARY_VIEW);
-		drawer.getItems().addAll(primaryItem, secondaryItem);
+		final var primaryItem = new ViewItem("Main Viewer", MaterialDesignIcon.HOME.graphic(), PRIMARY_VIEW, ViewStackPolicy.SKIP);
+		final var secondaryItem = new ViewItem("Properties and Default Settings", MaterialDesignIcon.DASHBOARD.graphic(), SECONDARY);
+		final var otherItem = new ViewItem("Other", MaterialDesignIcon.INFO.graphic(), OTHER_VIEW);
+		drawer.getItems().addAll(primaryItem, secondaryItem, otherItem);
 
 		if (Platform.isDesktop()) {
 			final var quitItem = new Item("Quit", MaterialDesignIcon.EXIT_TO_APP.graphic());

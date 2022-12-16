@@ -32,6 +32,7 @@ import jloda.fx.util.DraggableUtils;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
 import jloda.util.Pair;
+import org.husonlab.phylosketch.network.DefaultOptions;
 import org.husonlab.phylosketch.network.NetworkView;
 import org.husonlab.phylosketch.network.NodeView;
 import org.husonlab.phylosketch.network.commands.NodeLabelCommand;
@@ -78,12 +79,11 @@ public class LabelEditingManager {
 
 		DraggableUtils.setupDragMouseLayout(editor.getRoot());
 
-		networkView.fontScaleProperty().addListener((v, o, n) -> {
-			var fontSize = 12 * n.doubleValue();
-			if (fontSize >= 12 && fontSize <= 40)
-				editor.getTextField().setStyle("-fx-font-size: %.1f;".formatted(fontSize));
+		DefaultOptions.textAreaFontSizeProperty().addListener((v, o, n) -> {
+			if (n.intValue() >= 12 && n.intValue() <= 40)
+				editor.getTextField().setStyle("-fx-font-size: %d;".formatted(n.intValue()));
 		});
-
+		editor.getTextField().setStyle("-fx-font-size: %d;".formatted(DefaultOptions.getTextAreaFontSize()));
 	}
 
 	public void startEditing(Node v) {

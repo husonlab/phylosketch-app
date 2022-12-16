@@ -20,31 +20,35 @@
   ~
   -->
 
+<?import com.gluonhq.charm.glisten.control.Icon?>
+<?import com.gluonhq.charm.glisten.control.SettingsPane?>
 <?import com.gluonhq.charm.glisten.mvc.View?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<View fx:id="secondary" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18"
+
+<View fx:id="view" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.secondary.SecondaryController">
-   <bottom>
-      <VBox alignment="CENTER" BorderPane.alignment="CENTER">
-         <children>
-            <Label text="Configure stuff here"/>
-         </children>
-      </VBox>
-   </bottom>
    <center>
-      <ScrollPane fitToWidth="true" pannable="true">
-         <content>
-            <FlowPane fx:id="flowPane" hgap="3.0" vgap="3.0">
-               <padding>
-                  <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
-               </padding>
-            </FlowPane>
-         </content>
-      </ScrollPane>
+      <SettingsPane fx:id="settingsPane" searchBoxVisible="false"/>
    </center>
+   <top>
+      <VBox spacing="20.0">
+         <children>
+            <Label contentDisplay="CENTER" text="Properties of current tree/network"/>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Icon content="INFO_OUTLINE"/>
+                  <TextField fx:id="propertiesField" editable="false" promptText="Properties of current tree/network"
+                             HBox.hgrow="ALWAYS"/>
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+         </padding>
+      </VBox>
+   </top>
 </View>

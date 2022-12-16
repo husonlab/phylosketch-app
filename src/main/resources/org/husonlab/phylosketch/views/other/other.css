@@ -1,5 +1,5 @@
 /*
- * secondary.css Copyright (C) 2022 Daniel H. Huson
+ * other.css Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,7 +18,6 @@
  *
  */
 
-.icon .label {
-    -fx-text-fill: -primary-swatch-500;
-    -fx-background-color: transparent;
+.view {
+
 }

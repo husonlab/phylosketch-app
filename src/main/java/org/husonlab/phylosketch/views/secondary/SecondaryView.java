@@ -21,27 +21,47 @@
 package org.husonlab.phylosketch.views.secondary;
 
 import com.gluonhq.charm.glisten.mvc.View;
+import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import org.husonlab.phylosketch.network.Document;
+import org.husonlab.phylosketch.views.primary.PrimaryView;
 
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * the settings view
+ * Daniel Huson, 12.22
+ */
 public class SecondaryView {
-	final private SecondaryPresenter presenter;
-	final private SecondaryController controller;
+	private final SecondaryController controller;
+	private final Parent root;
 
-	public SecondaryView() {
+	public SecondaryView(PrimaryView primaryView) {
 		var fxmlLoader = new FXMLLoader();
-		try (var ins = Objects.requireNonNull(SecondaryController.class.getResource("secondary.fxml")).openStream()) {
+		try (var ins = Objects.requireNonNull(SecondaryView.class.getResource("secondary.fxml")).openStream()) {
 			fxmlLoader.load(ins);
 		} catch (IOException ex) {
+			System.err.println(ex);
 			throw new RuntimeException(ex);
 		}
 		controller = fxmlLoader.getController();
-		presenter = new SecondaryPresenter(this, controller);
+		root = fxmlLoader.getRoot();
+
+		new SecondaryPresenter(controller, primaryView);
+	}
+
+	public SecondaryController getController() {
+		return controller;
+	}
+
+	public Node getRoot() {
+		return root;
 	}
 
 	public View getView() {
-		return controller.getSecondary();
+		return controller.getView();
 	}
 }

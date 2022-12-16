@@ -185,10 +185,12 @@ public class NetworkView {
 	}
 
 	public void createShapeAndLabel(Node v, double x, double y, String text, double labelDx, double labelDy) {
-		var shape = new CircleShape(2);
+		var shape = new CircleShape(DefaultOptions.getNodeSize());
 		shape.setId("graph-node");
 		shape.setTranslateX(x);
 		shape.setTranslateY(y);
+		shape.setFill(DefaultOptions.getNodeColor());
+		shape.setStroke(DefaultOptions.getNodeColor());
 		var label = new RichTextLabel(text);
 		label.translateXProperty().bind(shape.translateXProperty());
 		label.translateYProperty().bind(shape.translateYProperty());
@@ -229,6 +231,8 @@ public class NetworkView {
 		var source = getView(e.getSource()).shape();
 		var target = getView(e.getTarget()).shape();
 		var edgeView = new EdgeView(e, source.translateXProperty(), source.translateYProperty(), target.translateXProperty(), target.translateYProperty());
+		edgeView.setStroke(e.getTarget().getOutDegree() > 1 ? DefaultOptions.getReticulateColor() : DefaultOptions.getEdgeColor());
+		edgeView.setStrokeWidth(DefaultOptions.getEdgeWidth());
 		setView(e, edgeView);
 		return edgeView;
 	}
@@ -402,8 +406,8 @@ public class NetworkView {
 			case CubicCurve -> {
 				return new double[]{
 						vShape.getTranslateX(),
-						wShape.getTranslateY(),
-						wShape.getTranslateX(),
+						vShape.getTranslateY(),
+						vShape.getTranslateX(),
 						wShape.getTranslateY()
 				};
 			}

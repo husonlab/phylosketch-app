@@ -24,7 +24,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <HBox fx:id="rootPane" alignment="CENTER_LEFT" opacity="0.8" xmlns="http://javafx.com/javafx/18"
-      xmlns:fx="http://javafx.com/fxml/1"
+      xmlns:fx="http://javafx.com/fxml/1" stylesheets="@/org/husonlab/phylosketch/views/labeleditor/label_editor.css"
       fx:controller="org.husonlab.phylosketch.views.labeleditor.LabelEditorController">
     <children>
         <Icon content="LABEL_OUTLINE"/>

@@ -75,10 +75,11 @@ public class NetworkModel {
 				var vy = (point != null ? point.getY() : 0);
 				var text = tree.getLabel(v);
 				var label = new Label(10, -0.5 * NetworkPresenter.DEFAULT_FONT_SIZE.get(), 0, text != null ? text : "");
-				setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, 2, 2, Color.BLACK, Color.BLACK, label));
+				setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, null, null, null, null, label));
 			}
+
 			for (var e : tree.edges()) {
-				edgeAttributesMap.put(e, new EdgeAttributes(EdgeGlyph.StraightLine, 1.0, Color.BLACK, null));
+				edgeAttributesMap.put(e, new EdgeAttributes(EdgeGlyph.StraightLine, null, null, null));
 			}
 		}
 
@@ -166,13 +167,13 @@ public class NetworkModel {
 		edgeAttributesMap.put(e, attributes);
 	}
 
-	public static record NodeAttributes(double x, double y, NodeGlyph glyph, double width, double height, Paint stroke,
+	public static record NodeAttributes(double x, double y, NodeGlyph glyph, Double width, Double height, Paint stroke,
 										Paint fill, Label label) {
 	}
 
 	public static record Label(double dx, double dy, double angle, String text) {
 	}
 
-	public static record EdgeAttributes(EdgeGlyph glyph, double strokeWidth, Paint stroke, Label label) {
+	public static record EdgeAttributes(EdgeGlyph glyph, Double strokeWidth, Paint stroke, Label label) {
 	}
 }

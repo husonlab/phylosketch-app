@@ -18,9 +18,9 @@
  *
  */
 
-.icon {
-    -fx-background-color: transparent;
+.icon .label {
     -fx-text-fill: -primary-swatch-500;
+    -fx-background-color: white;
 }
 
 .text-field {

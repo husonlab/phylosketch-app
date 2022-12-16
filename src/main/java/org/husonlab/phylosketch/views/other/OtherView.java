@@ -1,5 +1,5 @@
 /*
- * secondary.css Copyright (C) 2022 Daniel H. Huson
+ * OtherView.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,7 +18,30 @@
  *
  */
 
-.icon .label {
-    -fx-text-fill: -primary-swatch-500;
-    -fx-background-color: transparent;
+package org.husonlab.phylosketch.views.other;
+
+import com.gluonhq.charm.glisten.mvc.View;
+import javafx.fxml.FXMLLoader;
+
+import java.io.IOException;
+import java.util.Objects;
+
+public class OtherView {
+	final private OtherPresenter presenter;
+	final private OtherController controller;
+
+	public OtherView() {
+		var fxmlLoader = new FXMLLoader();
+		try (var ins = Objects.requireNonNull(OtherController.class.getResource("other.fxml")).openStream()) {
+			fxmlLoader.load(ins);
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+		controller = fxmlLoader.getController();
+		presenter = new OtherPresenter(this, controller);
+	}
+
+	public View getView() {
+		return controller.getView();
+	}
 }

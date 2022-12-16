@@ -1,5 +1,5 @@
 /*
- * secondary.css Copyright (C) 2022 Daniel H. Huson
+ * OtherPresenter.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,7 +18,19 @@
  *
  */
 
-.icon .label {
-    -fx-text-fill: -primary-swatch-500;
-    -fx-background-color: transparent;
+package org.husonlab.phylosketch.views.other;
+
+
+import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+
+public class OtherPresenter {
+	public OtherPresenter(OtherView view, OtherController controller) {
+		for (var icon : MaterialDesignIcon.values()) {
+			var label = new Label(icon.name());
+			label.setStyle("-fx-font-size: 9;");
+			controller.getFlowPane().getChildren().add(new VBox(icon.graphic(), label));
+		}
+	}
 }

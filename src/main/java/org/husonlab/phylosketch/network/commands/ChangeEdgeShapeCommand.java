@@ -42,8 +42,10 @@ public class ChangeEdgeShapeCommand extends UndoableRedoableCommand {
 		super("change edge shape");
 
 		if (oldShape != newShape) {
-			undo = () -> changeEdgeShape(document, oldShape);
-			redo = () -> changeEdgeShape(document, newShape);
+			if (oldShape != null)
+				undo = () -> changeEdgeShape(document, oldShape);
+			if (newShape != null)
+				redo = () -> changeEdgeShape(document, newShape);
 		}
 	}
 

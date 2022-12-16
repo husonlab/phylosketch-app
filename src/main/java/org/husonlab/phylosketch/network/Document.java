@@ -34,6 +34,7 @@ import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
 import jloda.phylo.algorithms.RootedNetworkProperties;
+import jloda.util.NumberUtils;
 
 import java.io.IOException;
 
@@ -53,7 +54,6 @@ public class Document {
 
 	private final BooleanProperty toScale = new SimpleBooleanProperty(this, "toScale", false);
 	private final BooleanProperty showHTML = new SimpleBooleanProperty(this, "showHTML", false);
-
 
 	public Document() {
 		model = new NetworkModel();
@@ -77,15 +77,11 @@ public class Document {
 
 		graphFX.lastUpdateProperty().addListener(e -> {
 			var tree = getModel().getTree();
-			String heading;
-			if (tree.getNumberOfNodes() > 0 && tree.isConnected()) {
-				if (tree.hasReticulateEdges())
-					heading = "Network ";
-				else
-					heading = "Tree ";
-			} else
-				heading = "";
-			info.set(heading + RootedNetworkProperties.computeInfoString(tree).replace(", network", ""));
+			info.set(RootedNetworkProperties.computeInfoString(tree));
+
+			var newick = getNewickString();
+			if (!DefaultOptions.getTrees().contains(newick))
+				DefaultOptions.getTrees().add(0, newick);
 		});
 	}
 
@@ -137,16 +133,20 @@ public class Document {
 	}
 
 	public String getNewickString() {
-		if (isToScale() && !model.getTree().hasEdgeWeights()) {
+		return getNewickString(isToScale(), isShowHTML());
+	}
+
+	public String getNewickString(boolean toScale, boolean showHTML) {
+		if (toScale && !model.getTree().hasEdgeWeights()) {
 			for (var e : model.getTree().edges()) {
 				if (!model.getTree().isReticulateEdge(e)) {
-					var weight = Math.abs(networkView.getView(e.getSource()).shape().getTranslateX() - (networkView.getView(e.getTarget()).shape().getTranslateX()));
+					var weight = Math.max(1.0, Math.round(Math.abs(networkView.getView(e.getSource()).shape().getTranslateX() - (networkView.getView(e.getTarget()).shape().getTranslateX()))));
 					model.getTree().setWeight(e, weight);
 				}
 			}
 		}
 
-		if (!isShowHTML()) {
+		if (!showHTML) {
 			var tmpTree = new PhyloTree(model.getTree());
 			for (var v : tmpTree.nodes()) {
 				var label = tmpTree.getLabel(v);
@@ -154,9 +154,9 @@ public class Document {
 					tmpTree.setLabel(v, RichTextLabel.getRawText(label));
 				}
 			}
-			return tmpTree.toBracketString(isToScale()) + ";";
+			return tmpTree.toBracketString(toScale) + ";";
 		} else
-			return model.getTree().toBracketString(isToScale()) + ";";
+			return model.getTree().toBracketString(toScale) + ";";
 	}
 
 	public Iterable<Node> getSelectedOrAllNodes() {
