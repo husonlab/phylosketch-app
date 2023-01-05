@@ -33,18 +33,24 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import jloda.fx.control.RichTextLabel;
+import jloda.fx.util.AService;
 import jloda.fx.util.AutoCompleteComboBox;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.RunAfterAWhile;
 import jloda.phylo.PhyloTree;
 import org.husonlab.phylosketch.Main;
-import org.husonlab.phylosketch.network.*;
+import org.husonlab.phylosketch.network.DefaultOptions;
+import org.husonlab.phylosketch.network.Document;
+import org.husonlab.phylosketch.network.NetworkModel;
+import org.husonlab.phylosketch.network.NetworkPresenter;
 import org.husonlab.phylosketch.network.commands.*;
+import org.husonlab.phylosketch.utils.CursorUtils;
 
 import java.util.Objects;
 
@@ -56,8 +62,6 @@ public class PrimaryPresenter {
 	public enum ArrowType {ArrowNone, ArrowRight, ArrowLeft, ArrowBoth}
 
 	private final ObjectProperty<InteractionMode> interactionMode = new SimpleObjectProperty<>(this, "interactionMode", InteractionMode.Pan);
-
-	private final ObjectProperty<NetworkModel.EdgeGlyph> edgeGlyph = new SimpleObjectProperty<>(this, "edgeShape");
 
 	private final DoubleProperty textFieldFontSize = new SimpleDoubleProperty(this, "textFieldFontSize", 14);
 
@@ -83,11 +87,24 @@ public class PrimaryPresenter {
 			transition.play();
 			if (n != null) {
 				switch (n) {
-					case Pan -> controller.getScrollPane().setCursor(Cursor.OPEN_HAND);
-					case EditLabels -> controller.getScrollPane().setCursor(Cursor.TEXT);
-					case Move -> controller.getScrollPane().setCursor(Cursor.HAND);
-					case CreateNewEdges -> controller.getScrollPane().setCursor(Cursor.CROSSHAIR);
-					default -> controller.getScrollPane().setCursor(Cursor.DEFAULT);
+					case Pan:
+						controller.getScrollPane().setCursor(Cursor.OPEN_HAND);
+						break;
+					case EditLabels:
+						controller.getScrollPane().setCursor(Cursor.TEXT);
+						break;
+					case Move:
+						controller.getScrollPane().setCursor(Cursor.HAND);
+						break;
+					case Erase:
+						controller.getScrollPane().setCursor(CursorUtils.createEraserCursor());
+						break;
+					case CreateNewEdges:
+						controller.getScrollPane().setCursor(Cursor.CROSSHAIR);
+						break;
+					default:
+						controller.getScrollPane().setCursor(Cursor.DEFAULT);
+						break;
 				}
 			}
 		});
@@ -99,7 +116,7 @@ public class PrimaryPresenter {
 		controller.getRedoButton().setOnAction(e -> document.getUndoManager().redo());
 		controller.getRedoButton().disableProperty().bind(document.getUndoManager().redoableProperty().not());
 
-		if (com.gluonhq.attach.util.Platform.isDesktop()) {
+		if (Main.isDesktop()) {
 			controller.getStackPane().setOnScroll(e -> {
 				var factor = (e.getDeltaY() > 0 ? 1.1 : 1 / 1.1);
 				var box = view.getDocument().getNetworkView().getBoundingBox();
@@ -127,7 +144,8 @@ public class PrimaryPresenter {
 
 		controller.getModeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
 			Node graphic = null;
-			if (n instanceof MenuItem menuItem) {
+			if (n instanceof MenuItem) {
+				var menuItem = (MenuItem) n;
 				if (menuItem == controller.getPanMenuItem()) {
 					interactionMode.set(InteractionMode.Pan);
 					graphic = MaterialDesignIcon.PAN_TOOL.graphic();
@@ -141,7 +159,7 @@ public class PrimaryPresenter {
 				}
 				if (menuItem == controller.getEraseMenuItem()) {
 					interactionMode.set(InteractionMode.Erase);
-					graphic = MaterialDesignIcon.REMOVE_CIRCLE.graphic();
+					graphic = MaterialDesignIcon.BACKSPACE.graphic();
 				}
 				if (menuItem == controller.getEditLabelMenuItem()) {
 					interactionMode.set(InteractionMode.EditLabels);
@@ -156,15 +174,15 @@ public class PrimaryPresenter {
 		});
 		controller.getPanMenuItem().setSelected(true);
 
-		edgeGlyph.addListener((c, o, n) -> document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, o, n)));
+		document.edgeGlyphProperty().addListener((c, o, n) -> document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, o, n)));
 
 		controller.getEdgeShapeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
 			if (n == controller.getRectangularEdgesRadioMenuItem())
-				edgeGlyph.set(NetworkModel.EdgeGlyph.RectangleLine);
+				document.setEdgeGlyph(NetworkModel.EdgeGlyph.RectangleLine);
 			else if (n == controller.getRoundEdgesRadioMenuItem())
-				edgeGlyph.set(NetworkModel.EdgeGlyph.CubicCurve);
+				document.setEdgeGlyph(NetworkModel.EdgeGlyph.CubicCurve);
 			else
-				edgeGlyph.set(NetworkModel.EdgeGlyph.StraightLine);
+				document.setEdgeGlyph(NetworkModel.EdgeGlyph.StraightLine);
 		});
 		controller.getEdgeShapeToggleGroup().selectToggle(controller.getStraightEdgesRadioMenuItem());
 
@@ -177,7 +195,8 @@ public class PrimaryPresenter {
 		controller.getArrowTypeToggleGroup().selectToggle(controller.getArrowNoneRadioMenuItem());
 
 		controller.getWidthSlider().valueProperty().addListener((v, o, n) -> RunAfterAWhile.applyInFXThread(controller.getWidthSlider(), () -> {
-			document.getUndoManager().doAndAdd(new ChangeLineWidthCommand(document, n.doubleValue()));
+			if (o.doubleValue() > 0 && n.doubleValue() > 0)
+				document.getUndoManager().doAndAdd(new ChangeLineWidthCommand(document, n.doubleValue()));
 		}));
 
 		controller.getLineColorPicker().setOnAction(a -> {
@@ -307,7 +326,7 @@ public class PrimaryPresenter {
 		controller.getImportButton().setOnAction(a -> {
 			if (!newickText.get().endsWith(";"))
 				newickText.set(newickText.get() + ";");
-			document.getUndoManager().doAndAdd(new ReplaceNetworkCommand(document, newickText.get(), edgeGlyph.get()));
+			document.getUndoManager().doAndAdd(new ReplaceNetworkCommand(document, newickText.get()));
 			inputChanged.set(false);
 		});
 
@@ -370,15 +389,54 @@ public class PrimaryPresenter {
 
 		controller.getZoomButtonPane().mouseTransparentProperty().bind(interactionMode.isNotEqualTo(InteractionMode.Pan));
 
-		controller.getZoomButtonPane().setOnMouseEntered(e -> controller.showZoomButtons(interactionMode.get() == InteractionMode.Pan));
-		controller.getZoomButtonPane().setOnMouseExited(e -> controller.showZoomButtons(false));
-		controller.getHorizontalZoomInButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1.2, 1));
-		controller.getHorizontalZoomOutButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1.0 / 1.2, 1));
-		controller.getVerticalZoomInButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1, 1.2));
-		controller.getVerticalZoomOutButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1, 1.0 / 1.2));
+		if (Main.isDesktop()) {
+			controller.getZoomButtonPane().setOnMouseEntered(e -> {
+				if (interactionMode.get() == InteractionMode.Pan)
+					controller.showZoomButtons(true);
+			});
+			controller.getZoomButtonPane().setOnMouseExited(e -> {
+				controller.showZoomButtons(false);
+			});
+
+			controller.getHorizontalZoomInButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1.2, 1));
+			controller.getHorizontalZoomOutButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1.0 / 1.2, 1));
+			controller.getVerticalZoomInButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1, 1.2));
+			controller.getVerticalZoomOutButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1, 1.0 / 1.2));
+		} else {
+			var service = new AService<Boolean>();
+			service.setCallable(() -> {
+				Thread.sleep(4000);
+				controller.showZoomButtons(false);
+				return true;
+			});
+			controller.getZoomButtonPane().addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+				if (interactionMode.get() == InteractionMode.Pan) {
+					controller.showZoomButtons(true);
+					service.restart();
+				}
+			});
+			controller.getHorizontalZoomInButton().setOnAction(a -> {
+						view.getDocument().getNetworkView().scale(1.2, 1);
+						service.restart();
+					}
+			);
+			controller.getHorizontalZoomOutButton().setOnAction(a -> {
+				view.getDocument().getNetworkView().scale(1.0 / 1.2, 1);
+				service.restart();
+			});
+			controller.getVerticalZoomInButton().setOnAction(a -> {
+				view.getDocument().getNetworkView().scale(1, 1.2);
+				service.restart();
+			});
+			controller.getVerticalZoomOutButton().setOnAction(a -> {
+				view.getDocument().getNetworkView().scale(1, 1.0 / 1.2);
+				service.restart();
+			});
+			interactionMode.addListener(a -> controller.showZoomButtons(false));
+		}
 
 		DefaultOptions.textAreaFontSizeProperty().addListener((v, o, n) ->
-				controller.getNewickTextArea().setStyle("-fx-font-family: 'Courier New';-fx-font-size: %d;".formatted(n.intValue())));
+				controller.getNewickTextArea().setStyle(String.format("-fx-font-family: 'Courier New';-fx-font-size: %d;", n.intValue())));
 
 		DefaultOptions.labelFontFamilyProperty().addListener((v, o, n) -> {
 			var font = RichTextLabel.getDefaultFont();
@@ -420,13 +478,5 @@ public class PrimaryPresenter {
 
 	public ObjectProperty<InteractionMode> interactionModeProperty() {
 		return interactionMode;
-	}
-
-	public NetworkModel.EdgeGlyph getEdgeGlyph() {
-		return edgeGlyph.get();
-	}
-
-	public ObjectProperty<NetworkModel.EdgeGlyph> edgeGlyphProperty() {
-		return edgeGlyph;
 	}
 }

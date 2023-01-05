@@ -35,17 +35,23 @@ public class LabelEditorPresenter {
 
 		controller.getTextField().addEventFilter(KeyEvent.KEY_PRESSED, a -> {
 			switch (a.getCode()) {
-				case ENTER -> manager.finishEditing();
-				case UP -> manager.continueEditing(LabelEditingManager.Direction.Up);
-				case DOWN -> manager.continueEditing(LabelEditingManager.Direction.Down);
-				case LEFT -> {
+				case ENTER:
+					manager.finishEditing();
+					break;
+				case UP:
+					manager.continueEditing(LabelEditingManager.Direction.Up);
+					break;
+				case DOWN:
+					manager.continueEditing(LabelEditingManager.Direction.Down);
+					break;
+				case LEFT:
 					if (a.isShiftDown())
 						manager.continueEditing(LabelEditingManager.Direction.Left);
-				}
-				case RIGHT -> {
+					break;
+				case RIGHT:
 					if (a.isShiftDown())
 						manager.continueEditing(LabelEditingManager.Direction.Right);
-				}
+					break;
 			}
 		});
 	}

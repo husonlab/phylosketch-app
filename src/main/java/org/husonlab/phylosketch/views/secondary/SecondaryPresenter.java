@@ -29,10 +29,10 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.BasicFX;
+import jloda.fx.util.ProgramExecutorService;
 import jloda.fx.util.RunAfterAWhile;
 import org.husonlab.phylosketch.network.DefaultOptions;
 import org.husonlab.phylosketch.network.Document;
@@ -61,7 +61,7 @@ public class SecondaryPresenter {
 		controller.getSettingsPane().getOptions().addAll(treeOption);
 		treeOption.valueProperty().addListener((v, o, n) -> {
 			if (n != null && !n.equals(document.getNewickString())) {
-				document.getUndoManager().doAndAdd(new ReplaceNetworkCommand(document, n, primaryView.getPresenter().getEdgeGlyph()));
+				document.getUndoManager().doAndAdd(new ReplaceNetworkCommand(document, n));
 			}
 		});
 
@@ -142,7 +142,7 @@ public class SecondaryPresenter {
 		resetAll.addListener((v, o, n) -> {
 			if (n) {
 				DefaultOptions.resetAll();
-				RunAfterAWhile.applyInFXThread(resetAll, () -> resetAll.setValue(false));
+				ProgramExecutorService.submit(500, () -> Platform.runLater(() -> resetAll.setValue(false)));
 			}
 		});
 	}

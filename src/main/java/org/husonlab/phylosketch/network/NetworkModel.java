@@ -32,6 +32,8 @@ import org.husonlab.phylosketch.algorithms.embedding.HeightAndAngles;
 import org.husonlab.phylosketch.algorithms.embedding.LSATree;
 import org.husonlab.phylosketch.algorithms.embedding.LayoutTreeRectangular;
 
+import java.util.Objects;
+
 /**
  * model of a network with some node and edge attributes
  * Daniel Huson, 10.2022
@@ -167,13 +169,204 @@ public class NetworkModel {
 		edgeAttributesMap.put(e, attributes);
 	}
 
-	public static record NodeAttributes(double x, double y, NodeGlyph glyph, Double width, Double height, Paint stroke,
-										Paint fill, Label label) {
+	public static final class NodeAttributes {
+		private final double x;
+		private final double y;
+		private final NodeGlyph glyph;
+		private final Double width;
+		private final Double height;
+		private final Paint stroke;
+		private final Paint fill;
+		private final Label label;
+
+		public NodeAttributes(double x, double y, NodeGlyph glyph, Double width, Double height, Paint stroke,
+							  Paint fill, Label label) {
+			this.x = x;
+			this.y = y;
+			this.glyph = glyph;
+			this.width = width;
+			this.height = height;
+			this.stroke = stroke;
+			this.fill = fill;
+			this.label = label;
+		}
+
+		public double x() {
+			return x;
+		}
+
+		public double y() {
+			return y;
+		}
+
+		public NodeGlyph glyph() {
+			return glyph;
+		}
+
+		public Double width() {
+			return width;
+		}
+
+		public Double height() {
+			return height;
+		}
+
+		public Paint stroke() {
+			return stroke;
+		}
+
+		public Paint fill() {
+			return fill;
+		}
+
+		public Label label() {
+			return label;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) return true;
+			if (obj == null || obj.getClass() != this.getClass()) return false;
+			var that = (NodeAttributes) obj;
+			return Double.doubleToLongBits(this.x) == Double.doubleToLongBits(that.x) &&
+				   Double.doubleToLongBits(this.y) == Double.doubleToLongBits(that.y) &&
+				   Objects.equals(this.glyph, that.glyph) &&
+				   Objects.equals(this.width, that.width) &&
+				   Objects.equals(this.height, that.height) &&
+				   Objects.equals(this.stroke, that.stroke) &&
+				   Objects.equals(this.fill, that.fill) &&
+				   Objects.equals(this.label, that.label);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(x, y, glyph, width, height, stroke, fill, label);
+		}
+
+		@Override
+		public String toString() {
+			return "NodeAttributes[" +
+				   "x=" + x + ", " +
+				   "y=" + y + ", " +
+				   "glyph=" + glyph + ", " +
+				   "width=" + width + ", " +
+				   "height=" + height + ", " +
+				   "stroke=" + stroke + ", " +
+				   "fill=" + fill + ", " +
+				   "label=" + label + ']';
+		}
+
 	}
 
-	public static record Label(double dx, double dy, double angle, String text) {
+	public static final class Label {
+		private final double dx;
+		private final double dy;
+		private final double angle;
+		private final String text;
+
+		public Label(double dx, double dy, double angle, String text) {
+			this.dx = dx;
+			this.dy = dy;
+			this.angle = angle;
+			this.text = text;
+		}
+
+		public double dx() {
+			return dx;
+		}
+
+		public double dy() {
+			return dy;
+		}
+
+		public double angle() {
+			return angle;
+		}
+
+		public String text() {
+			return text;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) return true;
+			if (obj == null || obj.getClass() != this.getClass()) return false;
+			var that = (Label) obj;
+			return Double.doubleToLongBits(this.dx) == Double.doubleToLongBits(that.dx) &&
+				   Double.doubleToLongBits(this.dy) == Double.doubleToLongBits(that.dy) &&
+				   Double.doubleToLongBits(this.angle) == Double.doubleToLongBits(that.angle) &&
+				   Objects.equals(this.text, that.text);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(dx, dy, angle, text);
+		}
+
+		@Override
+		public String toString() {
+			return "Label[" +
+				   "dx=" + dx + ", " +
+				   "dy=" + dy + ", " +
+				   "angle=" + angle + ", " +
+				   "text=" + text + ']';
+		}
+
 	}
 
-	public static record EdgeAttributes(EdgeGlyph glyph, Double strokeWidth, Paint stroke, Label label) {
+	public static final class EdgeAttributes {
+		private final EdgeGlyph glyph;
+		private final Double strokeWidth;
+		private final Paint stroke;
+		private final Label label;
+
+		public EdgeAttributes(EdgeGlyph glyph, Double strokeWidth, Paint stroke, Label label) {
+			this.glyph = glyph;
+			this.strokeWidth = strokeWidth;
+			this.stroke = stroke;
+			this.label = label;
+		}
+
+		public EdgeGlyph glyph() {
+			return glyph;
+		}
+
+		public Double strokeWidth() {
+			return strokeWidth;
+		}
+
+		public Paint stroke() {
+			return stroke;
+		}
+
+		public Label label() {
+			return label;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) return true;
+			if (obj == null || obj.getClass() != this.getClass()) return false;
+			var that = (EdgeAttributes) obj;
+			return Objects.equals(this.glyph, that.glyph) &&
+				   Objects.equals(this.strokeWidth, that.strokeWidth) &&
+				   Objects.equals(this.stroke, that.stroke) &&
+				   Objects.equals(this.label, that.label);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(glyph, strokeWidth, stroke, label);
+		}
+
+		@Override
+		public String toString() {
+			return "EdgeAttributes[" +
+				   "glyph=" + glyph + ", " +
+				   "strokeWidth=" + strokeWidth + ", " +
+				   "stroke=" + stroke + ", " +
+				   "label=" + label + ']';
+		}
+
 	}
 }

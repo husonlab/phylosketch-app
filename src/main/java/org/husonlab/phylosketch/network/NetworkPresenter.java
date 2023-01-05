@@ -26,6 +26,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.SetChangeListener;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
@@ -64,12 +65,12 @@ public class NetworkPresenter {
 		modeProperty.addListener(a -> labelEditingManager.finishEditing());
 
 		networkView.setNodeViewAddedCallback(v -> {
-			NodeLabelInteraction.install(labelEditingManager, document.getUndoManager(), networkView, nodeSelection, edgeSelection, v, modeProperty);
+			NodeLabelInteraction.install(labelEditingManager, document, v, modeProperty);
 			// todo: need to edit this method
-			NodeShapeInteraction.install(labelEditingManager, pane, document.getUndoManager(), networkView, nodeSelection, edgeSelection, v, modeProperty);
+			NodeShapeInteraction.install(labelEditingManager, document, v, modeProperty);
 		});
 
-		networkView.setEdgeViewAddedCallback(e -> EdgeShapeInteraction.apply(pane, document.getUndoManager(), networkView, nodeSelection, edgeSelection, e, modeProperty));
+		networkView.setEdgeViewAddedCallback(e -> EdgeShapeInteraction.apply(document, e, modeProperty));
 
 		nodeSelection.getSelectedItems().addListener((SetChangeListener<? super Node>) c -> {
 			if (c.wasAdded()) {
@@ -106,18 +107,26 @@ public class NetworkPresenter {
 
 	public static void model2view(NetworkModel model, NetworkView networkView) {
 		networkView.clear();
+		var tree = model.getTree();
 
-		try (NodeArray<DoubleProperty> x = model.getTree().newNodeArray();
-			 NodeArray<DoubleProperty> y = model.getTree().newNodeArray()) {
-			for (var v : model.getTree().nodes()) {
+		try (NodeArray<DoubleProperty> x = tree.newNodeArray();
+			 NodeArray<DoubleProperty> y = tree.newNodeArray()) {
+			for (var v : tree.nodes()) {
 				var attributes = model.getAttributes(v);
 				var size = attributes.height() != null ? attributes.height() : DefaultOptions.getNodeSize();
 				var fill = attributes.fill() != null ? attributes.fill() : DefaultOptions.getNodeColor();
 				var stroke = attributes.stroke() != null ? attributes.stroke() : DefaultOptions.getNodeColor();
-				var shape = switch (attributes.glyph()) {
-					case Square -> new SquareShape(size);
-					case Circle -> new CircleShape(size);
-				};
+				Shape shape;
+				switch (attributes.glyph()) {
+					case Square:
+						shape = new SquareShape(size);
+						break;
+					case Circle:
+						shape = new CircleShape(size);
+						break;
+					default:
+						throw new IllegalArgumentException();
+				}
 				shape.setId("graph-node");
 				shape.setStroke(stroke);
 				shape.setFill(fill);
@@ -138,12 +147,18 @@ public class NetworkPresenter {
 				networkView.setView(v, nv);
 			}
 
-			for (var e : model.getTree().edges()) {
+			for (var e : tree.edges()) {
 				var attributes = model.getAttributes(e);
 				var controlPoints = networkView.computeControlPoints(e, attributes.glyph());
 				var ev = networkView.createEdgeView(e);
 				ev.setStrokeWidth(attributes.strokeWidth() != null ? attributes.strokeWidth() : DefaultOptions.getEdgeWidth());
-				ev.setStroke(attributes.stroke() != null ? attributes.stroke() : DefaultOptions.getEdgeColor());
+				if (attributes.stroke() != null)
+					ev.setStroke(attributes.stroke());
+				else if (tree.isTreeEdge(e) || tree.isTransferAcceptorEdge(e))
+					ev.setStroke(DefaultOptions.getEdgeColor());
+				else
+					ev.setStroke(DefaultOptions.getReticulateColor());
+
 				ev.getCircle1().setTranslateX(controlPoints[0]);
 				ev.getCircle1().setTranslateY(controlPoints[1]);
 				ev.getCircle2().setTranslateX(controlPoints[2]);

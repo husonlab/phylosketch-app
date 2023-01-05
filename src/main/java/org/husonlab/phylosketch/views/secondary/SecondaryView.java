@@ -25,6 +25,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import jloda.util.Basic;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.views.primary.PrimaryView;
 
@@ -44,7 +45,7 @@ public class SecondaryView {
 		try (var ins = Objects.requireNonNull(SecondaryView.class.getResource("secondary.fxml")).openStream()) {
 			fxmlLoader.load(ins);
 		} catch (IOException ex) {
-			System.err.println(ex);
+			Basic.caught(ex);
 			throw new RuntimeException(ex);
 		}
 		controller = fxmlLoader.getController();

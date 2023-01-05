@@ -27,10 +27,23 @@ import javafx.scene.layout.VBox;
 
 public class OtherPresenter {
 	public OtherPresenter(OtherView view, OtherController controller) {
-		for (var icon : MaterialDesignIcon.values()) {
-			var label = new Label(icon.name());
-			label.setStyle("-fx-font-size: 9;");
-			controller.getFlowPane().getChildren().add(new VBox(icon.graphic(), label));
+
+		if (true) {
+			controller.getFlowPane().getChildren().add(new Label("AwesomeIcons            "));
+			for (var icon : AwesomeIcon.values()) {
+				var label = new Label(icon.name());
+				label.setStyle("-fx-font-size: 9;");
+				controller.getFlowPane().getChildren().add(new VBox(icon.graphic(), label));
+			}
+		}
+
+		if (true) {
+			controller.getFlowPane().getChildren().add(new Label("MaterialDesignIcons             "));
+			for (var icon : MaterialDesignIcon.values()) {
+				var label = new Label(icon.name());
+				label.setStyle("-fx-font-size: 9;");
+				controller.getFlowPane().getChildren().add(new VBox(icon.graphic(), label));
+			}
 		}
 	}
 }

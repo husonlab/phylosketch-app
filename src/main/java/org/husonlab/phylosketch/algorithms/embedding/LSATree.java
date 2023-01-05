@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Computes the lsa consensus
+ * some methods for LSA trees
  * Daniel Huson, 7.2007
  */
 public class LSATree {
@@ -50,22 +50,20 @@ public class LSATree {
 
 		if (tree.getRoot() != null) {
 			// first we compute the reticulate node to lsa node mapping:
-			var lsaTree = new LSATree();
-			lsaTree.computeReticulation2LSA(tree, reticulation2LSA);
+			computeReticulation2LSA(tree, reticulation2LSA);
 
 			for (Node v : tree.nodes()) {
 				var children = v.outEdgesStream(false).filter(e -> !tree.isReticulateEdge(e))
 						.map(Edge::getTarget).collect(Collectors.toList());
 				tree.getLSAChildrenMap().put(v, children);
 			}
-			for (Node v = tree.getFirstNode(); v != null; v = v.getNext()) {
-				Node lsa = reticulation2LSA.get(v);
+			for (var v : tree.nodes()) {
+				var lsa = reticulation2LSA.get(v);
 				if (lsa != null)
 					tree.getLSAChildrenMap().get(lsa).add(v);
 			}
 		}
 	}
-
 
 	/**
 	 * recursively determine the number of edges between a reticulation and its lsa
@@ -75,8 +73,8 @@ public class LSATree {
 	private static NodeIntArray computeReticulationSize(PhyloTree tree, NodeArray<Node> reticulation2LSA) {
 		NodeIntArray rSize = new NodeIntArray(tree);
 
-		for (Node r = tree.getFirstNode(); r != null; r = r.getNext()) {
-			Node lsa = reticulation2LSA.get(r);
+		for (var r : tree.nodes()) {
+			var lsa = reticulation2LSA.get(r);
 			if (lsa != null) {
 				System.err.println("lsa: " + lsa + " r: " + r);
 				EdgeSet visited = new EdgeSet(tree);
@@ -92,7 +90,7 @@ public class LSATree {
 	 * recursively count edges from r upto lsa
 	 */
 	private static void computeReticulationSizeRec(Node r, Node lsa, EdgeSet visited) {
-		for (Edge e = r.getFirstInEdge(); e != null; e = r.getNextInEdge(e)) {
+		for (var e : r.inEdges()) {
 			if (!visited.contains(e) && e.getSource() != lsa) {
 				visited.add(e);
 				computeReticulationSizeRec(e.getSource(), lsa, visited);
@@ -100,29 +98,22 @@ public class LSATree {
 		}
 	}
 
-
-	NodeArray<BitSet> ret2PathSet;
-	NodeArray<EdgeArray<BitSet>> ret2Edge2PathSet;
-	NodeArray<Node> reticulation2LSA;
-	NodeArray<Set<Node>> node2below;
-
 	/**
 	 * compute the reticulate node to lsa node mapping
 	 */
-	public void computeReticulation2LSA(PhyloTree network, NodeArray<Node> reticulation2LSA) {
+	public static void computeReticulation2LSA(PhyloTree tree, NodeArray<Node> reticulation2LSA) {
 		reticulation2LSA.clear();
-		ret2PathSet = new NodeArray<>(network);
-		ret2Edge2PathSet = new NodeArray<>(network);
-		this.reticulation2LSA = reticulation2LSA;
-		node2below = new NodeArray<>(network); // set of reticulation nodes below a given node
-
-		computeReticulation2LSARec(network, network.getRoot());
+		try (NodeArray<BitSet> ret2PathSet = tree.newNodeArray();
+			 NodeArray<EdgeArray<BitSet>> ret2Edge2PathSet = tree.newNodeArray();
+			 NodeArray<Set<Node>> node2below = tree.newNodeArray()) {
+			computeReticulation2LSARec(tree, tree.getRoot(), reticulation2LSA, ret2PathSet, ret2Edge2PathSet, node2below);
+		}
 	}
 
 	/**
 	 * recursively compute the mapping of reticulate nodes to their lsa nodes
 	 */
-	private void computeReticulation2LSARec(PhyloTree tree, Node v) {
+	private static void computeReticulation2LSARec(PhyloTree tree, Node v, NodeArray<Node> reticulation2LSA, NodeArray<BitSet> ret2PathSet, NodeArray<EdgeArray<BitSet>> ret2Edge2PathSet, NodeArray<Set<Node>> node2below) {
 		if (v.getInDegree() > 1) // this is a reticulate node, add paths to node and incoming edges
 		{
 			// create new paths for this node:
@@ -148,7 +139,7 @@ public class LSATree {
 		for (Edge f = v.getFirstOutEdge(); f != null; f = v.getNextOutEdge(f)) {
 			Node w = f.getTarget();
 			if (node2below.get(w) == null) // if haven't processed child yet, do it:
-				computeReticulation2LSARec(tree, w);
+				computeReticulation2LSARec(tree, w, reticulation2LSA, ret2PathSet, ret2Edge2PathSet,node2below);
 			reticulationsBelow.addAll(node2below.get(w));
 			if (w.getInDegree() > 1)
 				reticulationsBelow.add(w);
@@ -208,62 +199,6 @@ public class LSATree {
 					pathsForEdge.set(pathNum);
 					edge2PathSet.put(e, pathsForEdge);
 				}
-			}
-		}
-	}
-
-	NodeArray<NodeDoubleArray> ret2Node2Length;
-	NodeDoubleArray ret2length;
-
-	/**
-	 * computes the reticulation 2 lsa edge length map, after running the lsa computation
-	 *
-	 * @return mapping from reticulation nodes to the edge lengths
-	 */
-	private NodeDoubleArray computeReticulation2LSAEdgeLength(PhyloTree tree) {
-		ret2Node2Length = new NodeArray<>(tree);
-		ret2length = new NodeDoubleArray(tree);
-
-		for (Node v = tree.getFirstNode(); v != null; v = v.getNext()) {
-			if (v.getInDegree() > 1)
-				ret2Node2Length.put(v, new NodeDoubleArray(tree));
-			// if(v.getOutDegree()>0) tree.setLabel(v,""+v.getId());
-		}
-
-		computeReticulation2LSAEdgeLengthRec(tree, tree.getRoot(), new NodeSet(tree));
-		return ret2length;
-	}
-
-	/**
-	 * recursively does the work
-	 */
-	private void computeReticulation2LSAEdgeLengthRec(PhyloTree tree, Node v, NodeSet visited) {
-		if (!visited.contains(v)) {
-			visited.add(v);
-
-			Set<Node> reticulationsBelow = new HashSet<>();
-
-			for (Edge f = v.getFirstOutEdge(); f != null; f = v.getNextOutEdge(f)) {
-				computeReticulation2LSAEdgeLengthRec(tree, f.getTarget(), visited);
-				reticulationsBelow.addAll(node2below.get(f.getTarget()));
-			}
-
-			reticulationsBelow.removeAll(node2below.get(v)); // because reticulations mentioned here don't hve v as LSA
-
-			for (Node r : reticulationsBelow) {
-				NodeDoubleArray node2Dist = ret2Node2Length.get(r);
-				double length = 0;
-				for (Edge f = v.getFirstOutEdge(); f != null; f = v.getNextOutEdge(f)) {
-					Node w = f.getTarget();
-					length += node2Dist.getDouble(w);
-					if (!tree.isReticulateEdge(f))
-						length += tree.getWeight(f);
-				}
-				if (v.getOutDegree() > 0)
-					length /= v.getOutDegree();
-				node2Dist.put(v, length);
-				if (reticulation2LSA.get(r) == v)
-					ret2length.put(r, length);
 			}
 		}
 	}

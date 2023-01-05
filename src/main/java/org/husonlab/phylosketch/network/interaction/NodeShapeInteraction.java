@@ -25,19 +25,18 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.input.InputEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import jloda.fx.selection.SelectionModel;
-import jloda.fx.undo.UndoManager;
 import jloda.fx.util.GeometryUtilsFX;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.graph.algorithms.IsDAG;
 import jloda.util.Single;
 import org.husonlab.phylosketch.Main;
-import org.husonlab.phylosketch.network.NetworkView;
+import org.husonlab.phylosketch.network.Document;
+import org.husonlab.phylosketch.network.commands.DeleteSubTreeCommand;
 import org.husonlab.phylosketch.network.commands.MoveSelectedNodesCommand;
 import org.husonlab.phylosketch.network.commands.NewEdgeAndNodeCommand;
 import org.husonlab.phylosketch.views.primary.InteractionMode;
@@ -63,8 +62,11 @@ public class NodeShapeInteraction {
 
 	public final static SelectOnlyService selectOnlyService = new SelectOnlyService();
 
-	public static void install(LabelEditingManager editingManager, Pane pane, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
-							   SelectionModel<Edge> edgeSelection, Node v, ObjectProperty<InteractionMode> tool) {
+	public static void install(LabelEditingManager editingManager, Document document, Node v, ObjectProperty<InteractionMode> mode) {
+		var networkView = document.getNetworkView();
+		var nodeSelection = document.getNodeSelection();
+		var edgeSelection = document.getEdgeSelection();
+
 		var shape = networkView.getView(v).shape();
 		var shapeBelow = networkView.getView(v).shapeBelow();
 
@@ -106,7 +108,7 @@ public class NodeShapeInteraction {
 
 			selectOnlyService.restart(nodeSelection, edgeSelection, v);
 
-			currentTool.set(tool.get());
+			currentTool.set(mode.get());
 
 			startScenePosition[0] = previousScenePosition[0] = a.getSceneX();
 			startScenePosition[1] = previousScenePosition[1] = a.getSceneY();
@@ -215,11 +217,10 @@ public class NodeShapeInteraction {
 				if (moved.get()) {
 					final double dx = previousScenePosition[0] - startScenePosition[0];
 					final double dy = previousScenePosition[1] - startScenePosition[1];
-					undoManager.add(new MoveSelectedNodesCommand(dx, dy, networkView,
+					document.getUndoManager().add(new MoveSelectedNodesCommand(dx, dy, networkView,
 							nodeSelection.getSelectedItems(), oldControlPointLocations, newControlPointLocations));
 				}
 			} else if (currentTool.get() == InteractionMode.CreateNewEdges) {
-
 				if (GeometryUtilsFX.distance(shape.getTranslateX(), shape.getTranslateY(), circle.getTranslateX(), circle.getTranslateY()) >= 5) {
 					var w = networkView.findNodeIfHit(a.getScreenX(), a.getScreenY());
 					if (w == null && target.get() != null)
@@ -236,9 +237,11 @@ public class NodeShapeInteraction {
 						}
 					}
 					if (isDag) {
-						undoManager.doAndAdd(new NewEdgeAndNodeCommand(networkView, nodeSelection, v, w, circle.getTranslateX(), circle.getTranslateY()));
+						document.getUndoManager().doAndAdd(new NewEdgeAndNodeCommand(networkView, nodeSelection, v, w, circle.getTranslateX(), circle.getTranslateY()));
 					}
 				}
+			} else if (currentTool.get() == InteractionMode.Erase) {
+				document.getUndoManager().doAndAdd(new DeleteSubTreeCommand(document, v));
 			}
 			networkView.getWorld().getChildren().remove(line);
 			networkView.getWorld().getChildren().remove(circle);

@@ -40,7 +40,7 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 
 	private final PhyloTree newTree = new PhyloTree();
 
-	public ReplaceNetworkCommand(Document document, String newNewick, NetworkModel.EdgeGlyph glyph) {
+	public ReplaceNetworkCommand(Document document, String newNewick) {
 		super("Replace Network");
 
 		var oldTree = new PhyloTree();
@@ -81,7 +81,7 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 						label.setLayoutY(offset.getY());
 					}
 				}
-				ChangeEdgeShapeCommand.changeEdgeShape(document, glyph);
+				ChangeEdgeShapeCommand.changeEdgeShape(document, document.getEdgeGlyph());
 			};
 
 			redo = () -> {
@@ -98,7 +98,7 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 						}
 					}
 				}
-				ChangeEdgeShapeCommand.changeEdgeShape(document, glyph);
+				ChangeEdgeShapeCommand.changeEdgeShape(document, document.getEdgeGlyph());
 			};
 		} catch (IOException ignored) {
 		}

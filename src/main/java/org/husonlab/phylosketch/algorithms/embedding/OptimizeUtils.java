@@ -429,14 +429,13 @@ public class OptimizeUtils {
         }
         //recursion
         else {
-            TreeSet<String> set = new TreeSet<>();
-            for (Edge f : v.outEdges()) {
-                var w = f.getTarget();
-                set.addAll(collectAllHardwiredClustersRec(tree, w, clusters));
-            }
-            clusters.add(set);
-            return set;
-        }
+			var set = new TreeSet<String>();
+			for (var w : v.children()) {
+				set.addAll(collectAllHardwiredClustersRec(tree, w, clusters));
+			}
+			clusters.add(set);
+			return set;
+		}
     }
 
     /**

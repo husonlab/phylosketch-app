@@ -27,7 +27,9 @@ import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.util.Single;
 import org.husonlab.phylosketch.Main;
+import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkView;
+import org.husonlab.phylosketch.network.commands.DeleteSubTreeCommand;
 import org.husonlab.phylosketch.network.commands.MoveSelectedNodeLabelsCommand;
 import org.husonlab.phylosketch.views.primary.InteractionMode;
 
@@ -40,8 +42,11 @@ import static org.husonlab.phylosketch.network.interaction.NodeShapeInteraction.
  */
 public class NodeLabelInteraction {
 
-	public static void install(LabelEditingManager editingManager, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
-							   SelectionModel<Edge> edgeSelection, Node v, ObjectProperty<InteractionMode> tool) {
+	public static void install(LabelEditingManager editingManager, Document document, Node v, ObjectProperty<InteractionMode> mode) {
+		var networkView = document.getNetworkView();
+		var nodeSelection = document.getNodeSelection();
+		var edgeSelection = document.getEdgeSelection();
+
 		var label = networkView.getView(v).label();
 		var labelShapeBelow = networkView.getView(v).labelShapeBelow();
 
@@ -63,7 +68,7 @@ public class NodeLabelInteraction {
 
 			selectOnlyService.restart(nodeSelection, edgeSelection, v);
 
-			currentTool.set(tool.get());
+			currentTool.set(mode.get());
 			if (currentTool.get() == InteractionMode.Move) { // move label
 				startScenePosition[0] = previousScenePosition[0] = a.getSceneX();
 				startScenePosition[1] = previousScenePosition[1] = a.getSceneY();
@@ -114,8 +119,10 @@ public class NodeLabelInteraction {
 			}
 
 			if (currentTool.get() == InteractionMode.Move) {
-				undoManager.add(new MoveSelectedNodeLabelsCommand(a.getSceneX() - startScenePosition[0],
+				document.getUndoManager().add(new MoveSelectedNodeLabelsCommand(a.getSceneX() - startScenePosition[0],
 						a.getSceneY() - startScenePosition[1], networkView, nodeSelection.getSelectedItems()));
+			} else if (currentTool.get() == InteractionMode.Erase) {
+				document.getUndoManager().doAndAdd(new DeleteSubTreeCommand(document, v));
 			}
 			moved.set(false);
 			a.consume();

@@ -27,11 +27,66 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import jloda.fx.control.RichTextLabel;
 
+import java.util.Objects;
+
 /**
  * node view
  * Daniel Huson, 10.2022
  */
-public final record NodeView(Shape shape, Shape shapeBelow, RichTextLabel label, Shape labelShapeBelow) {
+public final class NodeView {
+	private final Shape shape;
+	private final Shape shapeBelow;
+	private final RichTextLabel label;
+	private final Shape labelShapeBelow;
+
+	NodeView(Shape shape, Shape shapeBelow, RichTextLabel label, Shape labelShapeBelow) {
+		this.shape = shape;
+		this.shapeBelow = shapeBelow;
+		this.label = label;
+		this.labelShapeBelow = labelShapeBelow;
+	}
+
+	public Shape shape() {
+		return shape;
+	}
+
+	public Shape shapeBelow() {
+		return shapeBelow;
+	}
+
+	public RichTextLabel label() {
+		return label;
+	}
+
+	public Shape labelShapeBelow() {
+		return labelShapeBelow;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) return true;
+		if (obj == null || obj.getClass() != this.getClass()) return false;
+		var that = (NodeView) obj;
+		return Objects.equals(this.shape, that.shape) &&
+			   Objects.equals(this.shapeBelow, that.shapeBelow) &&
+			   Objects.equals(this.label, that.label) &&
+			   Objects.equals(this.labelShapeBelow, that.labelShapeBelow);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(shape, shapeBelow, label, labelShapeBelow);
+	}
+
+	@Override
+	public String toString() {
+		return "NodeView[" +
+			   "shape=" + shape + ", " +
+			   "shapeBelow=" + shapeBelow + ", " +
+			   "label=" + label + ", " +
+			   "labelShapeBelow=" + labelShapeBelow + ']';
+	}
+
 	/**
 	 * constructs a node view, with shapes below
 	 *

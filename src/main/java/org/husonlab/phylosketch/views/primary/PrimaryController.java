@@ -34,6 +34,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 import jloda.util.Single;
+import org.husonlab.phylosketch.views.other.AwesomeIcon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,6 +170,8 @@ public class PrimaryController {
 
 	@FXML
 	private void initialize() {
+		eraseMenuItem.setGraphic(AwesomeIcon.ERASER.graphic());
+
 		primary.getStylesheets().add(Objects.requireNonNull(PrimaryController.class.getResource("primary.css")).toExternalForm());
 
 		{
@@ -199,7 +202,8 @@ public class PrimaryController {
 		});
 
 		for (var item : modeMenuButton.getItems()) {
-			if (item instanceof RadioMenuItem radioMenuItem) {
+			if (item instanceof RadioMenuItem) {
+				var radioMenuItem = (RadioMenuItem) item;
 				modeToggleGroup.getToggles().add(radioMenuItem);
 			}
 		}

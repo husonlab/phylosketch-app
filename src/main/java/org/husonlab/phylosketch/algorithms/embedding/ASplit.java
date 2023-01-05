@@ -128,7 +128,8 @@ public final class ASplit extends BiPartition {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof final ASplit that) {
+		if (obj instanceof ASplit) {
+			var that = (ASplit) obj;
 			return getPartContaining(1).equals(that.getPartContaining(1)) && getPartNotContaining(1).equals(that.getPartNotContaining(1));
 		} else
 			return false;

@@ -21,15 +21,12 @@
 package org.husonlab.phylosketch.network.interaction;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
-import jloda.fx.selection.SelectionModel;
-import jloda.fx.undo.UndoManager;
 import jloda.graph.Edge;
-import jloda.graph.Node;
 import jloda.util.Pair;
 import org.husonlab.phylosketch.Main;
-import org.husonlab.phylosketch.network.NetworkView;
+import org.husonlab.phylosketch.network.Document;
+import org.husonlab.phylosketch.network.commands.DeleteSubTreeCommand;
 import org.husonlab.phylosketch.network.commands.EdgeShapeCommand;
 import org.husonlab.phylosketch.utils.MouseDragClosestNode;
 import org.husonlab.phylosketch.views.primary.InteractionMode;
@@ -44,8 +41,11 @@ import static org.husonlab.phylosketch.network.interaction.NodeShapeInteraction.
  */
 public class EdgeShapeInteraction {
 
-	public static void apply(Pane pane, UndoManager undoManager, NetworkView networkView, SelectionModel<Node> nodeSelection,
-							 SelectionModel<Edge> edgeSelection, Edge e, ObjectProperty<InteractionMode> tool) {
+	public static void apply(Document document, Edge e, ObjectProperty<InteractionMode> mode) {
+		var networkView = document.getNetworkView();
+		var nodeSelection = document.getNodeSelection();
+		var edgeSelection = document.getEdgeSelection();
+
 		var ev = networkView.getView(e);
 		var curve = ev.curve();
 		var curveBelow = ev.curveBelow();
@@ -67,7 +67,7 @@ public class EdgeShapeInteraction {
 		var targetShape = networkView.getView(e.getTarget()).shape();
 
 		MouseDragClosestNode.setup(curveBelow, sourceShape, ev.getCircle1(), targetShape, ev.getCircle2(), networkView.getWorld(),
-				(circle, delta) -> undoManager.add(new EdgeShapeCommand(networkView, translatingControl.apply((Circle) circle), delta)),
+				(circle, delta) -> document.getUndoManager().add(new EdgeShapeCommand(networkView, translatingControl.apply((Circle) circle), delta)),
 				a -> {
 					if (Main.isDesktop() && a.isShiftDown())
 						edgeSelection.toggleSelection(e);
@@ -87,7 +87,9 @@ public class EdgeShapeInteraction {
 						edgeSelection.clearSelection();
 						edgeSelection.select(e);
 					}
+					if (mode.get() == InteractionMode.Erase)
+						document.getUndoManager().doAndAdd(new DeleteSubTreeCommand(document, e.getTarget()));
 				},
-				() -> tool.get() == InteractionMode.Move);
+				() -> mode.get() == InteractionMode.Move);
 	}
 }

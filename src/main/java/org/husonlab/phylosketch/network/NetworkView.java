@@ -82,12 +82,14 @@ public class NetworkView {
 		edgePathGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
 			while (c.next()) {
 				for (var node : c.getRemoved()) {
-					if (node.getUserData() instanceof EdgeView edgeView) {
+					if (node.getUserData() instanceof EdgeView) {
+						var edgeView = (EdgeView) node.getUserData();
 						edgeBelowWaterGroup.getChildren().remove(edgeView.curveBelow());
 					}
 				}
 				for (var node : c.getAddedSubList()) {
-					if (node.getUserData() instanceof EdgeView edgeView) {
+					if (node.getUserData() instanceof EdgeView) {
+						var edgeView = (EdgeView) node.getUserData();
 						edgeBelowWaterGroup.getChildren().add(edgeView.curveBelow());
 					}
 				}
@@ -97,12 +99,14 @@ public class NetworkView {
 		nodeShapeGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
 			while (c.next()) {
 				for (var node : c.getRemoved()) {
-					if (node.getUserData() instanceof NodeView nodeView) {
+					if (node.getUserData() instanceof NodeView) {
+						var nodeView = (NodeView) node.getUserData();
 						nodeBelowWaterGroup.getChildren().remove(nodeView.shapeBelow());
 					}
 				}
 				for (var node : c.getAddedSubList()) {
-					if (node.getUserData() instanceof NodeView nodeView) {
+					if (node.getUserData() instanceof NodeView) {
+						var nodeView = (NodeView) node.getUserData();
 						nodeBelowWaterGroup.getChildren().add(nodeView.shapeBelow());
 					}
 				}
@@ -112,13 +116,15 @@ public class NetworkView {
 		nodeLabelGroup.getChildren().addListener((ListChangeListener<? super javafx.scene.Node>) c -> {
 			while (c.next()) {
 				for (var node : c.getRemoved()) {
-					if (node.getUserData() instanceof NodeView nodeView) {
+					if (node.getUserData() instanceof NodeView) {
+						var nodeView = (NodeView) node.getUserData();
 						labelBelowWaterGroup.getChildren().remove(nodeView.labelShapeBelow());
 					}
 				}
 				for (var node : c.getAddedSubList()) {
-					if (node instanceof RichTextLabel label) {
-						if (node.getUserData() instanceof NodeView nodeView) {
+					if (node instanceof RichTextLabel) {
+						if (node.getUserData() instanceof NodeView) {
+							var nodeView = (NodeView) node.getUserData();
 							labelBelowWaterGroup.getChildren().add(nodeView.labelShapeBelow());
 						}
 					}
@@ -319,7 +325,6 @@ public class NetworkView {
 		for (var textField : BasicFX.getAllRecursively(world, v -> "text-field".equals(v.getId()))) {
 			textField.setTranslateX(textField.getTranslateX() * xFactor);
 			textField.setTranslateY(textField.getTranslateY() * yFactor);
-
 		}
 	}
 
@@ -387,30 +392,27 @@ public class NetworkView {
 		var wShape = getView(w).shape();
 
 		switch (edgeGlyph) {
-			default -> {
+			default:
 				return new double[]{
 						0.66 * vShape.getTranslateX() + 0.34 * wShape.getTranslateX(),
 						0.66 * vShape.getTranslateY() + 0.34 * wShape.getTranslateY(),
 						0.34 * vShape.getTranslateX() + 0.66 * wShape.getTranslateX(),
 						0.34 * vShape.getTranslateY() + 0.66 * wShape.getTranslateY()
 				};
-			}
-			case RectangleLine -> {
+			case RectangleLine:
 				return new double[]{
 						vShape.getTranslateX(),
 						0.01 * vShape.getTranslateY() + 0.99 * wShape.getTranslateY(),
 						0.99 * vShape.getTranslateX() + 0.01 * wShape.getTranslateX(),
 						wShape.getTranslateY()
 				};
-			}
-			case CubicCurve -> {
+			case CubicCurve:
 				return new double[]{
 						vShape.getTranslateX(),
 						vShape.getTranslateY(),
 						vShape.getTranslateX(),
 						wShape.getTranslateY()
 				};
-			}
 		}
 	}
 }

@@ -81,9 +81,9 @@ public class LabelEditingManager {
 
 		DefaultOptions.textAreaFontSizeProperty().addListener((v, o, n) -> {
 			if (n.intValue() >= 12 && n.intValue() <= 40)
-				editor.getTextField().setStyle("-fx-font-size: %d;".formatted(n.intValue()));
+				editor.getTextField().setStyle(String.format("-fx-font-size: %d;", n.intValue()));
 		});
-		editor.getTextField().setStyle("-fx-font-size: %d;".formatted(DefaultOptions.getTextAreaFontSize()));
+		editor.getTextField().setStyle(String.format("-fx-font-size: %d;", DefaultOptions.getTextAreaFontSize()));
 	}
 
 	public void startEditing(Node v) {
@@ -172,10 +172,18 @@ public class LabelEditingManager {
 
 	public void continueEditing(Direction direction) {
 		switch (direction) {
-			case Left -> setCurrent(leftNeighbor.get());
-			case Right -> setCurrent(rightNeighbor.get());
-			case Down -> setCurrent(downNeighbor.get());
-			case Up -> setCurrent(upNeighbor.get());
+			case Left:
+				setCurrent(leftNeighbor.get());
+				break;
+			case Right:
+				setCurrent(rightNeighbor.get());
+				break;
+			case Down:
+				setCurrent(downNeighbor.get());
+				break;
+			case Up:
+				setCurrent(upNeighbor.get());
+				break;
 		}
 	}
 
@@ -194,12 +202,18 @@ public class LabelEditingManager {
 						var uy = view.getView(u).shape().getTranslateY();
 						var dx = Math.abs(ux - vx);
 						var dy = Math.abs(uy - vy);
-						return switch (direction) {
-							case Up -> uy < vy && (!strict || dx < dy) ? new Pair<>(vy - uy, u) : null;
-							case Down -> uy > vy && (!strict || dx < dy) ? new Pair<>(uy - vy, u) : null;
-							case Left -> ux < vx && (!strict || dx > dy) ? new Pair<>(vx - ux, u) : null;
-							case Right -> ux > vx && (!strict || dx > dy) ? new Pair<>(ux - vx, u) : null;
-						};
+						switch (direction) {
+							case Up:
+								return uy < vy && (!strict || dx < dy) ? new Pair<>(vy - uy, u) : null;
+							case Down:
+								return uy > vy && (!strict || dx < dy) ? new Pair<>(uy - vy, u) : null;
+							case Left:
+								return ux < vx && (!strict || dx > dy) ? new Pair<>(vx - ux, u) : null;
+							case Right:
+								return ux > vx && (!strict || dx > dy) ? new Pair<>(ux - vx, u) : null;
+							default:
+								throw new IllegalArgumentException();
+						}
 					})
 					.filter(Objects::nonNull)
 					.collect(Collectors.toCollection(TreeSet::new));

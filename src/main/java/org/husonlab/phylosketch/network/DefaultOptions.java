@@ -64,10 +64,7 @@ public class DefaultOptions {
 			});
 			ProgramProperties.track(instance.labelFontFamily, "Arial");
 			ProgramProperties.track(instance.labelFontSize, 14.0);
-			{
-				var font = RichTextLabel.getDefaultFont();
-				RichTextLabel.setDefaultFont(Font.font(getLabelFontFamily(), BasicFX.getWeight(font), BasicFX.getPosture(font), getLabelFontSize()));
-			}
+			RichTextLabel.setDefaultFont(Font.font(instance.labelFontFamily.get(), instance.labelFontSize.get()));
 
 			ProgramProperties.track(instance.textAreaFontSize, 20);
 			ProgramProperties.track(instance.nodeColor, Color.BLACK);
@@ -93,7 +90,7 @@ public class DefaultOptions {
 		instance.nodeColor.set(Color.BLACK);
 		instance.nodeSize.set(2.0);
 		instance.edgeColor.set(Color.BLACK);
-		instance.reticulateColor.set(Color.BLACK);
+		instance.reticulateColor.set(Color.DARKORANGE);
 		instance.edgeWidth.set(1.0);
 	}
 

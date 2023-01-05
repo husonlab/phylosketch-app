@@ -20,10 +20,7 @@
 
 package org.husonlab.phylosketch.network;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.ListChangeListener;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.graph.GraphFX;
@@ -52,6 +49,7 @@ public class Document {
 
 	private final StringProperty info = new SimpleStringProperty(this, "info", "");
 
+	private final ObjectProperty<NetworkModel.EdgeGlyph> edgeGlyph = new SimpleObjectProperty<>(this, "edgeShape");
 	private final BooleanProperty toScale = new SimpleBooleanProperty(this, "toScale", false);
 	private final BooleanProperty showHTML = new SimpleBooleanProperty(this, "showHTML", false);
 
@@ -79,9 +77,11 @@ public class Document {
 			var tree = getModel().getTree();
 			info.set(RootedNetworkProperties.computeInfoString(tree));
 
-			var newick = getNewickString();
-			if (!DefaultOptions.getTrees().contains(newick))
+			if (tree.getNumberOfNodes() > 1) {
+				var newick = getNewickString();
+				DefaultOptions.getTrees().remove(newick);
 				DefaultOptions.getTrees().add(0, newick);
+			}
 		});
 	}
 
@@ -171,6 +171,19 @@ public class Document {
 			return edgeSelection.getSelectedItems();
 		else
 			return getModel().getTree().edges();
+	}
+
+
+	public NetworkModel.EdgeGlyph getEdgeGlyph() {
+		return edgeGlyph.get();
+	}
+
+	public ObjectProperty<NetworkModel.EdgeGlyph> edgeGlyphProperty() {
+		return edgeGlyph;
+	}
+
+	public void setEdgeGlyph(NetworkModel.EdgeGlyph edgeGlyph) {
+		this.edgeGlyph.set(edgeGlyph);
 	}
 
 	public boolean isToScale() {
