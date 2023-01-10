@@ -79,8 +79,10 @@ public class Document {
 
 			if (tree.getNumberOfNodes() > 1) {
 				var newick = getNewickString();
-				DefaultOptions.getTrees().remove(newick);
-				DefaultOptions.getTrees().add(0, newick);
+				if (!newick.isBlank()) {
+					DefaultOptions.getTrees().remove(newick);
+					DefaultOptions.getTrees().add(0, newick);
+				}
 			}
 		});
 	}
@@ -146,17 +148,21 @@ public class Document {
 			}
 		}
 
-		if (!showHTML) {
-			var tmpTree = new PhyloTree(model.getTree());
-			for (var v : tmpTree.nodes()) {
-				var label = tmpTree.getLabel(v);
-				if (label != null && !label.isBlank()) {
-					tmpTree.setLabel(v, RichTextLabel.getRawText(label));
+		try {
+			if (!showHTML) {
+				var tmpTree = new PhyloTree(model.getTree());
+				for (var v : tmpTree.nodes()) {
+					var label = tmpTree.getLabel(v);
+					if (label != null && !label.isBlank()) {
+						tmpTree.setLabel(v, RichTextLabel.getRawText(label));
+					}
 				}
-			}
-			return tmpTree.toBracketString(toScale) + ";";
-		} else
-			return model.getTree().toBracketString(toScale) + ";";
+				return tmpTree.toBracketString(toScale) + ";";
+			} else
+				return model.getTree().toBracketString(toScale) + ";";
+		} catch (Exception ex) {
+			return "";
+		}
 	}
 
 	public Iterable<Node> getSelectedOrAllNodes() {
