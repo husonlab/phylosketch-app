@@ -31,6 +31,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
+import jloda.fx.shapes.ISized;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.ProgramExecutorService;
 import jloda.fx.util.RunAfterAWhile;
@@ -74,8 +75,12 @@ public class SecondaryPresenter {
 		var fontFamilyOption = new DefaultOption<>(MaterialDesignIcon.FONT_DOWNLOAD.graphic(),
 				"Font Family", "Set the default font family for labels", "Labels", DefaultOptions.getLabelFontFamily(), true, FontFamilyEditor::new);
 		controller.getSettingsPane().getOptions().add(fontFamilyOption);
-
 		fontFamilyOption.valueProperty().bindBidirectional(DefaultOptions.labelFontFamilyProperty());
+
+		fontFamilyOption.valueProperty().addListener((v, o, n) -> {
+			document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).label().setFontFamily(n));
+		});
+
 
 		var fontSizeOption = new DefaultOption<>(MaterialDesignIcon.FORMAT_SIZE.graphic(),
 				"Size", "Set the default font size for labels", "Labels", DefaultOptions.getLabelFontSize(), true);
@@ -88,6 +93,7 @@ public class SecondaryPresenter {
 			} else {
 				var font = RichTextLabel.getDefaultFont();
 				RichTextLabel.setDefaultFont(Font.font(font.getFamily(), BasicFX.getWeight(font), BasicFX.getPosture(font), n));
+				document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).label().setFontSize(n));
 			}
 		});
 
@@ -97,6 +103,9 @@ public class SecondaryPresenter {
 				"Color", "Set the default color for nodes", "Nodes", DefaultOptions.getNodeColor(), true);
 		controller.getSettingsPane().getOptions().add(nodeColorOption);
 		nodeColorOption.valueProperty().bindBidirectional(DefaultOptions.nodeColorProperty());
+		nodeColorOption.valueProperty().addListener((v, o, n) -> {
+			document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).shape().setFill(n));
+		});
 
 		var nodeSizeOption = new DefaultOption<>(MaterialDesignIcon.CROP_FREE.graphic(),
 				"Size", "Set the default size for nodes", "Nodes", DefaultOptions.getNodeSize(), true);
@@ -106,6 +115,10 @@ public class SecondaryPresenter {
 		nodeSizeOption.valueProperty().addListener((v, o, n) -> {
 			if (n <= 0)
 				Platform.runLater(() -> nodeSizeOption.valueProperty().setValue(2.0));
+			else {
+				document.getModel().getTree().nodeStream().map(a -> document.getNetworkView().getView(a).shape()).filter(s -> s instanceof ISized)
+						.forEach(s -> ((ISized) s).setSize(n, n));
+			}
 			System.err.println("Default node size: " + n);
 		});
 
@@ -115,11 +128,28 @@ public class SecondaryPresenter {
 				"Color", "Set the default color for edges", "Edges", DefaultOptions.getEdgeColor(), true);
 		controller.getSettingsPane().getOptions().add(edgeColorOption);
 		edgeColorOption.valueProperty().bindBidirectional(DefaultOptions.edgeColorProperty());
+		edgeColorOption.valueProperty().addListener((v, o, n) -> {
+			var tree = document.getModel().getTree();
+			for (var e : tree.edges()) {
+				if (tree.isTreeEdge(e) || tree.isTransferAcceptorEdge(e))
+					document.getNetworkView().getView(e).setStroke(n);
+			}
+		});
+		edgeColorOption.valueProperty().addListener((v, o, n) -> {
+			document.getModel().getTree().edgeStream().forEach(a -> document.getNetworkView().getView(a).setStroke(n));
+		});
 
 		var reticulateEdgeOption = new DefaultOption<>(MaterialDesignIcon.COLOR_LENS.graphic(),
 				"Reticulate Color", "Set the default color for reticulate edges", "Edges", DefaultOptions.getReticulateColor(), true);
 		controller.getSettingsPane().getOptions().add(reticulateEdgeOption);
 		reticulateEdgeOption.valueProperty().bindBidirectional(DefaultOptions.reticulateColorProperty());
+		reticulateEdgeOption.valueProperty().addListener((v, o, n) -> {
+			var tree = document.getModel().getTree();
+			for (var e : tree.edges()) {
+				if (tree.isReticulateEdge(e) && !tree.isTransferAcceptorEdge(e))
+					document.getNetworkView().getView(e).setStroke(n);
+			}
+		});
 
 		var edgeWidthOption = new DefaultOption<>(MaterialDesignIcon.LINE_WEIGHT.graphic(),
 				"Width", "Set the default width for edges", "Edges", DefaultOptions.getEdgeWidth(), true);
@@ -127,8 +157,12 @@ public class SecondaryPresenter {
 		DefaultOptions.bindBidirectional(edgeWidthOption.valueProperty(), DefaultOptions.edgeWidthProperty());
 
 		edgeWidthOption.valueProperty().addListener((v, o, n) -> {
-			if (n <= 0)
+			if (n <= 0) {
 				Platform.runLater(() -> edgeWidthOption.valueProperty().setValue(1.0));
+			} else {
+				document.getModel().getTree().edgeStream().forEach(a -> document.getNetworkView().getView(a).setStrokeWidth(n));
+
+			}
 			System.err.println("Default line width: " + n);
 		});
 
