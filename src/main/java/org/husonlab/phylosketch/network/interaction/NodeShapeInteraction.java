@@ -217,7 +217,7 @@ public class NodeShapeInteraction {
 				if (moved.get()) {
 					final double dx = previousScenePosition[0] - startScenePosition[0];
 					final double dy = previousScenePosition[1] - startScenePosition[1];
-					document.getUndoManager().add(new MoveSelectedNodesCommand(dx, dy, networkView,
+					document.getUndoManager().add(new MoveSelectedNodesCommand(dx, dy, document,
 							nodeSelection.getSelectedItems(), oldControlPointLocations, newControlPointLocations));
 				}
 			} else if (currentTool.get() == InteractionMode.CreateNewEdges) {

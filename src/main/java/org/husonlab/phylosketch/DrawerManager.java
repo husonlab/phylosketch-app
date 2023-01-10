@@ -45,7 +45,7 @@ public class DrawerManager {
 		iconView.setFitHeight(32);
 		iconView.setFitWidth(32);
 
-		var header = new NavigationDrawer.Header("PhyloSketch App", "Sketch phylogenetic trees and networks", iconView);
+		var header = new NavigationDrawer.Header(Version.NAME, Version.VERSION, iconView);
 		drawer.setHeader(header);
 
 		final var primaryItem = new ViewItem("Main Viewer", MaterialDesignIcon.HOME.graphic(), PRIMARY_VIEW, ViewStackPolicy.SKIP);

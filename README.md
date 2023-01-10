@@ -18,7 +18,7 @@ the [Gluon documentation](https://docs.gluonhq.com/#_requirements).
 ### JLODA library required
 
 This project requires the jloda library to be present, available [here](https://github.com/husonlab/jloda2). As jloda is
-not (available via maven, you need to build jloda.jar from source and then place it in your local maven repository.
+not available via maven, you need to build jloda.jar from source and then place it in your local maven repository.
 
 ## Quick instructions for working with the code in Intellij
 

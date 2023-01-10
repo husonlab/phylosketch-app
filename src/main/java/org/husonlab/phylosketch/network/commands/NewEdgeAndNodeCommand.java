@@ -114,7 +114,8 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 					e = tree.newEdge(v, w, null, edgeId);
 				}
 				networkView.createEdgeView(e);
-
+				if (e.getTarget().getInDegree() > 1)
+					networkView.getView(e).setStroke(DefaultOptions.getReticulateColor());
 			}
 			if (wId > 0) Platform.runLater(() -> {
 				nodeSelection.clearSelection();

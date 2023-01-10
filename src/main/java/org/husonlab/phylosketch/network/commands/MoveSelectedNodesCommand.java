@@ -24,6 +24,7 @@ import javafx.collections.ObservableSet;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
 import jloda.graph.Node;
+import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkView;
 
 import java.util.HashMap;
@@ -42,11 +43,12 @@ public class MoveSelectedNodesCommand extends UndoableRedoableCommand {
 	/**
 	 * constructor
 	 */
-	public MoveSelectedNodesCommand(double dx, double dy, NetworkView networkView, ObservableSet<Node> selectedItems,
+	public MoveSelectedNodesCommand(double dx, double dy, Document document, ObservableSet<Node> selectedItems,
 									Map<Integer, double[]> oldEdgeControlCoordinates0, Map<Integer, double[]> newEdgeControlCoordinates0) {
 		super("Move");
-
+		final var networkView = document.getNetworkView();
 		final var tree = networkView.getTree();
+
 		final Map<Integer, double[]> oldEdgeControlCoordinates = new HashMap<>(oldEdgeControlCoordinates0);
 		final Map<Integer, double[]> newEdgeControlCoordinates = new HashMap<>(newEdgeControlCoordinates0);
 
@@ -54,16 +56,36 @@ public class MoveSelectedNodesCommand extends UndoableRedoableCommand {
 		final List<Integer> edgeData = tree.edgeStream().filter(e -> oldEdgeControlCoordinates.containsKey(e.getId()) && newEdgeControlCoordinates.containsKey(e.getId()))
 				.map(Edge::getId).collect(Collectors.toList());
 
+		final Map<Integer, Double> oldEdgeWeights;
+		if (tree.hasEdgeWeights()) {
+			oldEdgeWeights = new HashMap<>();
+			tree.edgeStream().forEach(e -> oldEdgeWeights.put(e.getId(), tree.getWeight(e)));
+		} else {
+			oldEdgeWeights = null;
+		}
+
 
 		undo = () -> {
+			if (oldEdgeWeights != null) {
+				edgeData.forEach(id -> {
+					tree.setWeight(tree.findEdgeById(id), oldEdgeWeights.get(id));
+				});
+			}
 			nodeData.forEach(id -> networkView.moveNode(tree.findNodeById(id), -dx, -dy));
 			edgeData.forEach(id -> networkView.getView(tree.findEdgeById(id)).setControlCoordinatesFromNormalized(oldEdgeControlCoordinates.get(id)));
+			document.getGraphFX().incrementLastUpdate();
 		};
 
 		redo = () -> {
+			tree.clearEdgeWeights();
 			nodeData.forEach(id -> networkView.moveNode(tree.findNodeById(id), dx, dy));
 			edgeData.forEach(id -> networkView.getView(tree.findEdgeById(id)).setControlCoordinatesFromNormalized(newEdgeControlCoordinates.get(id)));
+			document.getGraphFX().incrementLastUpdate();
 		};
+
+		// run this here because we usually don't redo directly
+		tree.clearEdgeWeights();
+		document.getGraphFX().incrementLastUpdate();
 	}
 
 	@Override
