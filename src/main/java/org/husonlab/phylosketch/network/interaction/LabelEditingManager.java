@@ -32,7 +32,7 @@ import jloda.fx.util.DraggableUtils;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
 import jloda.util.Pair;
-import org.husonlab.phylosketch.network.DefaultOptions;
+import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.network.NetworkView;
 import org.husonlab.phylosketch.network.NodeView;
 import org.husonlab.phylosketch.network.commands.NodeLabelCommand;

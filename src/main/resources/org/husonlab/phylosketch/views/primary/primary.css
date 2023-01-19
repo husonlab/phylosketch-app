@@ -38,7 +38,12 @@
     -fx-background-color: -primary-swatch-500;
 }
 
-.combo-box .list-view .list-cell {
+.combo-box .list-view {
+    -fx-background-color: -primary-swatch-500;
+    -fx-text-fill: white;
+}
+
+.combo-box .list-cell {
     -fx-background-color: -primary-swatch-500;
     -fx-text-fill: white;
 }
@@ -46,6 +51,46 @@
 .combo-box .text-input {
     -fx-background-color: -primary-swatch-600;
     -fx-text-fill: white;
+}
+
+.combo-box .arrow {
+    -fx-border-color: white;
+    -fx-background-color: white;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: -primary-swatch-500;
+}
+
+.combo-box .arrow-button:hover {
+    -fx-background-color: -primary-swatch-600;
+}
+
+.combo-box .text-input {
+    -fx-background-color: -primary-swatch-500;
+    -fx-border-color: -divider-light;
+    -fx-border-width: 1;
+}
+
+.combo-box .text-input:hover {
+    -fx-background-color: -primary-swatch-600;
+}
+
+.choice-box .label {
+    -fx-font-size: 12;
+}
+
+.choice-box .arrow {
+    -fx-border-color: white;
+    -fx-background-color: white;
+}
+
+.choice-box .arrow-button {
+    -fx-background-color: -primary-swatch-500;
+}
+
+.choice-box .arrow-button:hover {
+    -fx-background-color: -primary-swatch-600;
 }
 
 .menu-item {
@@ -105,31 +150,6 @@
 .menu-button:hover {
     -fx-background-color: derive(-primary-swatch-500, -10%);
 }
-
-.combo-box .arrow {
-    -fx-border-color: white;
-    -fx-background-color: white;
-
-}
-
-.combo-box .arrow-button {
-    -fx-background-color: -primary-swatch-500;
-}
-
-.combo-box .arrow-button:hover {
-    -fx-background-color: -primary-swatch-600;
-}
-
-.combo-box .text-input {
-    -fx-background-color: -primary-swatch-500;
-    -fx-border-color: -divider-light;
-    -fx-border-width: 1;
-}
-
-.combo-box .text-input:hover {
-    -fx-background-color: -primary-swatch-600;
-}
-
 
 .menu,
 .menu:focused,

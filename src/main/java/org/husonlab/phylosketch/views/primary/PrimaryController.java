@@ -27,14 +27,14 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.Transition;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 import jloda.util.Single;
-import org.husonlab.phylosketch.views.other.AwesomeIcon;
+import org.husonlab.phylosketch.utils.AwesomeIcon;
+import org.husonlab.phylosketch.utils.ExpandContractIcons;
+import org.husonlab.phylosketch.utils.TypeToSearchSupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +77,7 @@ public class PrimaryController {
 	private ColorPicker fontColorPicker;
 
 	@FXML
-	private ComboBox<String> fontComboBox;
+	private ChoiceBox<String> fontCBox;
 
 	@FXML
 	private Label modeLabel;
@@ -170,6 +170,8 @@ public class PrimaryController {
 
 	@FXML
 	private void initialize() {
+		TypeToSearchSupport.install(fontCBox);
+
 		eraseMenuItem.setGraphic(AwesomeIcon.ERASER.graphic());
 
 		primary.getStylesheets().add(Objects.requireNonNull(PrimaryController.class.getResource("primary.css")).toExternalForm());
@@ -239,6 +241,13 @@ public class PrimaryController {
 		for (var button : List.of(verticalZoomInButton, verticalZoomOutButton, horizontalZoomInButton, horizontalZoomOutButton)) {
 			button.setVisible(false);
 		}
+
+		horizontalZoomOutButton.setGraphic(ExpandContractIcons.createHorizontalCompressIcon());
+		horizontalZoomInButton.setGraphic(ExpandContractIcons.createHorizontalExpandIcon());
+		verticalZoomOutButton.setGraphic(ExpandContractIcons.createVerticalCompressIcon());
+		verticalZoomInButton.setGraphic(ExpandContractIcons.createVerticalExpandIcon());
+
+		panMenuItem.setGraphic(AwesomeIcon.ARROWS.graphic());
 	}
 
 	public void showZoomButtons(boolean show) {
@@ -369,8 +378,8 @@ public class PrimaryController {
 		return decreaseFontSizeButton;
 	}
 
-	public ComboBox<String> getFontComboBox() {
-		return fontComboBox;
+	public ChoiceBox<String> getFontCBox() {
+		return fontCBox;
 	}
 
 	public CheckMenuItem getBoldCheckMenuItem() {

@@ -48,6 +48,7 @@ public class PrintStreamForTextArea extends PrintStream {
 						final String line = lines.remove();
 						Platform.runLater(() -> {
 							textArea.setText(textArea.getText() + line);
+							textArea.setScrollTop(Double.MAX_VALUE);
 							textArea.positionCaret(textArea.getText().length());
 						});
 						if (System.currentTimeMillis() - start > 100)

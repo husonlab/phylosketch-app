@@ -1,5 +1,5 @@
 /*
- * OtherView.java Copyright (C) 2022 Daniel H. Huson
+ * LogView.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,27 +18,43 @@
  *
  */
 
-package org.husonlab.phylosketch.views.other;
+package org.husonlab.phylosketch.views.log;
 
 import com.gluonhq.charm.glisten.mvc.View;
 import javafx.fxml.FXMLLoader;
+import jloda.fx.message.EchoPrintStreamForTextArea;
+import jloda.util.Basic;
+import jloda.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Function;
 
-public class OtherView {
-	final private OtherPresenter presenter;
-	final private OtherController controller;
+public class LogView {
+	final private LogPresenter presenter;
+	final private LogController controller;
 
-	public OtherView() {
+	public LogView() {
 		var fxmlLoader = new FXMLLoader();
-		try (var ins = Objects.requireNonNull(OtherController.class.getResource("other.fxml")).openStream()) {
+		try (var ins = Objects.requireNonNull(LogController.class.getResource("other.fxml")).openStream()) {
 			fxmlLoader.load(ins);
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 		controller = fxmlLoader.getController();
-		presenter = new OtherPresenter(this, controller);
+		presenter = new LogPresenter(this, controller);
+
+		var collected = Basic.stopCollectingStdErr();
+		Basic.restoreSystemErr();
+
+		Function<String, String> filter = s -> {
+			if (s.isBlank() || s.contains("xception") || s.startsWith("\t") || !s.contains("gluonhq"))
+				return s;
+			else
+				return null;
+		};
+		System.setErr(new EchoPrintStreamForTextArea(System.err, filter, controller.getLogTextArea()));
+		collected.lines().forEach(System.err::println);
 	}
 
 	public View getView() {

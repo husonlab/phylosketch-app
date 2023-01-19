@@ -22,22 +22,22 @@
 
 <?import com.gluonhq.charm.glisten.mvc.View?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.VBox?>
-<View fx:id="view" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.husonlab.phylosketch.views.other.OtherController">
+
+<View fx:id="view" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.husonlab.phylosketch.views.log.LogController">
     <bottom>
-        <VBox alignment="CENTER" BorderPane.alignment="CENTER">
-            <children>
-                <Label text="Configure stuff here"/>
-            </children>
-        </VBox>
+        <TextArea fx:id="logTextArea" editable="false" wrapText="true" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="10.0"/>
+            </padding>
+        </TextArea>
     </bottom>
     <center>
-        <ScrollPane fitToWidth="true" pannable="true">
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" pannable="true" BorderPane.alignment="CENTER">
             <content>
                 <FlowPane fx:id="flowPane" hgap="3.0" vgap="3.0">
                     <padding>
@@ -45,6 +45,9 @@
                     </padding>
                 </FlowPane>
             </content>
+            <padding>
+                <Insets bottom="10.0"/>
+            </padding>
         </ScrollPane>
     </center>
 </View>

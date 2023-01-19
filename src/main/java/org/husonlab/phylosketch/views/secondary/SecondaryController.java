@@ -26,7 +26,6 @@ import com.gluonhq.charm.glisten.control.SettingsPane;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
 import java.util.Objects;

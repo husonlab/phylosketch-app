@@ -23,7 +23,7 @@ package org.husonlab.phylosketch.views.primary;
 import com.gluonhq.charm.glisten.mvc.View;
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXMLLoader;
-import org.husonlab.phylosketch.network.DefaultOptions;
+import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkPresenter;
 
@@ -49,11 +49,11 @@ public class PrimaryView {
 
 		presenter = new PrimaryPresenter(getDocument(), this, controller);
 
-		NetworkPresenter.setupView(controller.getStackPane(), getDocument(), getPresenter().interactionModeProperty());
+		NetworkPresenter.setupView(getView().focusedProperty(), controller.getStackPane(), getDocument(), getPresenter().interactionModeProperty());
 
 		if (DefaultOptions.getTrees().size() > 0) {
 			try {
-				getDocument().setNewickString(DefaultOptions.getTrees().get(0));
+				getDocument().setNewickString(DefaultOptions.getTrees().get(0).getNewick());
 			} catch (Exception ignored) {
 				DefaultOptions.getTrees().remove(0);
 				getDocument().setNewickString("((a,b),(c,d));");

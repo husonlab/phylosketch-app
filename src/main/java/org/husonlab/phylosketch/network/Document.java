@@ -35,7 +35,10 @@ import jloda.util.NumberUtils;
 
 import java.io.IOException;
 
-
+/**
+ * the main document
+ * Daniel Huson, 10.2022
+ */
 public class Document {
 	private final UndoManager undoManager = new UndoManager();
 
@@ -52,6 +55,8 @@ public class Document {
 	private final ObjectProperty<NetworkModel.EdgeGlyph> edgeGlyph = new SimpleObjectProperty<>(this, "edgeShape");
 	private final BooleanProperty toScale = new SimpleBooleanProperty(this, "toScale", false);
 	private final BooleanProperty showHTML = new SimpleBooleanProperty(this, "showHTML", false);
+
+	private final LongProperty modelAndViewUpdated = new SimpleLongProperty(this, "modelAndViewUpdated", 0L);
 
 	public Document() {
 		model = new NetworkModel();
@@ -76,15 +81,22 @@ public class Document {
 		graphFX.lastUpdateProperty().addListener(e -> {
 			var tree = getModel().getTree();
 			info.set(RootedNetworkProperties.computeInfoString(tree));
-
-			if (tree.getNumberOfNodes() > 1) {
-				var newick = getNewickString();
-				if (!newick.isBlank()) {
-					DefaultOptions.getTrees().remove(newick);
-					DefaultOptions.getTrees().add(0, newick);
-				}
-			}
 		});
+	}
+
+	public static boolean canParse(String newick, boolean first) {
+		newick = newick.trim();
+		if (!newick.startsWith("(") && !(newick.endsWith(")") || newick.endsWith(";")))
+			return false;
+		if (newick.endsWith(";"))
+			newick = newick.substring(0, newick.length() - 1).trim();
+		try {
+			var tree = new PhyloTree();
+			tree.parseBracketNotation(newick, true);
+			return tree.getNumberOfNodes() > 0 && (!first || !canParse(newick.substring(0, newick.length() - 1), false));
+		} catch (Exception ignored) {
+			return false;
+		}
 	}
 
 	public SelectionModel<Node> getNodeSelection() {
@@ -119,19 +131,18 @@ public class Document {
 		return info;
 	}
 
-	public boolean setNewickString(String newick) {
+	public void setNewickString(String newick) {
 		try {
 			model.getTree().parseBracketNotation(newick, true);
 			updateModelAndView();
-			return true;
-		} catch (IOException e) {
-			return false;
+		} catch (IOException ignored) {
 		}
 	}
 
 	public void updateModelAndView() {
 		model.computeEmbedding(isToScale(), 200, 200);
 		NetworkPresenter.model2view(model, getNetworkView());
+		modelAndViewUpdated.set(System.currentTimeMillis());
 	}
 
 	public String getNewickString() {
@@ -214,5 +225,9 @@ public class Document {
 
 	public void setShowHTML(boolean showHTML) {
 		this.showHTML.set(showHTML);
+	}
+
+	public ReadOnlyLongProperty modelAndViewUpdatedProperty() {
+		return modelAndViewUpdated;
 	}
 }

@@ -34,6 +34,7 @@ import javafx.scene.shape.*;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.GeometryUtilsFX;
 import jloda.graph.Edge;
+import org.husonlab.phylosketch.DefaultOptions;
 
 /**
  * edge view

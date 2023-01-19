@@ -27,7 +27,7 @@ import jloda.fx.selection.SelectionModel;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
 import jloda.graph.Node;
-import org.husonlab.phylosketch.network.DefaultOptions;
+import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.network.NetworkPresenter;
 import org.husonlab.phylosketch.network.NetworkView;
 
@@ -53,26 +53,32 @@ public class NewEdgeAndNodeCommand extends UndoableRedoableCommand {
 			if (wId > 0) {
 				final var v = tree.findNodeById(aId);
 				var w = tree.findNodeById(wId);
-				var translateTransition = new TranslateTransition(Duration.millis(100), networkView.getView(w).shape());
-				translateTransition.setToX(networkView.getView(v).shape().getTranslateX());
-				translateTransition.setToY(networkView.getView(v).shape().getTranslateY());
-				translateTransition.setOnFinished(z -> {
-					if (edgeId > 0) {
-						var e = tree.findEdgeById(edgeId);
-						networkView.removeView(e);
-						tree.deleteEdge(e);
-					}
-					networkView.removeView(w);
-					tree.deleteNode(w);
-				});
-				translateTransition.play();
+				var shape = networkView.getView(w).shape();
+				if (shape != null) {
+					var translateTransition = new TranslateTransition(Duration.millis(100), shape);
+					translateTransition.setToX(shape.getTranslateX());
+					translateTransition.setToY(shape.getTranslateY());
+					translateTransition.setOnFinished(z -> {
+						if (edgeId > 0) {
+							var e = tree.findEdgeById(edgeId);
+							networkView.removeView(e);
+							tree.deleteEdge(e);
+						}
+						networkView.removeView(w);
+						tree.deleteNode(w);
+					});
+					translateTransition.play();
+				}
 			} else if (edgeId > 0) {
 				var e = tree.findEdgeById(edgeId);
 				var w = e.getTarget();
 				networkView.removeView(e);
 				tree.deleteEdge(e);
-				if (w.getInDegree() == 1 && networkView.getView(w.getFirstInEdge()).getStroke().equals(DefaultOptions.getReticulateColor())) {
-					networkView.getView(w.getFirstInEdge()).setStroke(DefaultOptions.getEdgeColor());
+				if (w.getInDegree() == 1) {
+					var view = networkView.getView(w.getFirstInEdge());
+					if (view.getStroke().equals(DefaultOptions.getReticulateColor())) {
+						networkView.getView(w.getFirstInEdge()).setStroke(DefaultOptions.getEdgeColor());
+					}
 				}
 			}
 		};

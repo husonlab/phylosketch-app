@@ -25,19 +25,19 @@ import com.gluonhq.charm.glisten.control.settings.Option;
 import com.gluonhq.charm.glisten.control.settings.OptionEditor;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.ObservableList;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.ISized;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.ProgramExecutorService;
-import jloda.fx.util.RunAfterAWhile;
-import org.husonlab.phylosketch.network.DefaultOptions;
+import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.commands.ReplaceNetworkCommand;
+import org.husonlab.phylosketch.utils.TypeToSearchSupport;
 import org.husonlab.phylosketch.views.primary.PrimaryView;
 
 import java.util.Collection;
@@ -49,6 +49,8 @@ import java.util.Collection;
 public class SecondaryPresenter {
 	private final Document document;
 
+	private final BooleanProperty resetAll;
+
 	public SecondaryPresenter(SecondaryController controller, PrimaryView primaryView) {
 		this.document = primaryView.getDocument();
 
@@ -57,12 +59,12 @@ public class SecondaryPresenter {
 		// general:
 
 		var treeOption = new DefaultOption<>(MaterialDesignIcon.DATE_RANGE.graphic(),
-				"Previous Trees", "Choose tree or network to show", "Input", document.getNewickString(), true,
+				"Previous Trees", "Choose tree or network to show", "Input", new DefaultOptions.NamedNewick(document.getNewickString()), true,
 				NewickTreeEditor::new);
 		controller.getSettingsPane().getOptions().addAll(treeOption);
 		treeOption.valueProperty().addListener((v, o, n) -> {
-			if (n != null && !n.equals(document.getNewickString())) {
-				document.getUndoManager().doAndAdd(new ReplaceNetworkCommand(document, n));
+			if (n != null && !n.equals(new DefaultOptions.NamedNewick(document.getNewickString()))) {
+				document.getUndoManager().doAndAdd(new ReplaceNetworkCommand(document, n.getNewick()));
 			}
 		});
 
@@ -78,7 +80,14 @@ public class SecondaryPresenter {
 		fontFamilyOption.valueProperty().bindBidirectional(DefaultOptions.labelFontFamilyProperty());
 
 		fontFamilyOption.valueProperty().addListener((v, o, n) -> {
-			document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).label().setFontFamily(n));
+			var font = RichTextLabel.getDefaultFont();
+			if (Font.getFamilies().contains(n))
+				Platform.runLater(() -> fontFamilyOption.valueProperty().setValue(RichTextLabel.getDefaultFont().getFamily()));
+			else {
+				RichTextLabel.setDefaultFont(Font.font(n, BasicFX.getWeight(font), BasicFX.getPosture(font), font.getSize()));
+				if (false)
+					document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).label().setFontFamily(n));
+			}
 		});
 
 
@@ -93,18 +102,28 @@ public class SecondaryPresenter {
 			} else {
 				var font = RichTextLabel.getDefaultFont();
 				RichTextLabel.setDefaultFont(Font.font(font.getFamily(), BasicFX.getWeight(font), BasicFX.getPosture(font), n));
-				document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).label().setFontSize(n));
+				if (false)
+					document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).label().setFontSize(n));
 			}
 		});
 
 		// nodes:
 
-		var nodeColorOption = new DefaultOption<>(MaterialDesignIcon.COLOR_LENS.graphic(),
-				"Color", "Set the default color for nodes", "Nodes", DefaultOptions.getNodeColor(), true);
-		controller.getSettingsPane().getOptions().add(nodeColorOption);
-		nodeColorOption.valueProperty().bindBidirectional(DefaultOptions.nodeColorProperty());
-		nodeColorOption.valueProperty().addListener((v, o, n) -> {
+		var nodeFillOption = new DefaultOption<>(MaterialDesignIcon.COLOR_LENS.graphic(),
+				"Fill", "Set the default fill color for nodes", "Nodes", DefaultOptions.getNodeFill(), true);
+		controller.getSettingsPane().getOptions().add(nodeFillOption);
+		nodeFillOption.valueProperty().bindBidirectional(DefaultOptions.nodeFillProperty());
+		nodeFillOption.valueProperty().addListener((v, o, n) -> {
 			document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).shape().setFill(n));
+		});
+
+
+		var nodeStrokeOption = new DefaultOption<>(MaterialDesignIcon.COLOR_LENS.graphic(),
+				"Stroke", "Set the default stroke color for nodes", "Nodes", DefaultOptions.getNodeStroke(), true);
+		controller.getSettingsPane().getOptions().add(nodeStrokeOption);
+		nodeStrokeOption.valueProperty().bindBidirectional(DefaultOptions.nodeStrokeProperty());
+		nodeStrokeOption.valueProperty().addListener((v, o, n) -> {
+			document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).shape().setStroke(n));
 		});
 
 		var nodeSizeOption = new DefaultOption<>(MaterialDesignIcon.CROP_FREE.graphic(),
@@ -128,13 +147,6 @@ public class SecondaryPresenter {
 				"Color", "Set the default color for edges", "Edges", DefaultOptions.getEdgeColor(), true);
 		controller.getSettingsPane().getOptions().add(edgeColorOption);
 		edgeColorOption.valueProperty().bindBidirectional(DefaultOptions.edgeColorProperty());
-		edgeColorOption.valueProperty().addListener((v, o, n) -> {
-			var tree = document.getModel().getTree();
-			for (var e : tree.edges()) {
-				if (tree.isTreeEdge(e) || tree.isTransferAcceptorEdge(e))
-					document.getNetworkView().getView(e).setStroke(n);
-			}
-		});
 		edgeColorOption.valueProperty().addListener((v, o, n) -> {
 			document.getModel().getTree().edgeStream().forEach(a -> document.getNetworkView().getView(a).setStroke(n));
 		});
@@ -167,7 +179,7 @@ public class SecondaryPresenter {
 		});
 
 		// resetAll:
-		var resetAll = new SimpleBooleanProperty(this, "resetAll", false);
+		resetAll = new SimpleBooleanProperty(this, "resetAll", false);
 		var resetAllOption = new DefaultOption<>(MaterialDesignIcon.CLEAR_ALL.graphic(),
 				"Reset All", "Reset all default properties", "Reset", false, true);
 		controller.getSettingsPane().getOptions().add(resetAllOption);
@@ -181,51 +193,47 @@ public class SecondaryPresenter {
 		});
 	}
 
-	public class NewickTreeEditor extends ChoiceBoxEditor {
-		public NewickTreeEditor(Option<String> option) {
+	public class NewickTreeEditor extends ChoiceBoxEditor<DefaultOptions.NamedNewick> {
+		public NewickTreeEditor(Option<DefaultOptions.NamedNewick> option) {
 			super(option, DefaultOptions.getTrees());
 			document.getGraphFX().lastUpdateProperty().addListener((v, o, n) -> {
-				getEditor().setValue(document.getNewickString());
+				getEditor().setValue(new DefaultOptions.NamedNewick(document.getNewickString()));
 			});
 		}
 	}
 
-	public static class FontFamilyEditor extends ChoiceBoxEditor {
+	public static class FontFamilyEditor extends ChoiceBoxEditor<String> {
 		public FontFamilyEditor(Option<String> option) {
 			super(option, Font.getFamilies());
 		}
 	}
 
-	public static class ChoiceBoxEditor implements OptionEditor<String> {
-		private final ChoiceBox<String> choiceBox = new ChoiceBox<>();
+	public static class ChoiceBoxEditor<T> implements OptionEditor<T> {
+		private final ChoiceBox<T> choiceBox = new ChoiceBox<T>();
 
-		public ChoiceBoxEditor(Option<String> option, Collection<String> choices) {
+		public ChoiceBoxEditor(Option<T> option, Collection<T> choices) {
 			choiceBox.getItems().addAll(choices);
 			choiceBox.valueProperty().bindBidirectional(option.valueProperty());
-		}
-
-		public ChoiceBoxEditor(Option<String> option, ObservableList<String> choices) {
-			choiceBox.setItems(choices);
-			choiceBox.valueProperty().bindBidirectional(option.valueProperty());
+			TypeToSearchSupport.install(choiceBox);
 		}
 
 		@Override
-		public ChoiceBox<String> getEditor() {
+		public ChoiceBox<T> getEditor() {
 			return choiceBox;
 		}
 
 		@Override
-		public Property<String> valueProperty() {
+		public Property<T> valueProperty() {
 			return choiceBox.valueProperty();
 		}
 
 		@Override
-		public String getValue() {
+		public T getValue() {
 			return choiceBox.getValue();
 		}
 
 		@Override
-		public void setValue(String s) {
+		public void setValue(T s) {
 			choiceBox.setValue(s);
 		}
 	}

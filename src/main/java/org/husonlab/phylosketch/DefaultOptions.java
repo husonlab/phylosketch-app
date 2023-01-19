@@ -1,5 +1,5 @@
 /*
- * DefaultOptions.java Copyright (C) 2022 Daniel H. Huson
+ * DefaultOptions.java Copyright (C) 2023 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,7 +18,7 @@
  *
  */
 
-package org.husonlab.phylosketch.network;
+package org.husonlab.phylosketch;
 
 import com.gluonhq.attach.storage.StorageService;
 import com.gluonhq.attach.util.Services;
@@ -30,22 +30,30 @@ import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
-import jloda.fx.util.BasicFX;
 import jloda.fx.util.ProgramProperties;
-import org.husonlab.phylosketch.Main;
+import jloda.fx.util.RunAfterAWhile;
+import jloda.util.FileUtils;
+import jloda.util.StringUtils;
+import org.husonlab.phylosketch.network.Document;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * maintains default options for program
  * Daniel Huson, 12.22
  */
 public class DefaultOptions {
-	private final ObservableList<String> trees = FXCollections.observableArrayList();
+	private final ObservableList<NamedNewick> trees = FXCollections.observableArrayList();
 	private final IntegerProperty textAreaFontSize = new SimpleIntegerProperty(this, "textAreaFontSize");
 	private final StringProperty labelFontFamily = new SimpleStringProperty(this, "labelFontFamily");
 	private final DoubleProperty labelFontSize = new SimpleDoubleProperty(this, "labelFontSize");
-	private final ObjectProperty<Color> nodeColor = new SimpleObjectProperty<>(this, "nodeColor");
+	private final ObjectProperty<Color> nodeFill = new SimpleObjectProperty<>(this, "nodeFill");
+	private final ObjectProperty<Color> nodeStroke = new SimpleObjectProperty<>(this, "nodeStroke");
+
 	private final DoubleProperty nodeSize = new SimpleDoubleProperty(this, "nodeSize");
 	private final ObjectProperty<Color> edgeColor = new SimpleObjectProperty<>(this, "edgeColor");
 	private final ObjectProperty<Color> reticulateColor = new SimpleObjectProperty<>(this, "reticulateColor");
@@ -58,16 +66,19 @@ public class DefaultOptions {
 	private static DefaultOptions getInstance() {
 		if (instance == null) {
 			instance = new DefaultOptions();
-			instance.trees.setAll(ProgramProperties.get("trees", new String[0]));
+			var list = Stream.of(ProgramProperties.get("trees", new String[0])).filter(t -> Document.canParse(t, true)).
+					map(NamedNewick::new).filter(t -> !instance.trees.contains(t)).collect(Collectors.toList());
+			instance.trees.setAll(list);
 			instance.trees.addListener((InvalidationListener) e -> {
-				ProgramProperties.put("trees", instance.trees.toArray(new String[0]));
+				ProgramProperties.put("trees", instance.trees.stream().map(NamedNewick::getNewick).toArray(String[]::new));
 			});
 			ProgramProperties.track(instance.labelFontFamily, "Arial");
 			ProgramProperties.track(instance.labelFontSize, 14.0);
 			RichTextLabel.setDefaultFont(Font.font(instance.labelFontFamily.get(), instance.labelFontSize.get()));
 
 			ProgramProperties.track(instance.textAreaFontSize, 20);
-			ProgramProperties.track(instance.nodeColor, Color.BLACK);
+			ProgramProperties.track(instance.nodeFill, Color.BLACK);
+			ProgramProperties.track(instance.nodeStroke, Color.BLACK);
 			ProgramProperties.track(instance.nodeSize, 2.0);
 			ProgramProperties.track(instance.edgeColor, Color.BLACK);
 			ProgramProperties.track(instance.reticulateColor, Color.DARKORANGE);
@@ -75,8 +86,8 @@ public class DefaultOptions {
 
 			// save properties after each change:
 			instance.update.bind(Bindings.createLongBinding(System::currentTimeMillis, getTrees(), labelFontFamilyProperty(), labelFontSizeProperty(),
-					nodeColorProperty(), nodeSizeProperty(), edgeColorProperty(), edgeWidthProperty(), reticulateColorProperty()));
-			instance.update.addListener(e -> store());
+					nodeFillProperty(), nodeStrokeProperty(), nodeSizeProperty(), edgeColorProperty(), edgeWidthProperty(), reticulateColorProperty()));
+			instance.update.addListener((v, o, n) -> RunAfterAWhile.apply(instance, DefaultOptions::store));
 		}
 		return instance;
 	}
@@ -84,17 +95,25 @@ public class DefaultOptions {
 	public static void resetAll() {
 		if (instance.trees.size() > 0)
 			instance.trees.setAll(instance.trees.get(0));
+		instance.addTree("((a,b),(c.d));");
 		instance.labelFontFamily.set("Arial");
 		instance.labelFontSize.set(14.0);
 		instance.textAreaFontSize.set(20);
-		instance.nodeColor.set(Color.BLACK);
+		instance.nodeFill.set(Color.BLACK);
+		instance.nodeStroke.set(Color.BLACK);
 		instance.nodeSize.set(2.0);
 		instance.edgeColor.set(Color.BLACK);
 		instance.reticulateColor.set(Color.DARKORANGE);
 		instance.edgeWidth.set(1.0);
 	}
 
-	public static ObservableList<String> getTrees() {
+	public void addTree(String newick) {
+		var namedNewick = new NamedNewick(newick);
+		if (!getTrees().contains(namedNewick))
+			getTrees().add(namedNewick);
+	}
+
+	public static ObservableList<NamedNewick> getTrees() {
 		return getInstance().trees;
 	}
 
@@ -134,16 +153,28 @@ public class DefaultOptions {
 		getInstance().textAreaFontSize.set(textAreaFontSize);
 	}
 
-	public static Color getNodeColor() {
-		return getInstance().nodeColor.get();
+	public static Color getNodeFill() {
+		return getInstance().nodeFill.get();
 	}
 
-	public static ObjectProperty<Color> nodeColorProperty() {
-		return getInstance().nodeColor;
+	public static ObjectProperty<Color> nodeFillProperty() {
+		return getInstance().nodeFill;
 	}
 
-	public static void setNodeColor(Color nodeColor) {
-		getInstance().nodeColor.set(nodeColor);
+	public static void setNodeFill(Color nodeColor) {
+		getInstance().nodeFill.set(nodeColor);
+	}
+
+	public static Color getNodeStroke() {
+		return getInstance().nodeStroke.get();
+	}
+
+	public static ObjectProperty<Color> nodeStrokeProperty() {
+		return getInstance().nodeStroke;
+	}
+
+	public static void setNodeStroke(Color nodeStroke) {
+		getInstance().nodeStroke.set(nodeStroke);
 	}
 
 	public static double getNodeSize() {
@@ -205,18 +236,26 @@ public class DefaultOptions {
 					propertiesFile = new File(System.getProperty("user.home") + File.separator + ".PhyloSketch-App.def");
 
 			} else {
+				var optionalDir = Services.get(StorageService.class).flatMap(StorageService::getPrivateStorage);
+				if (optionalDir.isPresent()) {
+					System.err.println(optionalDir.get());
+					propertiesFile = new File(optionalDir.get(), "PhyloSketch-App.def");
+				}
 				Services.get(StorageService.class).flatMap(StorageService::getPrivateStorage).ifPresent(dir -> propertiesFile = new File(dir, "PhyloSketch-App.def"));
 			}
 		}
 		if (propertiesFile != null) {
-			System.err.println("propertiesFile: " + propertiesFile);
 			ProgramProperties.load(propertiesFile.getPath());
+			System.err.println("Properties file: " + propertiesFile.getPath() + ", already exists: " + propertiesFile.exists());
+		} else {
+			System.err.println("No properties file");
 		}
 	}
 
 	public static void store() {
-		if (propertiesFile != null)
-			ProgramProperties.store(propertiesFile.getPath());
+		if (propertiesFile != null) {
+			ProgramProperties.store();
+		}
 	}
 
 	public static void bindBidirectional(Property<Integer> p, IntegerProperty q) {
@@ -232,5 +271,40 @@ public class DefaultOptions {
 	public static void bindBidirectional(Property<String> p, StringProperty q) {
 		p.addListener((v, o, n) -> q.set(n));
 		q.addListener((v, o, n) -> p.setValue(n));
+	}
+
+	public static class NamedNewick {
+		private final String name;
+		private final String newick;
+
+		public NamedNewick(String newick) {
+			this.name = newick.length() < 60 ? newick : newick.substring(0, 57) + "...";
+			this.newick = newick;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getNewick() {
+			return newick;
+		}
+
+		public String toString() {
+			return getName();
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (!(o instanceof NamedNewick)) return false;
+			NamedNewick that = (NamedNewick) o;
+			return name.equals(that.name) && newick.equals(that.newick);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name, newick);
+		}
 	}
 }

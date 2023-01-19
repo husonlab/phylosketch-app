@@ -15,7 +15,7 @@
  *
  */
 
-package org.husonlab.phylosketch.views.other;
+package org.husonlab.phylosketch.utils;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -583,7 +583,7 @@ public enum AwesomeIcon {
 		var label = new Label(ch);
 		label.getStyleClass().add("icon-text");
 		label.setAlignment(Pos.CENTER);
-		label.setStyle("-fx-font-family: FontAwesome; -fx-font-size: 18; -fx-padding:0;" + (style != null ? style : ""));
+		label.setStyle("-fx-font-family: FontAwesome; -fx-font-size: 16; -fx-padding:0 3 0 3; -fx-background-color: transparent;" + (style != null ? style : ""));
 		return label;
 	}
 
@@ -598,7 +598,7 @@ public enum AwesomeIcon {
 	public Button button(EventHandler<ActionEvent> handler) {
 		var button = new Button(this.toString());
 		button.getStyleClass().add("icon-toggle");
-		button.setStyle("-fx-font-family: FontAwesome; -fx-font-size: 18;");
+		button.setStyle("-fx-font-family: FontAwesome; -fx-font-size: 16;");
 		if (handler != null) {
 			button.setOnAction(handler);
 		}

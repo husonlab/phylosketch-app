@@ -28,10 +28,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import jloda.fx.util.ProgramProperties;
 import jloda.phylo.PhyloTree;
-import org.husonlab.phylosketch.network.DefaultOptions;
+import jloda.util.Basic;
 import org.husonlab.phylosketch.views.primary.PrimaryView;
-import org.husonlab.phylosketch.views.other.OtherView;
+import org.husonlab.phylosketch.views.log.LogView;
 import org.husonlab.phylosketch.views.secondary.SecondaryView;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ import static com.gluonhq.charm.glisten.application.AppManager.HOME_VIEW;
 public class Main extends Application {
 	public static final String PRIMARY_VIEW = HOME_VIEW;
 	public static final String SECONDARY = "Settings View";
-	public static final String OTHER_VIEW = "Other View";
+	public static final String LOG_VIEW = "Log View";
 	public static final Swatch SWATCH = Swatch.TEAL;
 
 	private final AppManager appManager = AppManager.initialize(this::postInit);
@@ -56,8 +57,16 @@ public class Main extends Application {
 		System.setProperty(com.gluonhq.attach.util.Constants.ATTACH_DEBUG, "true");
 		appManager.addViewFactory(PRIMARY_VIEW, () -> (new PrimaryView(primaryView)).getView());
 		appManager.addViewFactory(SECONDARY, () -> (new SecondaryView(primaryView.get())).getView());
-		appManager.addViewFactory(OTHER_VIEW, () -> (new OtherView()).getView());
+		appManager.addViewFactory(LOG_VIEW, () -> (new LogView()).getView());
 		DrawerManager.buildDrawer(appManager);
+
+		System.err.println("\n***********\n"
+						   + "PhyloSketch-App by Daniel H. Huson, Copyright (C) 2023.\n"
+						   + "Uses network embedding code written by Celine Scornavacca.\n"
+						   + "This program comes with ABSOLUTELY NO WARRANTY.\n"
+						   + "This is free software, licensed under the terms of the GNU General Public License, Version 3.\n"
+						   + "Sources available at: https://github.com/husonlab/phylosketch-app\n"
+						   + "***********\n");
 	}
 
 	@Override
@@ -94,6 +103,8 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
+		Basic.startCollectionStdErr();
+
 		launch(args);
 	}
 

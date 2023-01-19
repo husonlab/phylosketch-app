@@ -20,9 +20,7 @@
 
 package org.husonlab.phylosketch.network;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.*;
 import javafx.collections.SetChangeListener;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
@@ -34,6 +32,7 @@ import jloda.fx.shapes.SquareShape;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.graph.NodeArray;
+import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.network.interaction.EdgeShapeInteraction;
 import org.husonlab.phylosketch.network.interaction.LabelEditingManager;
 import org.husonlab.phylosketch.network.interaction.NodeLabelInteraction;
@@ -55,7 +54,7 @@ public class NetworkPresenter {
 		});
 	}
 
-	public static void setupView(Pane pane, Document document, ObjectProperty<InteractionMode> modeProperty) {
+	public static void setupView(ReadOnlyBooleanProperty focus, Pane pane, Document document, ObjectProperty<InteractionMode> modeProperty) {
 		var networkView = document.getNetworkView();
 		pane.getChildren().setAll(networkView.getWorld());
 		var nodeSelection = document.getNodeSelection();
@@ -63,6 +62,10 @@ public class NetworkPresenter {
 
 		var labelEditingManager = new LabelEditingManager(networkView, nodeSelection, document.getUndoManager());
 		modeProperty.addListener(a -> labelEditingManager.finishEditing());
+		focus.addListener((v, o, n) -> {
+			if (!n)
+				labelEditingManager.finishEditing();
+		});
 
 		networkView.setNodeViewAddedCallback(v -> {
 			NodeLabelInteraction.install(labelEditingManager, document, v, modeProperty);
@@ -114,8 +117,8 @@ public class NetworkPresenter {
 			for (var v : tree.nodes()) {
 				var attributes = model.getAttributes(v);
 				var size = attributes.height() != null ? attributes.height() : DefaultOptions.getNodeSize();
-				var fill = attributes.fill() != null ? attributes.fill() : DefaultOptions.getNodeColor();
-				var stroke = attributes.stroke() != null ? attributes.stroke() : DefaultOptions.getNodeColor();
+				var fill = attributes.fill() != null ? attributes.fill() : DefaultOptions.getNodeFill();
+				var stroke = attributes.stroke() != null ? attributes.stroke() : DefaultOptions.getNodeStroke();
 				Shape shape;
 				switch (attributes.glyph()) {
 					case Square:

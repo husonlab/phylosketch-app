@@ -1,5 +1,5 @@
 /*
- * OtherPresenter.java Copyright (C) 2022 Daniel H. Huson
+ * LogPresenter.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,15 +18,16 @@
  *
  */
 
-package org.husonlab.phylosketch.views.other;
+package org.husonlab.phylosketch.views.log;
 
 
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import org.husonlab.phylosketch.utils.AwesomeIcon;
 
-public class OtherPresenter {
-	public OtherPresenter(OtherView view, OtherController controller) {
+public class LogPresenter {
+	public LogPresenter(LogView view, LogController controller) {
 
 		if (true) {
 			controller.getFlowPane().getChildren().add(new Label("AwesomeIcons            "));

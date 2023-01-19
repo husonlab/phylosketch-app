@@ -30,26 +30,22 @@ import javafx.beans.property.*;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.InputEvent;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.AService;
-import jloda.fx.util.AutoCompleteComboBox;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.RunAfterAWhile;
-import jloda.phylo.PhyloTree;
 import org.husonlab.phylosketch.Main;
-import org.husonlab.phylosketch.network.DefaultOptions;
+import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkModel;
 import org.husonlab.phylosketch.network.NetworkPresenter;
 import org.husonlab.phylosketch.network.commands.*;
+import org.husonlab.phylosketch.utils.AwesomeIcon;
 import org.husonlab.phylosketch.utils.CursorUtils;
 
 import java.util.Objects;
@@ -59,12 +55,12 @@ import java.util.Objects;
  * Daniel Huson, 10.2022
  */
 public class PrimaryPresenter {
-	public enum ArrowType {ArrowNone, ArrowRight, ArrowLeft, ArrowBoth}
-
 	private final ObjectProperty<InteractionMode> interactionMode = new SimpleObjectProperty<>(this, "interactionMode", InteractionMode.Pan);
-
 	private final DoubleProperty textFieldFontSize = new SimpleDoubleProperty(this, "textFieldFontSize", 14);
 
+	/**
+	 * constructor
+	 */
 	public PrimaryPresenter(Document document, PrimaryView view, PrimaryController controller) {
 		if (!Main.isDesktop()) {
 			controller.getScrollPane().addEventFilter(InputEvent.ANY, a -> {
@@ -148,7 +144,7 @@ public class PrimaryPresenter {
 				var menuItem = (MenuItem) n;
 				if (menuItem == controller.getPanMenuItem()) {
 					interactionMode.set(InteractionMode.Pan);
-					graphic = MaterialDesignIcon.PAN_TOOL.graphic();
+					graphic = AwesomeIcon.ARROWS.graphic();
 				} else if (menuItem == controller.getEditMenuItem()) {
 					interactionMode.set(InteractionMode.CreateNewEdges);
 					graphic = MaterialDesignIcon.EDIT.graphic();
@@ -168,21 +164,19 @@ public class PrimaryPresenter {
 			}
 			if (graphic == null)
 				graphic = MaterialDesignIcon.HELP_OUTLINE.graphic();
-			;
-			graphic.setStyle("-fx-text-fill: white;");
+			//graphic.setStyle("-fx-text-fill: white;");
 			controller.getModeMenuButton().setGraphic(graphic);
 		});
 		controller.getPanMenuItem().setSelected(true);
-
-		document.edgeGlyphProperty().addListener((c, o, n) -> document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, o, n)));
-
+		
 		controller.getEdgeShapeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
-			if (n == controller.getRectangularEdgesRadioMenuItem())
-				document.setEdgeGlyph(NetworkModel.EdgeGlyph.RectangleLine);
-			else if (n == controller.getRoundEdgesRadioMenuItem())
-				document.setEdgeGlyph(NetworkModel.EdgeGlyph.CubicCurve);
-			else
-				document.setEdgeGlyph(NetworkModel.EdgeGlyph.StraightLine);
+			if (n == controller.getRectangularEdgesRadioMenuItem()) {
+				document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, document.getEdgeGlyph(), NetworkModel.EdgeGlyph.RectangleLine));
+			} else if (n == controller.getRoundEdgesRadioMenuItem()) {
+				document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, document.getEdgeGlyph(), NetworkModel.EdgeGlyph.CubicCurve));
+			} else {
+				document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, document.getEdgeGlyph(), NetworkModel.EdgeGlyph.StraightLine));
+			}
 		});
 		controller.getEdgeShapeToggleGroup().selectToggle(controller.getStraightEdgesRadioMenuItem());
 
@@ -294,7 +288,7 @@ public class PrimaryPresenter {
 			controller.getItalicCheckMenuItem().setSelected(hasItalic && !hasNotItalic);
 			controller.getUnderlineCheckMenuItem().setSelected(hasUnderline && !hasNotUnderline);
 			if (!Objects.equals(fontFamily, ""))
-				controller.getFontComboBox().setValue(fontFamily);
+				controller.getFontCBox().setValue(fontFamily);
 		};
 		document.getNodeSelection().getSelectedItems().addListener(nodeSelectionInvalidationListener);
 		document.getGraphFX().lastUpdateProperty().addListener(nodeSelectionInvalidationListener);
@@ -306,10 +300,10 @@ public class PrimaryPresenter {
 		var inputChanged = new SimpleBooleanProperty(this, "inputChanged", false);
 
 		InvalidationListener updateNewickString = a -> {
-			newickText.set(document.getNewickString());
-			inputChanged.set(false);
-			var hasHTML = document.getNewickString(false, true).matches(".*<.*>.*");
-			controller.getShowHTMLToggleButton().setDisable(!hasHTML);
+			RunAfterAWhile.applyInFXThread(newickText, () -> {
+				newickText.set(document.getNewickString());
+				inputChanged.set(false);
+			});
 		};
 		controller.getShowHTMLToggleButton().setDisable(true);
 
@@ -319,7 +313,7 @@ public class PrimaryPresenter {
 		newickText.addListener(a -> inputChanged.set(true));
 
 		var isValidNewick = new SimpleBooleanProperty(this, "isValidNewick", false);
-		isValidNewick.bind(Bindings.createBooleanBinding(() -> canParse(newickText.get(), true), newickText, document.getGraphFX().lastUpdateProperty()));
+		isValidNewick.bind(Bindings.createBooleanBinding(() -> Document.canParse(newickText.get(), true), newickText, document.getGraphFX().lastUpdateProperty()));
 
 		controller.getImportButton().disableProperty().bind((inputChanged.and(isValidNewick)).not());
 
@@ -333,10 +327,12 @@ public class PrimaryPresenter {
 		controller.getShowWeightsToggleButton().selectedProperty().bindBidirectional(document.toScaleProperty());
 		controller.getShowWeightsToggleButton().selectedProperty().addListener(updateNewickString);
 		controller.getShowWeightsToggleButton().selectedProperty().addListener(e -> inputChanged.set(true));
+		controller.getShowWeightsToggleButton().disableProperty().bind(inputChanged);
 
 		controller.getShowHTMLToggleButton().selectedProperty().bindBidirectional(document.showHTMLProperty());
 		controller.getShowHTMLToggleButton().selectedProperty().addListener(updateNewickString);
 		controller.getShowHTMLToggleButton().selectedProperty().addListener(e -> inputChanged.set(true));
+		controller.getShowHTMLToggleButton().disableProperty().bind(inputChanged);
 
 		controller.getShowNewickToggleButton().selectedProperty().addListener((v, o, n) -> {
 			if (n)
@@ -369,13 +365,14 @@ public class PrimaryPresenter {
 		controller.getBoldCheckMenuItem().setOnAction(a -> document.getUndoManager().doAndAdd(new SetBoldFontCommand(document, controller.getBoldCheckMenuItem().isSelected())));
 		controller.getUnderlineCheckMenuItem().setOnAction(a -> document.getUndoManager().doAndAdd(new SetUnderlineFontCommand(document, controller.getUnderlineCheckMenuItem().isSelected())));
 
-		controller.getFontComboBox().getItems().addAll(Font.getFamilies());
-		controller.getFontComboBox().setValue(DefaultOptions.getLabelFontFamily());
-		controller.getFontComboBox().valueProperty().addListener((v, o, n) -> {
-			if (controller.getFontComboBox().getItems().contains(n))
-				document.getUndoManager().doAndAdd(new SetFontFamilyCommand(document, controller.getFontComboBox().getValue()));
+		controller.getFontCBox().getItems().addAll(Font.getFamilies());
+		controller.getFontCBox().setValue(DefaultOptions.getLabelFontFamily());
+		controller.getFontCBox().valueProperty().addListener((v, o, n) -> {
+			if (controller.getFontCBox().getItems().contains(n))
+				document.getUndoManager().doAndAdd(new SetFontFamilyCommand(document, controller.getFontCBox().getValue()));
 		});
-		AutoCompleteComboBox.install(controller.getFontComboBox());
+
+		// AutoCompleteComboBox.install(controller.getFontCBox());
 
 		// pressing enter in the newick text area will load the newick string, if it is valid
 		controller.getNewickTextArea().addEventFilter(KeyEvent.KEY_PRESSED, e -> {
@@ -387,22 +384,7 @@ public class PrimaryPresenter {
 			}
 		});
 
-		controller.getZoomButtonPane().mouseTransparentProperty().bind(interactionMode.isNotEqualTo(InteractionMode.Pan));
-
-		if (Main.isDesktop()) {
-			controller.getZoomButtonPane().setOnMouseEntered(e -> {
-				if (interactionMode.get() == InteractionMode.Pan)
-					controller.showZoomButtons(true);
-			});
-			controller.getZoomButtonPane().setOnMouseExited(e -> {
-				controller.showZoomButtons(false);
-			});
-
-			controller.getHorizontalZoomInButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1.2, 1));
-			controller.getHorizontalZoomOutButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1.0 / 1.2, 1));
-			controller.getVerticalZoomInButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1, 1.2));
-			controller.getVerticalZoomOutButton().setOnAction(a -> view.getDocument().getNetworkView().scale(1, 1.0 / 1.2));
-		} else {
+		{
 			var service = new AService<Boolean>();
 			service.setCallable(() -> {
 				Thread.sleep(4000);
@@ -433,6 +415,20 @@ public class PrimaryPresenter {
 				service.restart();
 			});
 			interactionMode.addListener(a -> controller.showZoomButtons(false));
+
+			if (Main.isDesktop()) {
+				controller.getStackPane().addEventHandler(ScrollEvent.SCROLL, e -> {
+					controller.showZoomButtons(true);
+					service.restart();
+				});
+				controller.getZoomButtonPane().setOnScroll(e -> controller.getStackPane().getOnScroll().handle(e));
+			} else {
+				controller.getStackPane().addEventHandler(ZoomEvent.ZOOM, e -> {
+					controller.showZoomButtons(true);
+					service.restart();
+				});
+			}
+
 		}
 
 		DefaultOptions.textAreaFontSizeProperty().addListener((v, o, n) ->
@@ -449,9 +445,9 @@ public class PrimaryPresenter {
 
 		InvalidationListener treesListener = e -> {
 			controller.getTreesMenu().getItems().clear();
-			for (var newick : DefaultOptions.getTrees()) {
-				var menuItem = new MenuItem(newick);
-				menuItem.setOnAction(a -> controller.getNewickTextArea().setText(newick));
+			for (var namedNewick : DefaultOptions.getTrees()) {
+				var menuItem = new MenuItem(namedNewick.getName());
+				menuItem.setOnAction(a -> controller.getNewickTextArea().setText(namedNewick.getNewick()));
 				controller.getTreesMenu().getItems().add(menuItem);
 				if (controller.getTreesMenu().getItems().size() > 10)
 					break; // ony keep last ten
@@ -459,21 +455,15 @@ public class PrimaryPresenter {
 		};
 		DefaultOptions.getTrees().addListener(treesListener);
 		treesListener.invalidated(null);
-	}
 
-	private static boolean canParse(String newick, boolean first) {
-		newick = newick.trim();
-		if (!newick.startsWith("(") && !(newick.endsWith(")") || newick.endsWith(";")))
-			return false;
-		if (newick.endsWith(";"))
-			newick = newick.substring(0, newick.length() - 1).trim();
-		try {
-			var tree = new PhyloTree();
-			tree.parseBracketNotation(newick, true);
-			return tree.getNumberOfNodes() > 0 && (!first || !canParse(newick.substring(0, newick.length() - 1), false));
-		} catch (Exception ignored) {
-			return false;
-		}
+		document.modelAndViewUpdatedProperty().addListener((v, o, n) -> {
+			var newick = document.getNewickString();
+			if (newick.length() > 3) {
+				var namedNewick = new DefaultOptions.NamedNewick(newick);
+				DefaultOptions.getTrees().remove(namedNewick);
+				DefaultOptions.getTrees().add(0, namedNewick);
+			}
+		});
 	}
 
 	public ObjectProperty<InteractionMode> interactionModeProperty() {

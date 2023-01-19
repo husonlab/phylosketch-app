@@ -32,6 +32,7 @@ import jloda.fx.util.BasicFX;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
+import org.husonlab.phylosketch.DefaultOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -195,8 +196,8 @@ public class NetworkView {
 		shape.setId("graph-node");
 		shape.setTranslateX(x);
 		shape.setTranslateY(y);
-		shape.setFill(DefaultOptions.getNodeColor());
-		shape.setStroke(DefaultOptions.getNodeColor());
+		shape.setFill(DefaultOptions.getNodeFill());
+		shape.setStroke(DefaultOptions.getNodeStroke());
 		var label = new RichTextLabel(text);
 		label.translateXProperty().bind(shape.translateXProperty());
 		label.translateYProperty().bind(shape.translateYProperty());

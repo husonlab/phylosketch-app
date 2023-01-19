@@ -92,6 +92,7 @@ public class ChangeEdgeShapeCommand extends UndoableRedoableCommand {
 			}
 		}
 		var parallel = new ParallelTransition(transitions.toArray(new Transition[0]));
+		parallel.setOnFinished(e -> document.setEdgeGlyph(glyph));
 		parallel.play();
 	}
 }

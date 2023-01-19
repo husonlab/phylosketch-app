@@ -69,16 +69,25 @@ public class EdgeShapeInteraction {
 		MouseDragClosestNode.setup(curveBelow, sourceShape, ev.getCircle1(), targetShape, ev.getCircle2(), networkView.getWorld(),
 				(circle, delta) -> document.getUndoManager().add(new EdgeShapeCommand(networkView, translatingControl.apply((Circle) circle), delta)),
 				a -> {
-					if (Main.isDesktop() && a.isShiftDown())
+					if (Main.isDesktop() && a.isShiftDown()) {
+						if (nodeSelection.isSelected(e.getSource()) == edgeSelection.isSelected(e))
+							nodeSelection.toggleSelection(e.getSource());
+						if (nodeSelection.isSelected(e.getTarget()) == edgeSelection.isSelected(e))
+							nodeSelection.toggleSelection(e.getTarget());
 						edgeSelection.toggleSelection(e);
-					else
+					} else {
 						edgeSelection.select(e);
+						nodeSelection.select(e.getSource());
+						nodeSelection.select(e.getTarget());
+					}
 				},
 				a -> {
 					if (edgeSelection.isSelected(e)) {
 						nodeSelection.clearSelection();
 						edgeSelection.clearSelection();
 						edgeSelection.select(e);
+						nodeSelection.select(e.getSource());
+						nodeSelection.select(e.getTarget());
 					}
 				},
 				a -> {
@@ -86,6 +95,8 @@ public class EdgeShapeInteraction {
 						nodeSelection.clearSelection();
 						edgeSelection.clearSelection();
 						edgeSelection.select(e);
+						nodeSelection.select(e.getSource());
+						nodeSelection.select(e.getTarget());
 					}
 					if (mode.get() == InteractionMode.Erase)
 						document.getUndoManager().doAndAdd(new DeleteSubTreeCommand(document, e.getTarget()));

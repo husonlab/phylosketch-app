@@ -50,7 +50,7 @@ public class DrawerManager {
 
 		final var primaryItem = new ViewItem("Main Viewer", MaterialDesignIcon.HOME.graphic(), PRIMARY_VIEW, ViewStackPolicy.SKIP);
 		final var secondaryItem = new ViewItem("Properties and Default Settings", MaterialDesignIcon.DASHBOARD.graphic(), SECONDARY);
-		final var otherItem = new ViewItem("Other", MaterialDesignIcon.INFO.graphic(), OTHER_VIEW);
+		final var otherItem = new ViewItem("Log", MaterialDesignIcon.INFO.graphic(), LOG_VIEW);
 		drawer.getItems().addAll(primaryItem, secondaryItem, otherItem);
 
 		if (Platform.isDesktop()) {

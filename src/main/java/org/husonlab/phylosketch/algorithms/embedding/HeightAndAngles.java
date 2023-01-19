@@ -81,9 +81,7 @@ public class HeightAndAngles {
 		HeightAndAngles.apply(tree, nodeAngleMap, averaging);
 		var max = nodeAngleMap.values().stream().mapToDouble(a -> a).max().orElse(0);
 		var factor = 360.0 / max;
-		for (var v : nodeAngleMap.keySet()) {
-			nodeAngleMap.put(v, nodeAngleMap.get(v) * factor);
-		}
+		nodeAngleMap.replaceAll((v, value) -> value * factor);
 	}
 
 	/**
