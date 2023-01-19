@@ -43,15 +43,19 @@ First, you need to launch the iOS simulator from the Tools menu of XCode. Then t
 ### Run the program as a native iOS image:
 
 Before you can run on a native iOS image on an iOS device, there are several configuration steps that one must go
-through, involving setting up a corresponding xCode project and setting up "provisioning", described [here](https://docs.gluonhq.com/#platforms_ios). It may be that you require an Apple Developer account for this to work.
+through, involving setting up a corresponding xCode project and setting up "provisioning",
+described [here](https://docs.gluonhq.com/#platforms_ios). It may be that you require an Apple Developer account for
+this to work.
 
     mvn -Pios gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
 
 ### Run the program as a native Android image:
 
+Unfortunately, I have got this to work yet...
+
     mvn -Pandroid gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
 
-## Important:
+## Important advise for when programming:
 
 When adding controls to an FXML file, remember to add the corresponding classes to the reflectionList in the pom.xml
 file. If you don't, then the program might fail with an exception indicating that "type coercion failed", or some other

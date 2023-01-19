@@ -38,7 +38,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <javafx.version>11</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
-        <gluonfx.plugin.version>1.0.15</gluonfx.plugin.version>
+        <gluonfx.plugin.version>1.0.16</gluonfx.plugin.version>
         <charm.version>6.1.1</charm.version>
         <attach.version>4.0.15</attach.version>
         <main.class>org.husonlab.phylosketch.Main</main.class>
