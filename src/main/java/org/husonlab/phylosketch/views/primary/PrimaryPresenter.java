@@ -39,8 +39,8 @@ import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.AService;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.RunAfterAWhile;
-import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.DefaultOptions;
+import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkModel;
 import org.husonlab.phylosketch.network.NetworkPresenter;
@@ -168,15 +168,21 @@ public class PrimaryPresenter {
 			controller.getModeMenuButton().setGraphic(graphic);
 		});
 		controller.getPanMenuItem().setSelected(true);
-		
+
 		controller.getEdgeShapeToggleGroup().selectedToggleProperty().addListener((v, o, n) -> {
+			NetworkModel.EdgeGlyph glyph;
 			if (n == controller.getRectangularEdgesRadioMenuItem()) {
-				document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, document.getEdgeGlyph(), NetworkModel.EdgeGlyph.RectangleLine));
+				glyph = NetworkModel.EdgeGlyph.RectangleLine;
 			} else if (n == controller.getRoundEdgesRadioMenuItem()) {
-				document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, document.getEdgeGlyph(), NetworkModel.EdgeGlyph.CubicCurve));
+				glyph = NetworkModel.EdgeGlyph.CubicCurve;
 			} else {
-				document.getUndoManager().doAndAdd(new ChangeEdgeShapeCommand(document, document.getEdgeGlyph(), NetworkModel.EdgeGlyph.StraightLine));
+				glyph = NetworkModel.EdgeGlyph.StraightLine;
 			}
+
+			if (document.getEdgeSelection().size() == 0)
+				document.getUndoManager().doAndAdd(new ChangeAllEdgeGlyphCommand(document, document.getEdgeGlyph(), glyph));
+			else
+				document.getUndoManager().doAndAdd(new ChangeEdgeGlyphCommand(document, document.getEdgeSelection().getSelectedItems(), glyph));
 		});
 		controller.getEdgeShapeToggleGroup().selectToggle(controller.getStraightEdgesRadioMenuItem());
 

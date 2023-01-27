@@ -34,11 +34,18 @@ Intellij terminal window. The commands that generate a native image for a mobile
 
     mvn gluonfx:build gluonfx:nativerun
 
+This doesn't work for me on MacOS X, I get this exception:
+
+    *** Assertion failure in -[_NSTrackingAreaAKViewHelper removeTrackingRect:], _NSTrackingAreaAKManager.m:1602
+
 ### Run the program on an iOS simulator:
 
-First, you need to launch the iOS simulator from the Tools menu of XCode. Then the following maven command will install and run the app in the simulator:
+First, you need to launch the iOS simulator from the Tools menu of XCode. Then the following maven command will install
+and run the app in the simulator:
 
     mvn -Pios-sim gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
+
+Adding code for printing breaks this.
 
 ### Run the program as a native iOS image:
 

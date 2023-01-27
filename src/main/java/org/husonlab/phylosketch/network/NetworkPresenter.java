@@ -20,7 +20,10 @@
 
 package org.husonlab.phylosketch.network;
 
-import javafx.beans.property.*;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.SetChangeListener;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
@@ -29,6 +32,7 @@ import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.CircleShape;
 import jloda.fx.shapes.SquareShape;
+import jloda.fx.util.ProgramProperties;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.graph.NodeArray;
@@ -196,7 +200,8 @@ public class NetworkPresenter {
 			var textLabel = ev.label();
 			var label = textLabel != null ? new NetworkModel.Label(textLabel.getLayoutX(), textLabel.getLayoutY(), textLabel.getRotate(), textLabel.getText()) : null;
 
-			var attributes = new NetworkModel.EdgeAttributes(NetworkModel.EdgeGlyph.StraightLine, curve.getStrokeWidth(), curve.getStroke(), label);
+			var edgeGlyph = NetworkModel.EdgeGlyph.valueOfNoFail(ProgramProperties.get("EdgeGlyph", NetworkModel.EdgeGlyph.RectangleLine.name()));
+			var attributes = new NetworkModel.EdgeAttributes(edgeGlyph, curve.getStrokeWidth(), curve.getStroke(), label);
 			model.setAttributes(e, attributes);
 		}
 	}

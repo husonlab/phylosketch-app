@@ -106,6 +106,7 @@
             <artifactId>util</artifactId>
             <version>${attach.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/install4j/i4jruntime -->
     </dependencies>
 
     <build>
@@ -138,18 +139,25 @@
                     </attachList>
                     <reflectionList>
                         <list>org.husonlab.phylosketch.utils.AwesomeIcon</list>
+
+                        <list>org.husonlab.phylosketch.views.log.LogController</list>
+                        <list>org.husonlab.phylosketch.views.log.LogView</list>
+                        <list>org.husonlab.phylosketch.views.labeleditor.LabelEditorController</list>
+                        <list>org.husonlab.phylosketch.views.labeleditor.LabelEditor</list>
+
+                        <list>org.husonlab.phylosketch.views.menu.MenuViewController</list>
+                        <list>org.husonlab.phylosketch.views.menu.MenuView</list>
+
                         <list>org.husonlab.phylosketch.views.primary.PrimaryController</list>
                         <list>org.husonlab.phylosketch.views.primary.PrimaryView</list>
                         <list>org.husonlab.phylosketch.views.secondary.SecondaryController</list>
                         <list>org.husonlab.phylosketch.views.secondary.SecondaryView</list>
-                        <list>org.husonlab.phylosketch.views.log.LogController</list>
-                        <list>org.husonlab.phylosketch.views.log.LogView</list>
-                        <list>org.husonlab.phylosketch.views.labeleditor.LabelEditor</list>
-                        <list>org.husonlab.phylosketch.views.labeleditor.LabelEditorController</list>
+
                         <list>com.gluonhq.charm.glisten.control.DropdownButton</list>
                         <list>com.gluonhq.charm.glisten.control.Icon</list>
                         <list>com.gluonhq.charm.glisten.control.ToggleButtonGroup</list>
                         <list>com.gluonhq.charm.glisten.control.SettingsPane</list>
+
                         <list>javafx.scene.control.Button</list>
                         <list>javafx.scene.control.CheckBox</list>
                         <list>javafx.scene.control.CheckMenuItem</list>
@@ -203,6 +211,10 @@
         <repository>
             <id>gluon-releases</id>
             <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>ej-technologies</id>
+            <url>https://maven.ej-technologies.com/repository</url>
         </repository>
     </repositories>
 </project>

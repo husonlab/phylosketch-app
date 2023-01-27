@@ -23,13 +23,10 @@ package org.husonlab.phylosketch.network.commands;
 import javafx.geometry.Point2D;
 import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.phylo.PhyloTree;
-import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.network.Document;
-import org.husonlab.phylosketch.network.NetworkModel;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * replace the current tree by the new tree provided as a newick string
@@ -82,7 +79,7 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 						label.setLayoutY(offset.getY());
 					}
 				}
-				ChangeEdgeShapeCommand.changeEdgeShape(document, document.getEdgeGlyph());
+				ChangeAllEdgeGlyphCommand.changeEdgeShape(document, document.getEdgeGlyph());
 			};
 
 			redo = () -> {
@@ -99,7 +96,7 @@ public class ReplaceNetworkCommand extends UndoableRedoableCommand {
 						}
 					}
 				}
-				ChangeEdgeShapeCommand.changeEdgeShape(document, document.getEdgeGlyph());
+				ChangeAllEdgeGlyphCommand.changeEdgeShape(document, document.getEdgeGlyph());
 			};
 		} catch (IOException ignored) {
 		}

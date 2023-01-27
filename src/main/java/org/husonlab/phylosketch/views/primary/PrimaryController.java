@@ -161,6 +161,10 @@ public class PrimaryController {
 	@FXML
 	private MenuButton treesMenu;
 
+	@FXML
+	private VBox topVBox;
+
+
 	private final ToggleGroup modeToggleGroup = new ToggleGroup();
 	private final ToggleGroup edgeShapeToggleGroup = new ToggleGroup();
 	private final ToggleGroup arrowTypeToggleGroup = new ToggleGroup();
@@ -424,5 +428,9 @@ public class PrimaryController {
 
 	public MenuButton getTreesMenu() {
 		return treesMenu;
+	}
+
+	public VBox getTopVBox() {
+		return topVBox;
 	}
 }

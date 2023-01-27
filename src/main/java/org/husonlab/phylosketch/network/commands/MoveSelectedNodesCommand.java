@@ -25,7 +25,6 @@ import jloda.fx.undo.UndoableRedoableCommand;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import org.husonlab.phylosketch.network.Document;
-import org.husonlab.phylosketch.network.NetworkView;
 
 import java.util.HashMap;
 import java.util.List;

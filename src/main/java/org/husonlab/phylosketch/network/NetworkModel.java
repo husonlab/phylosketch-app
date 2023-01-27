@@ -21,8 +21,8 @@
 package org.husonlab.phylosketch.network;
 
 import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import jloda.fx.util.ProgramProperties;
 import jloda.graph.*;
 import jloda.phylo.PhyloTree;
 import jloda.util.CanceledException;
@@ -41,7 +41,17 @@ import java.util.Objects;
 public class NetworkModel {
 	public enum NodeGlyph {Square, Circle}
 
-	public enum EdgeGlyph {StraightLine, RectangleLine, CubicCurve}
+	public enum EdgeGlyph {
+		StraightLine, RectangleLine, CubicCurve;
+
+		public static EdgeGlyph valueOfNoFail(String name) {
+			try {
+				return EdgeGlyph.valueOf(name);
+			} catch (Exception ex) {
+				return EdgeGlyph.RectangleLine;
+			}
+		}
+	}
 
 	private final PhyloTree tree;
 	private final NodeArray<NodeAttributes> nodeAttributesNodeMap;
@@ -80,8 +90,10 @@ public class NetworkModel {
 				setAttributes(v, new NodeAttributes(vx, vy, NodeGlyph.Circle, null, null, null, null, label));
 			}
 
+			var edgeGlyph = EdgeGlyph.valueOfNoFail(ProgramProperties.get("EdgeGlyph", EdgeGlyph.RectangleLine.name()));
+
 			for (var e : tree.edges()) {
-				edgeAttributesMap.put(e, new EdgeAttributes(EdgeGlyph.StraightLine, null, null, null));
+				edgeAttributesMap.put(e, new EdgeAttributes(edgeGlyph, null, null, null));
 			}
 		}
 

@@ -26,7 +26,6 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
-
 <View fx:id="view" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.husonlab.phylosketch.views.log.LogController">
     <bottom>

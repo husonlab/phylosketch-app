@@ -21,14 +21,10 @@
 package org.husonlab.phylosketch.network.interaction;
 
 import javafx.beans.property.ObjectProperty;
-import jloda.fx.selection.SelectionModel;
-import jloda.fx.undo.UndoManager;
-import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.util.Single;
 import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
-import org.husonlab.phylosketch.network.NetworkView;
 import org.husonlab.phylosketch.network.commands.DeleteSubTreeCommand;
 import org.husonlab.phylosketch.network.commands.MoveSelectedNodeLabelsCommand;
 import org.husonlab.phylosketch.views.primary.InteractionMode;

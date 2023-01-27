@@ -1,0 +1,70 @@
+/*
+ * menu.css Copyright (C) 2022 Daniel H. Huson
+ *
+ * (Some files contain contributions from other authors, who are then mentioned separately.)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+
+.icon .label {
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+
+}
+
+.menu-button:hover {
+    -fx-background-color: derive(-primary-swatch-500, -10%);
+}
+
+.menu,
+.menu:focused,
+.menu-item {
+    -fx-padding: 10;
+}
+
+/* Change padding of menu buttons when in menu bar */
+.menu-bar > .container > .menu-button > .label {
+    -fx-padding: 0;
+}
+
+/* Hide the down arrow for a menu placed in a menubar */
+.menu-bar > .container > .menu-button > .arrow-button > .arrow {
+    -fx-padding: 0.167em 0 0.250em 0; /* 2 0 3 0 */
+    -fx-background-color: transparent;
+    -fx-shape: null;
+}
+
+.menu-bar > .container > .menu > .arrow-button {
+    -fx-padding: 0.500em 0 0.500em 0; /* 6 0 6 0 */
+}
+
+.menu-bar > .container > .menu-button:hover,
+.menu-bar > .container > .menu-button:focused,
+.menu-bar > .container > .menu-button:showing {
+    -fx-background-color: derive(-primary-swatch-500, -10%);
+}
+
+.menu-bar > .container > .menu-button:hover > .label,
+.menu-bar > .container > .menu-button:focused > .label,
+.menu-bar > .container > .menu-button:showing > .label {
+    -fx-text-fill: -fx-text-background-color;
+}
+

@@ -21,12 +21,10 @@
 package org.husonlab.phylosketch.views.secondary;
 
 import com.gluonhq.charm.glisten.mvc.View;
-import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import jloda.util.Basic;
-import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.views.primary.PrimaryView;
 
 import java.io.IOException;

@@ -1,5 +1,5 @@
 /*
- * DrawerManager.java Copyright (C) 2022 Daniel H. Huson
+ * DrawerInitialization.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -23,7 +23,6 @@ package org.husonlab.phylosketch;
 import com.gluonhq.attach.lifecycle.LifecycleService;
 import com.gluonhq.attach.util.Platform;
 import com.gluonhq.attach.util.Services;
-import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.application.ViewStackPolicy;
 import com.gluonhq.charm.glisten.control.NavigationDrawer;
 import com.gluonhq.charm.glisten.control.NavigationDrawer.Item;
@@ -36,12 +35,11 @@ import java.util.Objects;
 
 import static org.husonlab.phylosketch.Main.*;
 
-public class DrawerManager {
+public class DrawerInitialization {
 
-	public static void buildDrawer(AppManager app) {
-		var drawer = app.getDrawer();
+	public static void apply(NavigationDrawer drawer) {
 
-		var iconView = new ImageView(new Image(Objects.requireNonNull(DrawerManager.class.getResourceAsStream("phylosketch.png"))));
+		var iconView = new ImageView(new Image(Objects.requireNonNull(DrawerInitialization.class.getResourceAsStream("phylosketch.png"))));
 		iconView.setFitHeight(32);
 		iconView.setFitWidth(32);
 
@@ -53,7 +51,7 @@ public class DrawerManager {
 		final var otherItem = new ViewItem("Log", MaterialDesignIcon.INFO.graphic(), LOG_VIEW);
 		drawer.getItems().addAll(primaryItem, secondaryItem, otherItem);
 
-		if (Platform.isDesktop()) {
+		if (Main.isDesktop()) {
 			final var quitItem = new Item("Quit", MaterialDesignIcon.EXIT_TO_APP.graphic());
 			quitItem.selectedProperty().addListener((obs, ov, nv) -> {
 				if (nv) {

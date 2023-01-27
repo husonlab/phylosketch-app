@@ -31,7 +31,6 @@ import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
 import jloda.phylo.algorithms.RootedNetworkProperties;
-import jloda.util.NumberUtils;
 
 import java.io.IOException;
 
@@ -57,6 +56,8 @@ public class Document {
 	private final BooleanProperty showHTML = new SimpleBooleanProperty(this, "showHTML", false);
 
 	private final LongProperty modelAndViewUpdated = new SimpleLongProperty(this, "modelAndViewUpdated", 0L);
+
+	private final StringProperty fileName = new SimpleStringProperty(this, "fileName", "Untitled.tre");
 
 	public Document() {
 		model = new NetworkModel();
@@ -229,5 +230,17 @@ public class Document {
 
 	public ReadOnlyLongProperty modelAndViewUpdatedProperty() {
 		return modelAndViewUpdated;
+	}
+
+	public String getFileName() {
+		return fileName.get();
+	}
+
+	public StringProperty fileNameProperty() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName.set(fileName);
 	}
 }

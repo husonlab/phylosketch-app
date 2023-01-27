@@ -139,7 +139,7 @@ public class LSATree {
 		for (Edge f = v.getFirstOutEdge(); f != null; f = v.getNextOutEdge(f)) {
 			Node w = f.getTarget();
 			if (node2below.get(w) == null) // if haven't processed child yet, do it:
-				computeReticulation2LSARec(tree, w, reticulation2LSA, ret2PathSet, ret2Edge2PathSet,node2below);
+				computeReticulation2LSARec(tree, w, reticulation2LSA, ret2PathSet, ret2Edge2PathSet, node2below);
 			reticulationsBelow.addAll(node2below.get(w));
 			if (w.getInDegree() > 1)
 				reticulationsBelow.add(w);

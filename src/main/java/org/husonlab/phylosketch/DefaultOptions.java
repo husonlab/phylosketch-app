@@ -32,12 +32,10 @@ import javafx.scene.text.Font;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.ProgramProperties;
 import jloda.fx.util.RunAfterAWhile;
-import jloda.util.FileUtils;
-import jloda.util.StringUtils;
 import org.husonlab.phylosketch.network.Document;
+import org.husonlab.phylosketch.network.NetworkModel;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,10 +49,12 @@ public class DefaultOptions {
 	private final IntegerProperty textAreaFontSize = new SimpleIntegerProperty(this, "textAreaFontSize");
 	private final StringProperty labelFontFamily = new SimpleStringProperty(this, "labelFontFamily");
 	private final DoubleProperty labelFontSize = new SimpleDoubleProperty(this, "labelFontSize");
+
 	private final ObjectProperty<Color> nodeFill = new SimpleObjectProperty<>(this, "nodeFill");
 	private final ObjectProperty<Color> nodeStroke = new SimpleObjectProperty<>(this, "nodeStroke");
-
 	private final DoubleProperty nodeSize = new SimpleDoubleProperty(this, "nodeSize");
+
+	private final ObjectProperty<NetworkModel.EdgeGlyph> edgeGlyph = new SimpleObjectProperty<>(this, "edgeGlyph");
 	private final ObjectProperty<Color> edgeColor = new SimpleObjectProperty<>(this, "edgeColor");
 	private final ObjectProperty<Color> reticulateColor = new SimpleObjectProperty<>(this, "reticulateColor");
 	private final DoubleProperty edgeWidth = new SimpleDoubleProperty(this, "edgeWidth");
@@ -80,13 +80,14 @@ public class DefaultOptions {
 			ProgramProperties.track(instance.nodeFill, Color.BLACK);
 			ProgramProperties.track(instance.nodeStroke, Color.BLACK);
 			ProgramProperties.track(instance.nodeSize, 2.0);
+			ProgramProperties.track(instance.edgeGlyph, NetworkModel.EdgeGlyph::valueOfNoFail, NetworkModel.EdgeGlyph.RectangleLine);
 			ProgramProperties.track(instance.edgeColor, Color.BLACK);
 			ProgramProperties.track(instance.reticulateColor, Color.DARKORANGE);
 			ProgramProperties.track(instance.edgeWidth, 1.0);
 
 			// save properties after each change:
 			instance.update.bind(Bindings.createLongBinding(System::currentTimeMillis, getTrees(), labelFontFamilyProperty(), labelFontSizeProperty(),
-					nodeFillProperty(), nodeStrokeProperty(), nodeSizeProperty(), edgeColorProperty(), edgeWidthProperty(), reticulateColorProperty()));
+					nodeFillProperty(), nodeStrokeProperty(), nodeSizeProperty(), edgeGlyphProperty(), edgeColorProperty(), edgeWidthProperty(), reticulateColorProperty()));
 			instance.update.addListener((v, o, n) -> RunAfterAWhile.apply(instance, DefaultOptions::store));
 		}
 		return instance;
@@ -96,15 +97,16 @@ public class DefaultOptions {
 		if (instance.trees.size() > 0)
 			instance.trees.setAll(instance.trees.get(0));
 		instance.addTree("((a,b),(c.d));");
-		instance.labelFontFamily.set("Arial");
-		instance.labelFontSize.set(14.0);
-		instance.textAreaFontSize.set(20);
-		instance.nodeFill.set(Color.BLACK);
-		instance.nodeStroke.set(Color.BLACK);
-		instance.nodeSize.set(2.0);
-		instance.edgeColor.set(Color.BLACK);
-		instance.reticulateColor.set(Color.DARKORANGE);
-		instance.edgeWidth.set(1.0);
+		setLabelFontFamily("Arial");
+		setLabelFontSize(14.0);
+		setTextAreaFontSize(20);
+		setNodeFill(Color.BLACK);
+		setNodeStroke(Color.BLACK);
+		setNodeSize(2.0);
+		setEdgeGlyph(NetworkModel.EdgeGlyph.RectangleLine);
+		setEdgeColor(Color.BLACK);
+		setReticulateColor(Color.DARKORANGE);
+		setEdgeWidth(1.0);
 	}
 
 	public void addTree(String newick) {
@@ -211,6 +213,18 @@ public class DefaultOptions {
 
 	public static void setReticulateColor(Color reticulateColor) {
 		getInstance().reticulateColor.set(reticulateColor);
+	}
+
+	public static NetworkModel.EdgeGlyph getEdgeGlyph() {
+		return getInstance().edgeGlyph.get();
+	}
+
+	public static ObjectProperty<NetworkModel.EdgeGlyph> edgeGlyphProperty() {
+		return getInstance().edgeGlyph;
+	}
+
+	public static void setEdgeGlyph(NetworkModel.EdgeGlyph edgeGlyph) {
+		getInstance().edgeGlyph.set(edgeGlyph);
 	}
 
 	public static double getEdgeWidth() {

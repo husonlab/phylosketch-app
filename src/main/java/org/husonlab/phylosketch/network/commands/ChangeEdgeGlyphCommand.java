@@ -1,5 +1,5 @@
 /*
- * ChangeEdgeShapeCommand.java Copyright (C) 2022 Daniel H. Huson
+ * ChangeAllEdgeGlyphCommand.java Copyright (C) 2022 Daniel H. Huson
  *
  * (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -25,28 +25,46 @@ import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 import jloda.fx.undo.UndoableRedoableCommand;
+import jloda.graph.Edge;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkModel;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * change the shape of the edges
  * Daniel Huson, 12.2022
  */
-public class ChangeEdgeShapeCommand extends UndoableRedoableCommand {
+public class ChangeEdgeGlyphCommand extends UndoableRedoableCommand {
 	private Runnable undo;
 	private Runnable redo;
 
-	public ChangeEdgeShapeCommand(Document document, NetworkModel.EdgeGlyph oldShape, NetworkModel.EdgeGlyph newShape) {
-		super("change edge shape");
+	public ChangeEdgeGlyphCommand(Document document, Collection<Edge> edges, NetworkModel.EdgeGlyph newShape) {
+		super("change edge type");
 
-		if (oldShape != newShape) {
-			if (oldShape != null)
-				undo = () -> changeEdgeShape(document, oldShape);
-			if (newShape != null)
-				redo = () -> changeEdgeShape(document, newShape);
+		var networkView = document.getNetworkView();
+		var id2oldCoordinates = new HashMap<Integer, double[]>();
+
+		for (var e : edges) {
+			id2oldCoordinates.put(e.getId(), networkView.getView(e).getControlCoordinatesNormalized());
 		}
+
+		undo = () -> {
+			for (var id : id2oldCoordinates.keySet()) {
+				var e = document.getModel().getTree().findEdgeById(id);
+				networkView.getView(e).setControlCoordinatesFromNormalized(id2oldCoordinates.get(id));
+			}
+		};
+
+		redo = () -> {
+			var tree = document.getModel().getTree();
+			var theEdges = id2oldCoordinates.keySet().stream().map(tree::findEdgeById).filter(Objects::nonNull).collect(Collectors.toList());
+			changeEdgeShape(document, theEdges, newShape);
+		};
 	}
 
 
@@ -68,12 +86,11 @@ public class ChangeEdgeShapeCommand extends UndoableRedoableCommand {
 	@Override
 	public void redo() {
 		redo.run();
-
 	}
 
-	public static void changeEdgeShape(Document document, NetworkModel.EdgeGlyph glyph) {
+	public static void changeEdgeShape(Document document, Collection<Edge> edges, NetworkModel.EdgeGlyph glyph) {
 		var transitions = new ArrayList<Transition>();
-		for (var e : document.getModel().getTree().edges()) {
+		for (var e : edges) {
 			var ev = document.getNetworkView().getView(e);
 			var coordinates = document.getNetworkView().computeControlPoints(e, glyph);
 			{

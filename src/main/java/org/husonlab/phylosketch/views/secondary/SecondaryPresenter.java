@@ -34,13 +34,17 @@ import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.ISized;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.ProgramExecutorService;
+import jloda.fx.util.ProgramProperties;
 import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.network.Document;
+import org.husonlab.phylosketch.network.NetworkModel;
+import org.husonlab.phylosketch.network.commands.ChangeAllEdgeGlyphCommand;
 import org.husonlab.phylosketch.network.commands.ReplaceNetworkCommand;
 import org.husonlab.phylosketch.utils.TypeToSearchSupport;
 import org.husonlab.phylosketch.views.primary.PrimaryView;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * settings presenter
@@ -90,7 +94,6 @@ public class SecondaryPresenter {
 			}
 		});
 
-
 		var fontSizeOption = new DefaultOption<>(MaterialDesignIcon.FORMAT_SIZE.graphic(),
 				"Size", "Set the default font size for labels", "Labels", DefaultOptions.getLabelFontSize(), true);
 		controller.getSettingsPane().getOptions().add(fontSizeOption);
@@ -117,7 +120,6 @@ public class SecondaryPresenter {
 			document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).shape().setFill(n));
 		});
 
-
 		var nodeStrokeOption = new DefaultOption<>(MaterialDesignIcon.COLOR_LENS.graphic(),
 				"Stroke", "Set the default stroke color for nodes", "Nodes", DefaultOptions.getNodeStroke(), true);
 		controller.getSettingsPane().getOptions().add(nodeStrokeOption);
@@ -142,6 +144,17 @@ public class SecondaryPresenter {
 		});
 
 		// edges:
+
+		var edgeGlyphOption = new DefaultOption<>(MaterialDesignIcon.FONT_DOWNLOAD.graphic(),
+				"Edge type", "Set the default edge type", "Edges", DefaultOptions.getEdgeGlyph(), true, EdgeGlyphEditor::new);
+		controller.getSettingsPane().getOptions().add(edgeGlyphOption);
+		edgeGlyphOption.valueProperty().bindBidirectional(DefaultOptions.edgeGlyphProperty());
+
+		edgeGlyphOption.valueProperty().addListener((v, o, n) -> {
+			ProgramProperties.put("EdgeGylph", n.name());
+			(new ChangeAllEdgeGlyphCommand(document, o, n)).redo();
+		});
+
 
 		var edgeColorOption = new DefaultOption<>(MaterialDesignIcon.COLOR_LENS.graphic(),
 				"Color", "Set the default color for edges", "Edges", DefaultOptions.getEdgeColor(), true);
@@ -205,6 +218,12 @@ public class SecondaryPresenter {
 	public static class FontFamilyEditor extends ChoiceBoxEditor<String> {
 		public FontFamilyEditor(Option<String> option) {
 			super(option, Font.getFamilies());
+		}
+	}
+
+	public static class EdgeGlyphEditor extends ChoiceBoxEditor<NetworkModel.EdgeGlyph> {
+		public EdgeGlyphEditor(Option<NetworkModel.EdgeGlyph> option) {
+			super(option, List.of(NetworkModel.EdgeGlyph.values()));
 		}
 	}
 

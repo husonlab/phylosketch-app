@@ -21,20 +21,12 @@
 package org.husonlab.phylosketch.network.commands;
 
 import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import jloda.fx.undo.UndoableRedoableCommand;
-import jloda.fx.window.MainWindowManager;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
 import org.husonlab.phylosketch.network.Document;
-import org.husonlab.phylosketch.network.NetworkModel;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * delete subtree
@@ -49,7 +41,6 @@ public class DeleteSubTreeCommand extends UndoableRedoableCommand {
 	 */
 	public DeleteSubTreeCommand(Document document, Node v) {
 		super("delete subtree");
-
 
 		if (document.getModel().getTree().getRoot() != v) {
 			var oldTree = new PhyloTree();
@@ -86,13 +77,15 @@ public class DeleteSubTreeCommand extends UndoableRedoableCommand {
 						label.setLayoutY(offset.getY());
 					}
 				}
-				ChangeEdgeShapeCommand.changeEdgeShape(document, document.getEdgeGlyph());
+				ChangeAllEdgeGlyphCommand.changeEdgeShape(document, document.getEdgeGlyph());
 			};
+
+			var vid = v.getId();
 
 			redo = () -> {
 				var tree = document.getModel().getTree();
 				try (var allBelow = tree.newNodeSet()) {
-					tree.preorderTraversal(v, allBelow::add);
+					tree.preorderTraversal(tree.findNodeById(vid), allBelow::add);
 					allBelow.forEach(tree::deleteNode);
 				}
 				document.updateModelAndView();

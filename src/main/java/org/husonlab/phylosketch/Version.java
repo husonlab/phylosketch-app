@@ -22,5 +22,5 @@ package org.husonlab.phylosketch;
 
 public class Version {
 	public static final String NAME = "PhyloSketch-App";
-	public static final String VERSION = "By Daniel Huson, University of Tübingen, 2023";
+	public static final String VERSION = "Version 0.0.0 (2023)";
 }

@@ -25,21 +25,25 @@ import com.gluonhq.charm.glisten.visual.Swatch;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import jloda.fx.util.ProgramProperties;
+import jloda.fx.window.SplashScreen;
 import jloda.phylo.PhyloTree;
 import jloda.util.Basic;
-import org.husonlab.phylosketch.views.primary.PrimaryView;
 import org.husonlab.phylosketch.views.log.LogView;
+import org.husonlab.phylosketch.views.primary.PrimaryView;
 import org.husonlab.phylosketch.views.secondary.SecondaryView;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static com.gluonhq.charm.glisten.application.AppManager.HOME_VIEW;
 
 public class Main extends Application {
+	public static boolean use = true;
 	public static final String PRIMARY_VIEW = HOME_VIEW;
 	public static final String SECONDARY = "Settings View";
 	public static final String LOG_VIEW = "Log View";
@@ -52,13 +56,23 @@ public class Main extends Application {
 	@Override
 	public void init() {
 		DefaultOptions.load();
+		if (use) {
+			SplashScreen.setLabelAnchor(new Point2D(160, 10));
+			ProgramProperties.setProgramVersion(Version.VERSION);
+			SplashScreen.setVersionString(ProgramProperties.getProgramVersion());
+			try (var iconStream = Main.class.getResourceAsStream("splash.png")) {
+				if (iconStream != null)
+					SplashScreen.setImage(new Image(iconStream));
+			} catch (IOException ignored) {
+			}
+		}
 
 		PhyloTree.SUPPORT_RICH_NEWICK = true;
 		System.setProperty(com.gluonhq.attach.util.Constants.ATTACH_DEBUG, "true");
 		appManager.addViewFactory(PRIMARY_VIEW, () -> (new PrimaryView(primaryView)).getView());
 		appManager.addViewFactory(SECONDARY, () -> (new SecondaryView(primaryView.get())).getView());
 		appManager.addViewFactory(LOG_VIEW, () -> (new LogView()).getView());
-		DrawerManager.buildDrawer(appManager);
+		DrawerInitialization.apply(appManager.getDrawer());
 
 		System.err.println("\n***********\n"
 						   + "PhyloSketch-App by Daniel H. Huson, Copyright (C) 2023.\n"
@@ -72,12 +86,13 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		appManager.start(primaryStage);
-
 		if (isDesktop()) {
 			primaryStage.setX(100);
 			primaryStage.setY(100);
 			primaryStage.setWidth(600);
 			primaryStage.setHeight(800);
+			if (use)
+				SplashScreen.showSplash(Duration.ofSeconds(5));
 		}
 	}
 
@@ -91,6 +106,8 @@ public class Main extends Application {
 		try (var iconStream = Main.class.getResourceAsStream("phylosketch.png")) {
 			assert iconStream != null;
 			((Stage) scene.getWindow()).getIcons().add(new Image(iconStream));
+			if (use)
+				ProgramProperties.getProgramIconsFX().setAll(new Image(iconStream));
 		} catch (IOException exception) {
 			exception.printStackTrace();
 		}

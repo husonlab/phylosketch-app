@@ -24,7 +24,6 @@ import com.gluonhq.charm.glisten.mvc.View;
 import javafx.fxml.FXMLLoader;
 import jloda.fx.message.EchoPrintStreamForTextArea;
 import jloda.util.Basic;
-import jloda.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Objects;
