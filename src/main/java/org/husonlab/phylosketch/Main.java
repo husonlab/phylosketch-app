@@ -29,6 +29,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import jloda.fx.util.ProgramProperties;
 import jloda.fx.window.SplashScreen;
 import jloda.phylo.PhyloTree;
@@ -43,11 +44,11 @@ import java.time.Duration;
 import static com.gluonhq.charm.glisten.application.AppManager.HOME_VIEW;
 
 public class Main extends Application {
-	public static boolean use = true;
 	public static final String PRIMARY_VIEW = HOME_VIEW;
 	public static final String SECONDARY = "Settings View";
 	public static final String LOG_VIEW = "Log View";
-	public static final Swatch SWATCH = Swatch.TEAL;
+
+	public static final Swatch DEFAULT_SWATCH = Swatch.TEAL;
 
 	private final AppManager appManager = AppManager.initialize(this::postInit);
 
@@ -56,7 +57,8 @@ public class Main extends Application {
 	@Override
 	public void init() {
 		DefaultOptions.load();
-		if (use) {
+
+		if (isDesktop()) {
 			SplashScreen.setLabelAnchor(new Point2D(160, 10));
 			ProgramProperties.setProgramVersion(Version.VERSION);
 			SplashScreen.setVersionString(ProgramProperties.getProgramVersion());
@@ -91,13 +93,17 @@ public class Main extends Application {
 			primaryStage.setY(100);
 			primaryStage.setWidth(600);
 			primaryStage.setHeight(800);
-			if (use)
-				SplashScreen.showSplash(Duration.ofSeconds(5));
+			// SplashScreen.showSplash(Duration.ofSeconds(5));
+			primaryStage.setOnCloseRequest(e -> System.exit(0));
 		}
 	}
 
 	private void postInit(Scene scene) {
-		SWATCH.assignTo(scene);
+		try {
+			Swatch.valueOf(ProgramProperties.get("Swatch", Swatch.TEAL.name())).assignTo(scene);
+		} catch (Exception ex) {
+			Swatch.TEAL.assignTo(scene);
+		}
 
 		var stylesURL = Main.class.getResource("styles.css");
 		assert stylesURL != null;
@@ -106,8 +112,7 @@ public class Main extends Application {
 		try (var iconStream = Main.class.getResourceAsStream("phylosketch.png")) {
 			assert iconStream != null;
 			((Stage) scene.getWindow()).getIcons().add(new Image(iconStream));
-			if (use)
-				ProgramProperties.getProgramIconsFX().setAll(new Image(iconStream));
+			ProgramProperties.getProgramIconsFX().setAll(new Image(iconStream));
 		} catch (IOException exception) {
 			exception.printStackTrace();
 		}
@@ -127,5 +132,13 @@ public class Main extends Application {
 
 	public static boolean isDesktop() {
 		return com.gluonhq.attach.util.Platform.isDesktop();
+	}
+
+	public static void setSwatch(Swatch swatch) {
+		ProgramProperties.put("Swatch", swatch.name());
+		for (var window : Window.getWindows()) {
+			if (window.getScene() != null)
+				swatch.assignTo(window.getScene());
+		}
 	}
 }

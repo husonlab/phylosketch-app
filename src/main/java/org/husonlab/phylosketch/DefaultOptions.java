@@ -22,6 +22,7 @@ package org.husonlab.phylosketch;
 
 import com.gluonhq.attach.storage.StorageService;
 import com.gluonhq.attach.util.Services;
+import com.gluonhq.charm.glisten.visual.Swatch;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
@@ -47,6 +48,8 @@ import java.util.stream.Stream;
 public class DefaultOptions {
 	private final ObservableList<NamedNewick> trees = FXCollections.observableArrayList();
 	private final IntegerProperty textAreaFontSize = new SimpleIntegerProperty(this, "textAreaFontSize");
+	private final ObjectProperty<Swatch> swatch = new SimpleObjectProperty<>(this, "swatch");
+
 	private final StringProperty labelFontFamily = new SimpleStringProperty(this, "labelFontFamily");
 	private final DoubleProperty labelFontSize = new SimpleDoubleProperty(this, "labelFontSize");
 
@@ -72,11 +75,13 @@ public class DefaultOptions {
 			instance.trees.addListener((InvalidationListener) e -> {
 				ProgramProperties.put("trees", instance.trees.stream().map(NamedNewick::getNewick).toArray(String[]::new));
 			});
+			ProgramProperties.track(instance.textAreaFontSize, 20);
+			ProgramProperties.track(instance.swatch, Swatch::valueOf, Main.DEFAULT_SWATCH);
+
 			ProgramProperties.track(instance.labelFontFamily, "Arial");
 			ProgramProperties.track(instance.labelFontSize, 14.0);
 			RichTextLabel.setDefaultFont(Font.font(instance.labelFontFamily.get(), instance.labelFontSize.get()));
 
-			ProgramProperties.track(instance.textAreaFontSize, 20);
 			ProgramProperties.track(instance.nodeFill, Color.BLACK);
 			ProgramProperties.track(instance.nodeStroke, Color.BLACK);
 			ProgramProperties.track(instance.nodeSize, 2.0);
@@ -87,7 +92,8 @@ public class DefaultOptions {
 
 			// save properties after each change:
 			instance.update.bind(Bindings.createLongBinding(System::currentTimeMillis, getTrees(), labelFontFamilyProperty(), labelFontSizeProperty(),
-					nodeFillProperty(), nodeStrokeProperty(), nodeSizeProperty(), edgeGlyphProperty(), edgeColorProperty(), edgeWidthProperty(), reticulateColorProperty()));
+					nodeFillProperty(), nodeStrokeProperty(), nodeSizeProperty(), edgeGlyphProperty(), edgeColorProperty(), edgeWidthProperty(), reticulateColorProperty(),
+					swatchProperty()));
 			instance.update.addListener((v, o, n) -> RunAfterAWhile.apply(instance, DefaultOptions::store));
 		}
 		return instance;
@@ -97,9 +103,11 @@ public class DefaultOptions {
 		if (instance.trees.size() > 0)
 			instance.trees.setAll(instance.trees.get(0));
 		instance.addTree("((a,b),(c.d));");
+		setTextAreaFontSize(20);
+		setSwatch(Main.DEFAULT_SWATCH);
+
 		setLabelFontFamily("Arial");
 		setLabelFontSize(14.0);
-		setTextAreaFontSize(20);
 		setNodeFill(Color.BLACK);
 		setNodeStroke(Color.BLACK);
 		setNodeSize(2.0);
@@ -117,6 +125,18 @@ public class DefaultOptions {
 
 	public static ObservableList<NamedNewick> getTrees() {
 		return getInstance().trees;
+	}
+
+	public static Swatch getSwatch() {
+		return getInstance().swatch.get();
+	}
+
+	public static ObjectProperty<Swatch> swatchProperty() {
+		return getInstance().swatch;
+	}
+
+	public static void setSwatch(Swatch swatch) {
+		getInstance().swatch.set(swatch);
 	}
 
 	public static String getLabelFontFamily() {

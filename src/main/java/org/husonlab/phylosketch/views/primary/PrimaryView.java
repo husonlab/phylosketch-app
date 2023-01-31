@@ -70,7 +70,6 @@ public class PrimaryView {
 		} else
 			getDocument().setNewickString("((a,b),(c,d));");
 
-		if (Main.use) {
 			if (Main.isDesktop()) {
 				Platform.runLater(() -> {
 					var scene = controller.getPrimary().getScene();
@@ -95,7 +94,6 @@ public class PrimaryView {
 					});
 				});
 			}
-		}
 	}
 
 	public PrimaryController getController() {

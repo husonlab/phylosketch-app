@@ -30,12 +30,14 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.text.Font;
+import javafx.stage.Window;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.shapes.ISized;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.ProgramExecutorService;
 import jloda.fx.util.ProgramProperties;
 import org.husonlab.phylosketch.DefaultOptions;
+import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkModel;
 import org.husonlab.phylosketch.network.commands.ChangeAllEdgeGlyphCommand;
@@ -109,6 +111,7 @@ public class SecondaryPresenter {
 					document.getModel().getTree().nodeStream().forEach(a -> document.getNetworkView().getView(a).label().setFontSize(n));
 			}
 		});
+
 
 		// nodes:
 
@@ -190,6 +193,13 @@ public class SecondaryPresenter {
 			}
 			System.err.println("Default line width: " + n);
 		});
+
+		// app preferences:
+		var swatchOption = new DefaultOption<>(MaterialDesignIcon.COLOR_LENS.graphic(),
+				"App color", "Set the app color", "App", DefaultOptions.getSwatch(), true);
+		controller.getSettingsPane().getOptions().add(swatchOption);
+		swatchOption.valueProperty().addListener((v, o, n) -> Main.setSwatch(n));
+		swatchOption.valueProperty().bindBidirectional(DefaultOptions.swatchProperty());
 
 		// resetAll:
 		resetAll = new SimpleBooleanProperty(this, "resetAll", false);

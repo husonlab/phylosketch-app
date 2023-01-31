@@ -38,7 +38,7 @@ public class SelectionEffect extends DropShadow {
 	}
 
 	private SelectionEffect() {
-		super(BlurType.THREE_PASS_BOX, Main.SWATCH.getColor(SwatchElement.PRIMARY_200), 3.0D, 2.0D, 0.0D, 0.0D);
+		super(BlurType.THREE_PASS_BOX, Main.DEFAULT_SWATCH.getColor(SwatchElement.PRIMARY_200), 3.0D, 2.0D, 0.0D, 0.0D);
 	}
 
 	public static DropShadow create(Color color) {

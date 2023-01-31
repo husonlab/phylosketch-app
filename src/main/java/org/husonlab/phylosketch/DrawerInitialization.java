@@ -55,7 +55,7 @@ public class DrawerInitialization {
 			final var quitItem = new Item("Quit", MaterialDesignIcon.EXIT_TO_APP.graphic());
 			quitItem.selectedProperty().addListener((obs, ov, nv) -> {
 				if (nv) {
-					Services.get(LifecycleService.class).ifPresent(LifecycleService::shutdown);
+					Services.get(LifecycleService.class).ifPresentOrElse(LifecycleService::shutdown, () -> System.exit(0));
 				}
 			});
 			drawer.getItems().add(quitItem);
