@@ -171,11 +171,16 @@
                         <list>javafx.scene.control.ScrollPane</list>
                         <list>javafx.scene.control.Separator</list>
                         <list>javafx.scene.control.SeparatorMenuItem</list>
-                        <list>javafx.scene.control.Slider</list>
                         <list>javafx.scene.control.SplitPane</list>
+                        <list>javafx.scene.control.Slider</list>
+
                         <list>javafx.scene.control.TextArea</list>
                         <list>javafx.scene.control.TextField</list>
                         <list>javafx.scene.control.ToggleButton</list>
+
+                        <list>javafx.scene.layout.AnchorPane</list>
+                        <list>javafx.scene.layout.BorderPane</list>
+                        <list>javafx.scene.layout.StackPane</list>
                         <list>javafx.scene.image.ImageView</list>
                         <list>javafx.scene.layout.FlowPane</list>
                         <list>javafx.scene.layout.GridPane</list>
