@@ -33,15 +33,21 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>11</maven.compiler.release>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.source>11</maven.compiler.source>
-        <javafx.version>11</javafx.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <javafx.version>17</javafx.version>
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
         <gluonfx.plugin.version>1.0.16</gluonfx.plugin.version>
         <charm.version>6.1.1</charm.version>
         <attach.version>4.0.15</attach.version>
         <main.class>org.husonlab.phylosketch.Main</main.class>
+
+        <my.signing.identity>${env.SIGNING_IDENTITY}</my.signing.identity>
+        <my.provisioning>${env.PROVISIONING}</my.provisioning>
+
+        <app.version>1.0.0</app.version>
+
     </properties>
 
     <dependencies>
@@ -186,6 +192,13 @@
                         <list>javafx.scene.layout.GridPane</list>
                         <list>javafx.scene.layout.HBox</list>
                     </reflectionList>
+                    <releaseConfiguration>
+                        <bundleVersion>${app.version}</bundleVersion>
+                        <bundleShortVersion>${app.version}</bundleShortVersion>
+                        <providedProvisioningProfile>
+                            PhyloSketch
+                        </providedProvisioningProfile>
+                    </releaseConfiguration>
                 </configuration>
             </plugin>
         </plugins>

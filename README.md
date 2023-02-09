@@ -58,11 +58,15 @@ this to work.
 
 ### Run the program as a native Android image:
 
-Unfortunately, I have got this to work yet...
+Unfortunately, I have not got this to work yet...
 
     mvn -Pandroid gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
 
-## Important advise for when programming:
+### Use this command to list values of maven properties:
+
+    mvn help:evaluate -Dexpression=project.properties
+
+## Important advice for when programming:
 
 When adding controls to an FXML file, remember to add the corresponding classes to the reflectionList in the pom.xml
 file. If you don't, then the program might fail with an exception indicating that "type coercion failed", or some other
