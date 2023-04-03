@@ -40,6 +40,7 @@ import org.husonlab.phylosketch.views.secondary.SecondaryView;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 
 import static com.gluonhq.charm.glisten.application.AppManager.HOME_VIEW;
 
@@ -76,13 +77,16 @@ public class Main extends Application {
 		appManager.addViewFactory(LOG_VIEW, () -> (new LogView()).getView());
 		DrawerInitialization.apply(appManager.getDrawer());
 
-		System.err.println("\n***********\n"
-						   + "PhyloSketch-App by Daniel H. Huson, Copyright (C) 2023.\n"
-						   + "Uses network embedding code written by Celine Scornavacca.\n"
-						   + "This program comes with ABSOLUTELY NO WARRANTY.\n"
-						   + "This is free software, licensed under the terms of the GNU General Public License, Version 3.\n"
-						   + "Sources available at: https://github.com/husonlab/phylosketch-app\n"
-						   + "***********\n");
+		System.err.println("""
+
+				***********
+				PhyloSketch-App by Daniel H. Huson, Copyright (C) 2023.
+				Uses network embedding code written by Celine Scornavacca.
+				This program comes with ABSOLUTELY NO WARRANTY.
+				This is free software, licensed under the terms of the GNU General Public License, Version 3.
+				Sources available at: https://github.com/husonlab/phylosketch-app
+				***********
+				""");
 	}
 
 	@Override
@@ -109,12 +113,15 @@ public class Main extends Application {
 		assert stylesURL != null;
 		scene.getStylesheets().add(stylesURL.toExternalForm());
 
-		try (var iconStream = Main.class.getResourceAsStream("phylosketch.png")) {
-			assert iconStream != null;
-			((Stage) scene.getWindow()).getIcons().add(new Image(iconStream));
-			ProgramProperties.getProgramIconsFX().setAll(new Image(iconStream));
-		} catch (IOException exception) {
-			exception.printStackTrace();
+		for (var fileName : List.of("PhyloSketch-16x16.png", "PhyloSketch-32x32.png", "PhyloSketch-48x48.png",
+				"PhyloSketch-64x64.png", "PhyloSketch-128x128.png")) {
+			try (var iconStream = Main.class.getResourceAsStream(fileName)) {
+				assert iconStream != null;
+				((Stage) scene.getWindow()).getIcons().add(new Image(iconStream));
+				ProgramProperties.getProgramIconsFX().setAll(new Image(iconStream));
+			} catch (IOException ex) {
+				Basic.caught(ex);
+			}
 		}
 	}
 

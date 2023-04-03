@@ -35,6 +35,7 @@ import jloda.fx.util.ProgramProperties;
 import jloda.fx.util.RunAfterAWhile;
 import org.husonlab.phylosketch.network.Document;
 import org.husonlab.phylosketch.network.NetworkModel;
+import org.husonlab.phylosketch.utils.Store;
 
 import java.io.File;
 import java.util.Objects;
@@ -46,6 +47,7 @@ import java.util.stream.Stream;
  * Daniel Huson, 12.22
  */
 public class DefaultOptions {
+	private static final String PROPERTIES_FILE = "PhyloSketch-App.def";
 	private final ObservableList<NamedNewick> trees = FXCollections.observableArrayList();
 	private final IntegerProperty textAreaFontSize = new SimpleIntegerProperty(this, "textAreaFontSize");
 	private final ObjectProperty<Swatch> swatch = new SimpleObjectProperty<>(this, "swatch");
@@ -263,20 +265,7 @@ public class DefaultOptions {
 
 	public static void load() {
 		if (propertiesFile == null) {
-			if (Main.isDesktop()) {
-				if (ProgramProperties.isMacOS())
-					propertiesFile = new File(System.getProperty("user.home") + "/Library/Preferences/PhyloSketch-App.def");
-				else
-					propertiesFile = new File(System.getProperty("user.home") + File.separator + ".PhyloSketch-App.def");
-
-			} else {
-				var optionalDir = Services.get(StorageService.class).flatMap(StorageService::getPrivateStorage);
-				if (optionalDir.isPresent()) {
-					System.err.println(optionalDir.get());
-					propertiesFile = new File(optionalDir.get(), "PhyloSketch-App.def");
-				}
-				Services.get(StorageService.class).flatMap(StorageService::getPrivateStorage).ifPresent(dir -> propertiesFile = new File(dir, "PhyloSketch-App.def"));
-			}
+			propertiesFile = Store.access(PROPERTIES_FILE);
 		}
 		if (propertiesFile != null) {
 			ProgramProperties.load(propertiesFile.getPath());

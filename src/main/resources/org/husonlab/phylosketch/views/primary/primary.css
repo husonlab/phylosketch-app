@@ -165,3 +165,8 @@
 .text-area .content {
     -fx-background-color: white;
 }
+
+.chip .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}

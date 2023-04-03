@@ -20,16 +20,19 @@
 
 package org.husonlab.phylosketch.views.primary;
 
+import com.gluonhq.charm.glisten.control.Chip;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -469,6 +472,29 @@ public class PrimaryPresenter {
 				DefaultOptions.getTrees().remove(namedNewick);
 				DefaultOptions.getTrees().add(0, namedNewick);
 			}
+		});
+
+		var infoChip = new Chip("", true);
+		infoChip.setOnDeleteAction(a -> controller.getStackPane().getChildren().remove(infoChip));
+		var hideService = new AService<>(() -> {
+			Thread.sleep(4000);
+			Platform.runLater(() -> controller.getStackPane().getChildren().remove(infoChip));
+			return true;
+		});
+
+		infoChip.setOnMouseExited(a -> hideService.restart());
+
+		controller.getInfoButton().setOnAction(e -> {
+			infoChip.setText(document.getInfo().replaceAll("leaves, ", "leaves,\n"));
+			System.err.println(infoChip.getText());
+			controller.getStackPane().getChildren().add(infoChip);
+		});
+
+		interactionMode.addListener(a -> controller.getStackPane().getChildren().remove(infoChip));
+
+		view.getView().focusedProperty().addListener((v, o, n) -> {
+			if (!n)
+				controller.getStackPane().getChildren().remove(infoChip);
 		});
 	}
 

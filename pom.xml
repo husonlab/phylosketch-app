@@ -1,5 +1,5 @@
 <!--
-  ~ pom.xml Copyright (C) 2022 Daniel H. Huson
+  ~ pom.xml Copyright (C) 2023 Daniel H. Huson
   ~
   ~ (Some files contain contributions from other authors, who are then mentioned separately.)
   ~
@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.husonlab</groupId>
-    <artifactId>phylosketch</artifactId>
+    <artifactId>PhyloSketch</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -42,10 +42,6 @@
         <charm.version>6.1.1</charm.version>
         <attach.version>4.0.15</attach.version>
         <main.class>org.husonlab.phylosketch.Main</main.class>
-
-        <my.signing.identity>${env.SIGNING_IDENTITY}</my.signing.identity>
-        <my.provisioning>${env.PROVISIONING}</my.provisioning>
-
         <app.version>1.0.0</app.version>
 
     </properties>
@@ -192,13 +188,15 @@
                         <list>javafx.scene.layout.GridPane</list>
                         <list>javafx.scene.layout.HBox</list>
                     </reflectionList>
+                    <!-->
                     <releaseConfiguration>
                         <bundleVersion>${app.version}</bundleVersion>
                         <bundleShortVersion>${app.version}</bundleShortVersion>
-                        <providedProvisioningProfile>
-                            PhyloSketch
-                        </providedProvisioningProfile>
-                    </releaseConfiguration>
+                                 <providedProvisioningProfile>
+                                    PhyloSketch
+                                </providedProvisioningProfile>
+                     </releaseConfiguration>
+                     </!-->
                 </configuration>
             </plugin>
         </plugins>

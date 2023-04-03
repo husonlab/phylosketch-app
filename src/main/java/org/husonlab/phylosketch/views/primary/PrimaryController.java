@@ -164,6 +164,8 @@ public class PrimaryController {
 	@FXML
 	private VBox topVBox;
 
+	@FXML
+	private Button infoButton;
 
 	private final ToggleGroup modeToggleGroup = new ToggleGroup();
 	private final ToggleGroup edgeShapeToggleGroup = new ToggleGroup();
@@ -432,5 +434,9 @@ public class PrimaryController {
 
 	public VBox getTopVBox() {
 		return topVBox;
+	}
+
+	public Button getInfoButton() {
+		return infoButton;
 	}
 }

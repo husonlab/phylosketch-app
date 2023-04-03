@@ -20,6 +20,7 @@
 
 package org.husonlab.phylosketch.network.interaction;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
@@ -106,7 +107,8 @@ public class NodeShapeInteraction {
 			} else
 				nodeSelection.select(v);
 
-			selectOnlyService.restart(nodeSelection, edgeSelection, v);
+			if (!Main.isDesktop())
+				selectOnlyService.restart(nodeSelection, edgeSelection, v);
 
 			currentTool.set(mode.get());
 
@@ -272,9 +274,11 @@ public class NodeShapeInteraction {
 				@Override
 				protected Boolean call() throws InterruptedException {
 					Thread.sleep(1000);
-					nodeSelectionModel.clearSelection();
-					edgeSelectionModel.clearSelection();
-					nodeSelectionModel.select(v);
+					Platform.runLater(() -> {
+						nodeSelectionModel.clearSelection();
+						edgeSelectionModel.clearSelection();
+						nodeSelectionModel.select(v);
+					});
 					return true;
 				}
 			};

@@ -38,8 +38,7 @@ import static org.husonlab.phylosketch.Main.*;
 public class DrawerInitialization {
 
 	public static void apply(NavigationDrawer drawer) {
-
-		var iconView = new ImageView(new Image(Objects.requireNonNull(DrawerInitialization.class.getResourceAsStream("phylosketch.png"))));
+		var iconView = new ImageView(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("PhyloSketch-32x32.png"))));
 		iconView.setFitHeight(32);
 		iconView.setFitWidth(32);
 
