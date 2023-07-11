@@ -23,7 +23,6 @@ Run like this: mvn -f pom-icons.xml com.filmon.maven:image-maven-plugin:scale
 Unfortunately, throws an exception and I can't find out what the problem is...
 -->
 
-
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">

@@ -29,13 +29,18 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
+import jloda.util.Basic;
 import jloda.util.Single;
 import org.husonlab.phylosketch.utils.AwesomeIcon;
 import org.husonlab.phylosketch.utils.ExpandContractIcons;
+import org.husonlab.phylosketch.utils.IconUtils;
 import org.husonlab.phylosketch.utils.TypeToSearchSupport;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -112,7 +117,6 @@ public class PrimaryController {
 	@FXML
 	private Button importButton;
 
-
 	@FXML
 	private Slider widthSlider;
 
@@ -173,10 +177,13 @@ public class PrimaryController {
 
 	private final Button undoButton = MaterialDesignIcon.UNDO.button(a -> getUndoButton().fire());
 	private final Button redoButton = MaterialDesignIcon.REDO.button(a -> getRedoButton().fire());
+	private final Button shareButton = new Button();
 
 	@FXML
 	private void initialize() {
 		TypeToSearchSupport.install(fontCBox);
+
+		shareButton.setGraphic(IconUtils.getIcon(PrimaryController.class, "Share-white.png", 20));
 
 		eraseMenuItem.setGraphic(AwesomeIcon.ERASER.graphic());
 
@@ -201,7 +208,7 @@ public class PrimaryController {
 				appBar.setNavIcon(MaterialDesignIcon.MENU.button(e ->
 						AppManager.getInstance().getDrawer().open()));
 				appBar.setTitleText("PhyloSketch");
-				appBar.getActionItems().addAll(undoButton, redoButton);
+				appBar.getActionItems().addAll(undoButton, redoButton, shareButton);
 			}
 		});
 
@@ -282,6 +289,10 @@ public class PrimaryController {
 
 	public Button getUndoButton() {
 		return undoButton;
+	}
+
+	public Button getShareButton() {
+		return shareButton;
 	}
 
 	public ScrollPane getScrollPane() {

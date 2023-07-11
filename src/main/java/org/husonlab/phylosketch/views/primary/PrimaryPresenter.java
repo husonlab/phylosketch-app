@@ -20,6 +20,7 @@
 
 package org.husonlab.phylosketch.views.primary;
 
+import com.gluonhq.attach.share.ShareService;
 import com.gluonhq.charm.glisten.control.Chip;
 import com.gluonhq.charm.glisten.visual.MaterialDesignIcon;
 import javafx.animation.FadeTransition;
@@ -32,7 +33,6 @@ import javafx.beans.property.*;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -50,6 +50,7 @@ import org.husonlab.phylosketch.network.NetworkPresenter;
 import org.husonlab.phylosketch.network.commands.*;
 import org.husonlab.phylosketch.utils.AwesomeIcon;
 import org.husonlab.phylosketch.utils.CursorUtils;
+import org.husonlab.phylosketch.utils.ImageFileUtils;
 
 import java.util.Objects;
 
@@ -86,24 +87,12 @@ public class PrimaryPresenter {
 			transition.play();
 			if (n != null) {
 				switch (n) {
-					case Pan:
-						controller.getScrollPane().setCursor(Cursor.OPEN_HAND);
-						break;
-					case EditLabels:
-						controller.getScrollPane().setCursor(Cursor.TEXT);
-						break;
-					case Move:
-						controller.getScrollPane().setCursor(Cursor.HAND);
-						break;
-					case Erase:
-						controller.getScrollPane().setCursor(CursorUtils.createEraserCursor());
-						break;
-					case CreateNewEdges:
-						controller.getScrollPane().setCursor(Cursor.CROSSHAIR);
-						break;
-					default:
-						controller.getScrollPane().setCursor(Cursor.DEFAULT);
-						break;
+					case Pan -> controller.getScrollPane().setCursor(Cursor.OPEN_HAND);
+					case EditLabels -> controller.getScrollPane().setCursor(Cursor.TEXT);
+					case Move -> controller.getScrollPane().setCursor(Cursor.HAND);
+					case Erase -> controller.getScrollPane().setCursor(CursorUtils.createEraserCursor());
+					case CreateNewEdges -> controller.getScrollPane().setCursor(Cursor.CROSSHAIR);
+					default -> controller.getScrollPane().setCursor(Cursor.DEFAULT);
 				}
 			}
 		});
@@ -114,6 +103,30 @@ public class PrimaryPresenter {
 		controller.getUndoButton().disableProperty().bind(document.getUndoManager().undoableProperty().not());
 		controller.getRedoButton().setOnAction(e -> document.getUndoManager().redo());
 		controller.getRedoButton().disableProperty().bind(document.getUndoManager().redoableProperty().not());
+
+		controller.getShareButton().setOnAction(e -> {
+			if (Main.isDesktop()) {
+				var clipboardContent = new ClipboardContent();
+				clipboardContent.putString(document.getNewickString());
+				var image = ImageFileUtils.createImage(controller.getStackPane(), 1024, 1024);
+				clipboardContent.putImage(image);
+				Clipboard.getSystemClipboard().setContent(clipboardContent);
+			} else {
+				ShareService.create().ifPresentOrElse(service -> {
+					service.share("text/plain", document.getNewickString());
+					System.err.println("Sharing: text/plain," + document.getNewickString());
+					var image = ImageFileUtils.createImage(controller.getStackPane(), 1024, 1024);
+					var file = ImageFileUtils.saveToPublicPNGFile(image);
+					if (file != null) {
+						service.share("image/png", file);
+						System.err.println("Sharing: image/png," + file);
+					}
+
+				}, () -> System.err.println("ShareService: not available"));
+			}
+		});
+
+		controller.getShareButton().disableProperty().bind(view.getDocument().getGraphFX().emptyProperty());
 
 		if (Main.isDesktop()) {
 			controller.getStackPane().setOnScroll(e -> {
@@ -501,4 +514,5 @@ public class PrimaryPresenter {
 	public ObjectProperty<InteractionMode> interactionModeProperty() {
 		return interactionMode;
 	}
+
 }

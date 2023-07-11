@@ -40,7 +40,7 @@
         <javafx.plugin.version>0.0.8</javafx.plugin.version>
         <gluonfx.plugin.version>1.0.16</gluonfx.plugin.version>
         <charm.version>6.1.1</charm.version>
-        <attach.version>4.0.15</attach.version>
+        <attach.version>4.0.17</attach.version>
         <main.class>org.husonlab.phylosketch.Main</main.class>
         <app.version>1.0.0</app.version>
 
@@ -95,6 +95,11 @@
         </dependency>
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
+            <artifactId>share</artifactId>
+            <version>${attach.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gluonhq.attach</groupId>
             <artifactId>statusbar</artifactId>
             <version>${attach.version}</version>
         </dependency>
@@ -138,6 +143,7 @@
                         <list>lifecycle</list>
                         <list>statusbar</list>
                         <list>storage</list>
+                        <list>share</list>
                     </attachList>
                     <reflectionList>
                         <list>org.husonlab.phylosketch.utils.AwesomeIcon</list>
@@ -219,6 +225,12 @@
             <id>ios-sim</id>
             <properties>
                 <gluonfx.target>ios-sim</gluonfx.target>
+            </properties>
+        </profile>
+        <profile> <!-- This one doesn't work-->
+            <id>web</id>
+            <properties>
+                <gluonfx.target>web</gluonfx.target>
             </properties>
         </profile>
     </profiles>
