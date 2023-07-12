@@ -20,17 +20,17 @@ the [Gluon documentation](https://docs.gluonhq.com/#_requirements).
 This project requires the jloda library to be present, available [here](https://github.com/husonlab/jloda2). As jloda is
 not available via maven, you need to build jloda.jar from source and then place it in your local maven repository.
 
-## Quick instructions for working with the code in Intellij
+## Instructions for working with the code in Intellij
 
 You can run the project from within Intellij as usual. This is the best way to do basic development and debugging. To
 test different aspects of the code running as a mobile app, you can type one of the following maven commands into the
 Intellij terminal window. The commands that generate a native image for a mobile device take much longer to complete.
 
-### Run the program on JVM/HotSpot:
+### Run the program on JVM/HotSpot
 
     mvn gluonfx:run
 
-### Run the program as a native image:
+### Run the program as a native image
 
     mvn gluonfx:build gluonfx:nativerun
 
@@ -38,7 +38,7 @@ This doesn't work for me on MacOS X, I get this exception:
 
     *** Assertion failure in -[_NSTrackingAreaAKViewHelper removeTrackingRect:], _NSTrackingAreaAKManager.m:1602
 
-### Run the program on an iOS simulator:
+### Run the program on an iOS simulator
 
 First, you need to launch the iOS simulator from the Tools menu of XCode. Then the following maven command will install
 and run the app in the simulator:
@@ -47,7 +47,7 @@ and run the app in the simulator:
 
 Adding code for printing breaks this.
 
-### Run the program as a native iOS image:
+### Run the program as a native iOS image
 
 Before you can run on a native iOS image on an iOS device, there are several configuration steps that one must go
 through, involving setting up a corresponding xCode project and setting up "provisioning",
@@ -56,17 +56,24 @@ this to work.
 
     mvn -Pios gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
 
-### Run the program as a native Android image:
+### Run the program as a native Android image
 
 Unfortunately, I have not got this to work yet...
 
     mvn -Pandroid gluonfx:build gluonfx:package gluonfx:install gluonfx:nativerun
 
-### Use this command to list values of maven properties:
+### Use this command to list values of maven properties
 
     mvn help:evaluate -Dexpression=project.properties
 
-## Important advice for when programming:
+### Preparation for building desktop installers using install4j
+
+Before using install4j to build installers for Linux, MacOS and Windows, run the following command to build a jar and to
+copy all non-JavaFX jars into the directory target/dependency:
+
+    mvn clean package
+
+### Editing FMXL files can cause problems
 
 When adding controls to an FXML file, remember to add the corresponding classes to the reflectionList in the pom.xml
 file. If you don't, then the program might fail with an exception indicating that "type coercion failed", or some other

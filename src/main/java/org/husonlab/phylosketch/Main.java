@@ -114,7 +114,7 @@ public class Main extends Application {
 		scene.getStylesheets().add(stylesURL.toExternalForm());
 
 		for (var fileName : List.of("PhyloSketch-16x16.png", "PhyloSketch-32x32.png", "PhyloSketch-48x48.png",
-				"PhyloSketch-64x64.png", "PhyloSketch-128x128.png")) {
+				"PhyloSketch-64x64.png", "PhyloSketch-128x128.png", "PhyloSketch-256x256.png", "PhyloSketch-512x512.png")) {
 			try (var iconStream = Main.class.getResourceAsStream(fileName)) {
 				assert iconStream != null;
 				((Stage) scene.getWindow()).getIcons().add(new Image(iconStream));

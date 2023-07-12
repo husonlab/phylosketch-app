@@ -1,15 +1,6 @@
 Before builing using install4, do the following:
 
-1) mvn clean package
+mvn clean package
 
-This will build a new jar for phylosketch app
-
-Optionally, if the pom.xml has changed:
-
-2) mvn dependency:copy-dependencies
-
-This will copy all required jars to target/dependency
-
-Then remove all jars that have javafx in their name.
-
-Then run the install4j build.
+This will build a new jar for phylosketch app and will put all the required non-javafxml jars into the
+directory target/dependency

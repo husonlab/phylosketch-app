@@ -59,11 +59,7 @@
         </modulePath>
       </java>
       <iconImageFiles>
-        <file path="../target/classes/org/husonlab/phylosketch/PhyloSketch-16x16.png" />
-        <file path="../target/classes/org/husonlab/phylosketch/PhyloSketch-32x32.png" />
-        <file path="../target/classes/org/husonlab/phylosketch/PhyloSketch-48x48.png" />
-        <file path="../target/classes/org/husonlab/phylosketch/PhyloSketch-64x64.png" />
-        <file path="../target/classes/org/husonlab/phylosketch/PhyloSketch-128x128.png" />
+        <file path="../target/classes/org/husonlab/phylosketch/PhyloSketch-512x512.png" />
       </iconImageFiles>
     </launcher>
   </launchers>
