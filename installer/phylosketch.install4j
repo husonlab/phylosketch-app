@@ -47,15 +47,13 @@
       <executable name="PhyloSketch" iconSet="true" redirectStdout="true" executableMode="gui" changeWorkingDirectory="false" singleInstance="true" checkConsoleParameter="true" dpiAware="false">
         <versionInfo include="true" fileDescription="PhyloSketch app" legalCopyright="Copyright (C)  2023 ${compiler:sys.publisher}" internalName="PhyloSketch" />
       </executable>
-      <java mainClass="org.husonlab.phylosketch.Main" vmParameters="-server -Duser.language=en -Duser.region=US  ${compiler:renderingVMOption}">
+      <java mainClass="phylosketch/org.husonlab.phylosketch.Main" mainMode="module" vmParameters="-server -Duser.language=en -Duser.region=US  ${compiler:renderingVMOption}">
         <classPath>
           <scanDirectory location="jars" failOnError="false" />
-          <scanDirectory location="jars2" failOnError="false" />
         </classPath>
         <modulePath>
           <directory location="jars" failOnError="false" />
           <directory location="openjfx/${compiler:sys.platform}/lib" failOnError="false" />
-          <directory location="jars" failOnError="false" />
         </modulePath>
       </java>
       <iconImageFiles>

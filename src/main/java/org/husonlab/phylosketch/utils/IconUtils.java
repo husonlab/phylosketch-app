@@ -20,15 +20,10 @@
 
 package org.husonlab.phylosketch.utils;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import jloda.util.FileUtils;
 
 import java.util.Objects;

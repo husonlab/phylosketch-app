@@ -21,7 +21,6 @@
 package org.husonlab.phylosketch;
 
 import com.gluonhq.attach.lifecycle.LifecycleService;
-import com.gluonhq.attach.util.Platform;
 import com.gluonhq.attach.util.Services;
 import com.gluonhq.charm.glisten.application.ViewStackPolicy;
 import com.gluonhq.charm.glisten.control.NavigationDrawer;
