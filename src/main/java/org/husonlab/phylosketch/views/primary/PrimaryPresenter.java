@@ -42,6 +42,7 @@ import jloda.fx.control.RichTextLabel;
 import jloda.fx.util.AService;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.RunAfterAWhile;
+import jloda.fx.util.SaveToPNG;
 import org.husonlab.phylosketch.DefaultOptions;
 import org.husonlab.phylosketch.Main;
 import org.husonlab.phylosketch.network.Document;
@@ -108,14 +109,14 @@ public class PrimaryPresenter {
 			if (Main.isDesktop()) {
 				var clipboardContent = new ClipboardContent();
 				clipboardContent.putString(document.getNewickString());
-				var image = ImageFileUtils.createImage(controller.getStackPane(), 1024, 1024);
+				var image = SaveToPNG.createImage(controller.getStackPane(), 1024, 1024, true);
 				clipboardContent.putImage(image);
 				Clipboard.getSystemClipboard().setContent(clipboardContent);
 			} else {
 				ShareService.create().ifPresentOrElse(service -> {
 					service.share("text/plain", document.getNewickString());
 					System.err.println("Sharing: text/plain," + document.getNewickString());
-					var image = ImageFileUtils.createImage(controller.getStackPane(), 1024, 1024);
+					var image = SaveToPNG.createImage(controller.getStackPane(), 1024, 1024, true);
 					var file = ImageFileUtils.saveToPublicPNGFile(image);
 					if (file != null) {
 						service.share("image/png", file);

@@ -68,21 +68,4 @@ public class ImageFileUtils {
 		}
 		return null;
 	}
-
-	/**
-	 * create an image for a given region
-	 *
-	 * @param region the region
-	 * @return the image
-	 */
-	public static Image createImage(Region region, double maxWidth, double maxHeight) {
-		var parameters = new SnapshotParameters();
-		parameters.setFill(Color.TRANSPARENT);
-		var xFactor = (maxWidth > 0 ? region.getWidth() / maxWidth : 1.0);
-		var yFactor = (maxHeight > 0 ? region.getHeight() / maxHeight : 1.0);
-		var factor = Math.min(xFactor, yFactor);
-		parameters.setTransform(new Scale(factor, factor));
-		parameters.setViewport(new Rectangle2D(0, 0, factor * region.getWidth(), factor * region.getHeight()));
-		return region.snapshot(parameters, null);
-	}
 }
