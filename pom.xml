@@ -42,9 +42,8 @@
         <charm.version>6.1.1</charm.version>
         <attach.version>4.0.17</attach.version>
         <gluonfx.target></gluonfx.target>
-        <main.class>org.husonlab.phylosketch.Main</main.class>
         <app.version>1.0.0</app.version>
-
+        <main.class>org.husonlab.phylosketch.Main</main.class>
     </properties>
 
     <dependencies>
@@ -168,18 +167,18 @@
                         <list>javafx.scene.control.SeparatorMenuItem</list>
                         <list>javafx.scene.control.SplitPane</list>
                         <list>javafx.scene.control.Slider</list>
-
                         <list>javafx.scene.control.TextArea</list>
                         <list>javafx.scene.control.TextField</list>
                         <list>javafx.scene.control.ToggleButton</list>
 
+                        <list>javafx.scene.image.ImageView</list>
+
                         <list>javafx.scene.layout.AnchorPane</list>
                         <list>javafx.scene.layout.BorderPane</list>
-                        <list>javafx.scene.layout.StackPane</list>
-                        <list>javafx.scene.image.ImageView</list>
                         <list>javafx.scene.layout.FlowPane</list>
                         <list>javafx.scene.layout.GridPane</list>
                         <list>javafx.scene.layout.HBox</list>
+                        <list>javafx.scene.layout.StackPane</list>
                     </reflectionList>
                     <!-->
                     <releaseConfiguration>
@@ -212,6 +211,40 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>desktop</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <client.target>host</client.target>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>display</artifactId>
+                    <version>${attach.version}</version>
+                    <classifier>desktop</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>lifecycle</artifactId>
+                    <version>${attach.version}</version>
+                    <classifier>desktop</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>storage</artifactId>
+                    <version>${attach.version}</version>
+                    <classifier>desktop</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>com.gluonhq.attach</groupId>
+                    <artifactId>util</artifactId>
+                    <version>${attach.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>android</id>
             <properties>
