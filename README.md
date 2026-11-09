@@ -1,3 +1,7 @@
+> **Archived (November 2026).** This 2023 prototype has been superseded by the PhyloSketch app built on the shared
+> [mobile-support](https://github.com/husonlab/mobile-support) library. Information about the current iOS apps, including
+> the privacy policy and support contacts, is at <https://husonlab.github.io/mobile-apps/>.
+
 # PhyloSketch App
 
 This is going to be a reimplementation of my [PhyloSketch desktop program](https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/phylosketch/) that will target iOS and Android.
